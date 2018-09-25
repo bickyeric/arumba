@@ -1,1 +1,1 @@
-web: nbcomicbot
+web: nbcomicbot-telegram-golang
