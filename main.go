@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,6 +12,27 @@ import (
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
+
+// Episode merepresentasikan objek episode
+type Episode struct {
+	Page []string `json:"page"`
+}
+
+type Source struct {
+	Name string `json:"name"`
+}
+
+// Comic merepresentasikan objek komik
+type Comic struct {
+	Source  Source  `json:"source"`
+	Episode Episode `json:"episode"`
+}
+
+// PhotoParams ...
+type PhotoParams struct {
+	ChatID int64  `json:"chat_id"`
+	Photo  string `json:"photo"`
+}
 
 func handleStartCommand(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
@@ -25,10 +48,27 @@ func handleStartCommand(message *tgbotapi.Message) {
 	splittedString := strings.Split(decodedString, "_")
 
 	resp, _ := http.Get("https://backend-bot.000webhostapp.com/index.php/comic/read/userid/" + splittedString[0] + "/" + splittedString[1])
-	json, _ := ioutil.ReadAll(resp.Body)
-	log.Printf("%s\n", json)
+	jsonRaw, _ := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
+
+	dec := json.NewDecoder(strings.NewReader(string(jsonRaw)))
+	var comic Comic
+	if err := dec.Decode(&comic); err != nil {
+		log.Fatal(err)
+	}
+	log.Print(comic.Source.Name)
+	url := "https://api.telegram.org/bot" + os.Getenv("telegramToken") + "/sendPhoto"
+
+	for _, page := range comic.Episode.Page {
+		params := PhotoParams{message.Chat.ID, page}
+		jsonParams, _ := json.Marshal(params)
+
+		resp, err = http.Post(url, "application/json", bytes.NewBuffer(jsonParams))
+		log.Print(resp.Body)
+	}
 }
+
+var bot tgbotapi.BotAPI
 
 func main() {
 
@@ -53,8 +93,8 @@ func main() {
 		command := update.Message.Command()
 		if command == "start" {
 			handleStartCommand(update.Message)
+			tqMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Spesial Thanks to : Mangacanblog")
+			bot.Send(tqMsg)
 		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Masih Development mang!!!")
-		bot.Send(msg)
 	}
 }
