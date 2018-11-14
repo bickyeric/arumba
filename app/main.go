@@ -19,6 +19,7 @@ func main() {
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
+	log.Printf("Webhook run on %s", port)
 
 	bot := arumba.Instance()
 	log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -30,8 +31,6 @@ func main() {
 		command := update.Message.Command()
 		if command == "start" {
 			handler.StartCommand(update.Message)
-			tqMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Spesial Thanks to : Mangacanblog")
-			bot.Send(tqMsg)
 		}
 	}
 }

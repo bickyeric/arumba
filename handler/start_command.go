@@ -36,23 +36,30 @@ func parseArg(arg string) (string, int) {
 
 func StartCommand(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
-	if arg == "" {
-		bot := arumba.Instance()
+	bot := arumba.Instance()
+	if arg == "" { // TODO kirim pesan salam kepada pemirsa
 		tqMsg := tgbotapi.NewMessage(message.Chat.ID, "hai")
 		bot.Send(tqMsg)
 		return
 	}
 
 	comicName, episode := parseArg(arg)
-	comic := model.ReadComic(comicName, episode, 0)
-	log.Print(comic.Source.Name)
+	comic, err := model.ReadComic(comicName, episode)
+	if err != nil {
+		log.Print(comicName, episode)
+		log.Print(err)
+	} else {
+		log.Print(comic)
+	}
 	url := "https://api.telegram.org/bot" + os.Getenv("telegramToken") + "/sendPhoto"
 
 	for _, page := range comic.Episode.Page {
-		params := PhotoParams{message.Chat.ID, page}
+		params := PhotoParams{message.Chat.ID, page.Link}
 		jsonParams, _ := json.Marshal(params)
 
 		resp, _ := http.Post(url, "application/json", bytes.NewBuffer(jsonParams))
 		log.Print(resp.Body)
 	}
+	tqMsg := tgbotapi.NewMessage(message.Chat.ID, "Spesial Thanks to : "+comic.Source.Name)
+	bot.Send(tqMsg)
 }

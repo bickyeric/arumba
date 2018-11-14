@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -17,20 +16,18 @@ type Comic struct {
 	Episode Episode `json:"episode"`
 }
 
-var readPath = "/comic/read/%d/%s/%s"
-
-func ReadComic(name string, episode int, userID int64) *Comic {
+func ReadComic(name string, episode int) (*Comic, error) {
 	dataSource := connection.DataSourceInstance()
-	url := fmt.Sprintf(dataSource.BaseURL+readPath, userID, name, episode)
+	url := fmt.Sprintf("%s/api/comic/%s/episode/%d", dataSource.BaseURL, strings.ToLower(name), episode)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	resp, err := dataSource.HTTPClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	jsonRaw, _ := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
@@ -38,8 +35,8 @@ func ReadComic(name string, episode int, userID int64) *Comic {
 	dec := json.NewDecoder(strings.NewReader(string(jsonRaw)))
 	var comic Comic
 	if err := dec.Decode(&comic); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return &comic
+	return &comic, nil
 }
