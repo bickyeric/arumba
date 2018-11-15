@@ -31,6 +31,12 @@ func main() {
 		command := update.Message.Command()
 		if command == "start" {
 			handler.StartCommand(update.Message)
+		} else if command == "help" {
+			handler.HelpCommand(update.Message)
+		} else if command == "feedback" {
+			handler.FeedbackCommand(update.Message)
+		} else {
+			handler.Common(update.Message)
 		}
 	}
 }

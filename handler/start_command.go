@@ -38,18 +38,20 @@ func StartCommand(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
 	bot := arumba.Instance()
 	if arg == "" { // TODO kirim pesan salam kepada pemirsa
-		tqMsg := tgbotapi.NewMessage(message.Chat.ID, "hai")
+		tqMsg := tgbotapi.NewMessage(message.Chat.ID, "Hai, coba deh klik /help")
 		bot.Send(tqMsg)
 		return
 	}
 
 	comicName, episode := parseArg(arg)
 	comic, err := model.ReadComic(comicName, episode)
-	if err != nil {
-		log.Print(comicName, episode)
+	log.Print(comicName, episode)
+	if err != nil { // TODO kalo error kirim pesan ke maintainer!!!
 		log.Print(err)
-	} else {
-		log.Print(comic)
+	}
+
+	if len(comic.Episode.Page) < 1 {
+		// TODO kalo error kirim pesan ke maintainer!!!
 	}
 	url := "https://api.telegram.org/bot" + os.Getenv("telegramToken") + "/sendPhoto"
 
