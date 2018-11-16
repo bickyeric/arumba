@@ -1,2 +1,1 @@
-# web: go run app/main.go
-web: app
+web: ./app/app
