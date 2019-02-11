@@ -1,12 +1,12 @@
 package model
 
-// Page ...
-type Page struct {
-	ID   int    `json:"id"`
-	Link string `json:"link"`
-}
+import "time"
 
-// Episode merepresentasikan objek episode
 type Episode struct {
-	Page []Page `json:"page"`
+	ID        int
+	No        float32
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	ComicID   int
 }
