@@ -1,55 +1,58 @@
 package arumba
 
 import (
-	"log"
-	"os"
-	"strconv"
-
-	"github.com/bickyeric/arumba/model"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/bickyeric/arumba/repository"
+	"github.com/bickyeric/arumba/service"
+	"github.com/bickyeric/arumba/telegram"
+	"github.com/bickyeric/arumba/telegram/command"
 )
 
 var (
-	Instance Bot
+	Instance Arumba
 )
 
-type Bot struct {
-	*tgbotapi.BotAPI
-}
+func Configure() {
+	Instance = Arumba{
+		Bot: telegram.BotInstance,
 
-func ConfigureBot() {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("telegramToken"))
-	if err != nil {
-		log.Fatal(err)
+		ComicRepo:   repository.ComicRepository{},
+		EpisodeRepo: repository.EpisodeRepository{},
+		PageRepo:    repository.PageRepository{},
 	}
-
-	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
-	bot.Debug = debug
-
-	Instance = Bot{bot}
 }
 
-func (bot Bot) SendHelpMessage(chatID int64) {
-	tqMsg := tgbotapi.NewMessage(chatID, "Hai, coba deh klik /help")
-	bot.Send(tqMsg)
+type Arumba struct {
+	Bot telegram.Bot
+
+	ComicRepo   repository.ComicRepository
+	EpisodeRepo repository.EpisodeRepository
+	PageRepo    repository.PageRepository
 }
 
-func (bot Bot) SendNotFoundComic(chatID int64, comicName string) {
-	tqMsg := tgbotapi.NewMessage(chatID, "Gk nemu nih bro comic +"+comicName+" ma :(")
-	bot.Send(tqMsg)
+func (kernel Arumba) InjectTelegramStart() command.Start {
+	return command.Start{
+		Bot: kernel.Bot,
+		ComicService: service.ComicService{
+			ComicRepo:   kernel.ComicRepo,
+			EpisodeRepo: kernel.EpisodeRepo,
+			PageRepo:    kernel.PageRepo,
+		},
+	}
 }
 
-func (bot Bot) SendNotFoundEpisode(chatID int64) {
-	tqMsg := tgbotapi.NewMessage(chatID, "Gk nemu nih bro episode nya")
-	bot.Send(tqMsg)
+func (kernel Arumba) InjectTelegramHelp() command.Help {
+	return command.Help{
+		Bot: kernel.Bot,
+	}
 }
 
-func (bot Bot) SendErrorMessage(chatID int64) {
-	tqMsg := tgbotapi.NewMessage(chatID, "Waduh error nih bro maaf ya")
-	bot.Send(tqMsg)
-}
-
-func (bot Bot) SendPage(chatID int64, pages []*model.Page) {
-	tqMsg := tgbotapi.NewMessage(chatID, "Waduh error nih bro maaf ya")
-	bot.Send(tqMsg)
+func (kernel Arumba) InjectTelegramRead() command.Read {
+	return command.Read{
+		Bot: kernel.Bot,
+		ComicService: service.ComicService{
+			ComicRepo:   kernel.ComicRepo,
+			EpisodeRepo: kernel.EpisodeRepo,
+			PageRepo:    kernel.PageRepo,
+		},
+	}
 }

@@ -1,4 +1,4 @@
-package telegram
+package command
 
 import (
 	"database/sql"
@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service"
+	"github.com/bickyeric/arumba/telegram"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type Start struct {
-	Bot          arumba.Bot
+	Bot          telegram.Bot
 	ComicService service.IComic
 }
 
