@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// Episode ...
 type Episode struct {
 	ID        int
 	No        float64

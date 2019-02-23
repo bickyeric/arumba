@@ -72,12 +72,12 @@ func (bot Bot) NotifyNewEpisode(update model.Update) {
 	bot.Send(tqMsg)
 }
 
-type photoParams struct {
-	ChatID int64  `json:"chat_id"`
-	Photo  string `json:"photo"`
-}
-
 func (bot Bot) SendPage(chatID int64, pages []*model.Page) {
+	type photoParams struct {
+		ChatID int64  `json:"chat_id"`
+		Photo  string `json:"photo"`
+	}
+
 	url := "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_TOKEN") + "/sendPhoto"
 	for _, page := range pages {
 		params := photoParams{chatID, page.Link}

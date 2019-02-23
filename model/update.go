@@ -1,5 +1,6 @@
 package model
 
+// Update ...
 type Update struct {
 	ComicName   string  `json:"comic_name"`
 	EpisodeLink string  `json:"episode_link"`
