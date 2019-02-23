@@ -1,35 +1,41 @@
 package updater
 
 import (
+	"log"
+
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/telegram"
 )
 
-type Mangacan struct {
+// Runner ...
+type Runner struct {
 	Bot     telegram.Bot
 	Kendang connection.Kendang
 	Saver   episode.UpdateSaver
 }
 
-func (updater Mangacan) Run() {
-	updates, err := updater.Kendang.GetMangacanUpdate()
+// Run ...
+func (r Runner) Run(source ISource) {
+	log.Println("Processing " + source.Name() + " updates...")
+	updates, err := r.Kendang.FetchUpdate("/" + source.Name() + "-update")
 	if err != nil {
-		updater.Bot.NotifyError(err)
+		r.Bot.NotifyError(err)
 		return
 	}
 
 	for _, u := range updates {
-		err := updater.Saver.Perform(u, 3)
+		err := r.Saver.Perform(u, source.GetID())
 		if err != nil {
 			switch err {
 			case episode.ErrEpisodeExist:
 				continue
 			default:
-				updater.Bot.NotifyError(err)
+				r.Bot.NotifyError(err)
 			}
 		}
 
-		updater.Bot.NotifyNewEpisode(u)
+		r.Bot.NotifyNewEpisode(u)
 	}
+	log.Println(source.Name() + " updates processed.")
 }

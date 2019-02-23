@@ -4,6 +4,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/telegram"
+	"github.com/bickyeric/arumba/updater/source"
 	"github.com/subosito/gotenv"
 )
 
@@ -16,10 +17,14 @@ func main() {
 	arumba.Configure()
 
 	app := arumba.Instance
-	mangacanUpdater := app.InjectMangacanUpdater()
+	updater := app.InjectUpdateRunner()
 
-	mangacanUpdater.Run()
-	// gocron.Every(1).Minute().Do(updater.Mangacan)
+	mangacan := source.Mangacan{}
+	updater.Run(mangacan)
+	// gocron.Every(1).Minute().Do(updater.Run, mangacan)
+
+	mangatail := source.Mangatail{}
+	updater.Run(mangatail)
 
 	// <-gocron.Start()
 }

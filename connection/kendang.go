@@ -20,10 +20,10 @@ func NewKendang() Kendang {
 	}
 }
 
-func (k Kendang) GetMangacanUpdate() ([]model.Update, error) {
+func (k Kendang) FetchUpdate(source string) ([]model.Update, error) {
 	result := make([]model.Update, 0)
 
-	request, err := http.NewRequest("GET", k.baseURL+"/mangacan-update", nil)
+	request, err := http.NewRequest("GET", k.baseURL+source, nil)
 	if err != nil {
 		return nil, err
 	}

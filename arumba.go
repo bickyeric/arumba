@@ -60,8 +60,8 @@ func (kernel Arumba) InjectTelegramRead() command.Read {
 	}
 }
 
-func (kernel Arumba) InjectMangacanUpdater() updater.Mangacan {
-	return updater.Mangacan{
+func (kernel Arumba) InjectUpdateRunner() updater.Runner {
+	return updater.Runner{
 		Bot:     kernel.Bot,
 		Kendang: connection.NewKendang(),
 		Saver: episode.UpdateSaver{
