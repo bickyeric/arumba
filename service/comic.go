@@ -9,7 +9,7 @@ import (
 )
 
 type IComic interface {
-	ReadComic(comicName string, episodeNo int) ([]*model.Page, error)
+	ReadComic(comicName string, episodeNo float64) ([]*model.Page, error)
 }
 
 type ComicService struct {
@@ -18,7 +18,7 @@ type ComicService struct {
 	PageRepo    repository.IPage
 }
 
-func (service ComicService) ReadComic(comicName string, episodeNo int) ([]*model.Page, error) {
+func (service ComicService) ReadComic(comicName string, episodeNo float64) ([]*model.Page, error) {
 	comic, err := service.ComicRepo.FindByName(comicName)
 	if err != nil {
 		return nil, err

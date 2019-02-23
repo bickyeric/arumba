@@ -40,7 +40,7 @@ func (s Start) Handle(message *tgbotapi.Message) {
 	s.Bot.SendPage(message.Chat.ID, pages)
 }
 
-func parseArg(arg string) (string, int) {
+func parseArg(arg string) (string, float64) {
 	decodedArg, err := base64.StdEncoding.DecodeString(arg)
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func parseArg(arg string) (string, int) {
 
 	decodedString := string(decodedArg)
 	splittedString := strings.Split(decodedString, "_")
-	episode, _ := strconv.Atoi(splittedString[1])
+	episode, _ := strconv.ParseFloat(splittedString[1], 64)
 
 	return splittedString[0], episode
 }

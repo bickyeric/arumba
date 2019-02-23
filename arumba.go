@@ -1,10 +1,13 @@
 package arumba
 
 import (
+	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/repository"
 	"github.com/bickyeric/arumba/service"
+	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/telegram"
 	"github.com/bickyeric/arumba/telegram/command"
+	"github.com/bickyeric/arumba/updater"
 )
 
 var (
@@ -50,6 +53,18 @@ func (kernel Arumba) InjectTelegramRead() command.Read {
 	return command.Read{
 		Bot: kernel.Bot,
 		ComicService: service.ComicService{
+			ComicRepo:   kernel.ComicRepo,
+			EpisodeRepo: kernel.EpisodeRepo,
+			PageRepo:    kernel.PageRepo,
+		},
+	}
+}
+
+func (kernel Arumba) InjectMangacanUpdater() updater.Mangacan {
+	return updater.Mangacan{
+		Bot:     kernel.Bot,
+		Kendang: connection.NewKendang(),
+		Saver: episode.UpdateSaver{
 			ComicRepo:   kernel.ComicRepo,
 			EpisodeRepo: kernel.EpisodeRepo,
 			PageRepo:    kernel.PageRepo,

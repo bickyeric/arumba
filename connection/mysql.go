@@ -3,6 +3,7 @@ package connection
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	// mysql database driver
 	_ "github.com/go-sql-driver/mysql"
@@ -12,7 +13,7 @@ var Mysql *sql.DB
 
 // Connect ...
 func Connect() {
-	var datasource = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", "root", "rootpw", "127.0.0.1", 3306, "nbcomic")
+	var datasource = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", os.Getenv("MYSQL_USERNAME"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
 	conn, err := sql.Open("mysql", datasource)
 
 	if err != nil {

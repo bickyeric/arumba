@@ -30,7 +30,7 @@ func (r Read) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (r Read) readComicEpisode(chatID int64, comicName string, episodeNo int) {
+func (r Read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
 	pages, err := r.ComicService.ReadComic(comicName, episodeNo)
 	if err != nil {
 		switch err {
@@ -45,13 +45,13 @@ func (r Read) readComicEpisode(chatID int64, comicName string, episodeNo int) {
 	r.Bot.SendPage(chatID, pages)
 }
 
-func (r Read) parseArg(arg string) (string, int) {
+func (r Read) parseArg(arg string) (string, float64) {
 	if arg == "" {
 		return "", -1
 	}
 
 	words := strings.Split(arg, " ")
-	episodeNo, err := strconv.Atoi(words[len(words)-1])
+	episodeNo, err := strconv.ParseFloat(words[len(words)-1], 64)
 	if err != nil {
 		return arg, -1
 	}
