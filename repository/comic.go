@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 )
 
@@ -13,10 +12,16 @@ type IComic interface {
 	Insert(*model.Comic) error
 }
 
-type ComicRepository struct{}
+type ComicRepository struct {
+	*sql.DB
+}
 
-func (r ComicRepository) Insert(comic *model.Comic) error {
-	res, err := connection.Mysql.Exec("INSERT INTO comics(name, status, summary, created_at, updated_at) VALUES(?,?,?,?,?)", comic.Name, "", "", comic.CreatedAt, comic.UpdatedAt)
+func NewComic(db *sql.DB) IComic {
+	return ComicRepository{db}
+}
+
+func (repo ComicRepository) Insert(comic *model.Comic) error {
+	res, err := repo.Exec("INSERT INTO comics(name, status, summary, created_at, updated_at) VALUES(?,?,?,?,?)", comic.Name, "", "", comic.CreatedAt, comic.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -26,10 +31,10 @@ func (r ComicRepository) Insert(comic *model.Comic) error {
 	return nil
 }
 
-func (r ComicRepository) FindByName(name string) (*model.Comic, error) {
+func (repo ComicRepository) FindByName(name string) (*model.Comic, error) {
 	comic := new(model.Comic)
 	query := fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`)
-	row := connection.Mysql.QueryRow(query)
+	row := repo.QueryRow(query)
 	summary := sql.NullString{}
 	err := row.Scan(&comic.ID, &comic.Name, &comic.Status, &summary, &comic.CreatedAt, &comic.UpdatedAt)
 	if summary.Valid {

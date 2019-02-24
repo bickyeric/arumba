@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bickyeric/arumba/service"
+	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/telegram"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type Read struct {
-	Bot          telegram.Bot
-	ComicService service.IComic
+	Bot    telegram.Bot
+	Reader comic.Read
 }
 
 func (r Read) Handle(message *tgbotapi.Message) {
@@ -21,7 +21,6 @@ func (r Read) Handle(message *tgbotapi.Message) {
 	comicName, episodeNo := r.parseArg(arg)
 
 	if comicName != "" && episodeNo > -1 {
-		// log.Println("ada nama_comic dan episodenya")
 		r.readComicEpisode(message.Chat.ID, comicName, episodeNo)
 	} else if comicName != "" {
 		log.Println("ada nama_comic saja")
@@ -31,7 +30,7 @@ func (r Read) Handle(message *tgbotapi.Message) {
 }
 
 func (r Read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
-	pages, err := r.ComicService.ReadComic(comicName, episodeNo)
+	pages, err := r.Reader.Perform(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

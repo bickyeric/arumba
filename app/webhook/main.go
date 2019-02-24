@@ -15,11 +15,10 @@ func main() {
 
 	gotenv.Load(".env")
 
-	connection.Connect()
-	arumba.Configure()
+	db := connection.NewMysql()
 	updates := telegram.ConfigureBot()
 
-	app := arumba.Instance
+	app := arumba.New(telegram.BotInstance, db)
 	startHandler := app.InjectTelegramStart()
 	helpHandler := app.InjectTelegramHelp()
 	readHandler := app.InjectTelegramRead()
@@ -28,16 +27,16 @@ func main() {
 	go http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil)
 
 	for update := range updates {
-		command := update.Message.Command()
-		if command == "start" {
-			startHandler.Handle(update.Message)
-		} else if command == "help" {
-			helpHandler.Handle(update.Message)
-		} else if command == "read" {
-			readHandler.Handle(update.Message)
-			// } else if command == "feedback" {
+		switch update.Message.Command() {
+		case telegram.StartCommand:
+			go startHandler.Handle(update.Message)
+		case telegram.HelpCommand:
+			go helpHandler.Handle(update.Message)
+		case telegram.ReadCommand:
+			go readHandler.Handle(update.Message)
+			// case telegram.FeedbackCommand:
 			// 	handler.FeedbackCommand(update.Message)
-			// } else {
+			// default:
 			// 	handler.Common(update.Message)
 		}
 	}

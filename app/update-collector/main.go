@@ -12,19 +12,18 @@ func main() {
 
 	gotenv.Load(".env")
 
-	connection.Connect()
 	telegram.ConfigureBot()
-	arumba.Configure()
+	db := connection.NewMysql()
 
-	app := arumba.Instance
+	app := arumba.New(telegram.BotInstance, db)
 	updater := app.InjectUpdateRunner()
 
 	mangacan := source.Mangacan{}
 	updater.Run(mangacan)
 	// gocron.Every(1).Minute().Do(updater.Run, mangacan)
 
-	mangatail := source.Mangatail{}
-	updater.Run(mangatail)
+	// mangatail := source.Mangatail{}
+	// updater.Run(mangatail)
 
 	// <-gocron.Start()
 }

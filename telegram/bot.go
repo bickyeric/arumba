@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	b64 "encoding/base64"
 
@@ -32,10 +33,19 @@ func ConfigureBot() tgbotapi.UpdatesChannel {
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 	bot.Debug = debug
 
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	BotInstance = Bot{bot}
+	time.Sleep(time.Millisecond * 500)
+	updates.Clear()
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-	return bot.ListenForWebhook("/" + bot.Token)
+	return updates
 }
 
 func (bot Bot) SendHelpMessage(chatID int64) {

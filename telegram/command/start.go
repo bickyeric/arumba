@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bickyeric/arumba/service"
+	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/telegram"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type Start struct {
-	Bot          telegram.Bot
-	ComicService service.IComic
+	Bot    telegram.Bot
+	Reader comic.Read
 }
 
 func (s Start) Handle(message *tgbotapi.Message) {
@@ -25,8 +25,8 @@ func (s Start) Handle(message *tgbotapi.Message) {
 		return
 	}
 
-	comicName, episodeNo := parseArg(arg)
-	pages, err := s.ComicService.ReadComic(comicName, episodeNo)
+	comicName, episodeNo := s.parseArg(arg)
+	pages, err := s.Reader.Perform(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -40,7 +40,7 @@ func (s Start) Handle(message *tgbotapi.Message) {
 	s.Bot.SendPage(message.Chat.ID, pages)
 }
 
-func parseArg(arg string) (string, float64) {
+func (s Start) parseArg(arg string) (string, float64) {
 	decodedArg, err := base64.StdEncoding.DecodeString(arg)
 	if err != nil {
 		log.Fatal(err)

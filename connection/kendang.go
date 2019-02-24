@@ -8,19 +8,23 @@ import (
 	"github.com/bickyeric/arumba/model"
 )
 
-type Kendang struct {
+type IKendang interface {
+	FetchUpdate(source string) ([]model.Update, error)
+}
+
+type kendang struct {
 	client  *http.Client
 	baseURL string
 }
 
-func NewKendang() Kendang {
-	return Kendang{
+func NewKendang() IKendang {
+	return kendang{
 		client:  http.DefaultClient,
 		baseURL: os.Getenv("KENDANG_URL"),
 	}
 }
 
-func (k Kendang) FetchUpdate(source string) ([]model.Update, error) {
+func (k kendang) FetchUpdate(source string) ([]model.Update, error) {
 	result := make([]model.Update, 0)
 
 	request, err := http.NewRequest("GET", k.baseURL+source, nil)

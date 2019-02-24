@@ -8,34 +8,47 @@ import (
 	"github.com/bickyeric/arumba/telegram"
 )
 
-// Runner ...
-type Runner struct {
-	Bot     telegram.Bot
-	Kendang connection.Kendang
-	Saver   episode.UpdateSaver
+// IRunner ...
+type IRunner interface {
+	Run(source ISource)
+}
+
+type runner struct {
+	bot     telegram.Bot
+	kendang connection.IKendang
+	saver   episode.UpdateSaver
+}
+
+func NewRunner(bot telegram.Bot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
+	return runner{
+		bot:     bot,
+		kendang: kendang,
+		saver:   saver,
+	}
 }
 
 // Run ...
-func (r Runner) Run(source ISource) {
+func (r runner) Run(source ISource) {
 	log.Println("Processing " + source.Name() + " updates...")
-	updates, err := r.Kendang.FetchUpdate("/" + source.Name() + "-update")
+	updates, err := r.kendang.FetchUpdate("/" + source.Name() + "-update")
 	if err != nil {
-		r.Bot.NotifyError(err)
+		r.bot.NotifyError(err)
 		return
 	}
 
 	for _, u := range updates {
-		err := r.Saver.Perform(u, source.GetID())
+		err := r.saver.Perform(u, source.GetID())
 		if err != nil {
 			switch err {
 			case episode.ErrEpisodeExist:
 				continue
 			default:
-				r.Bot.NotifyError(err)
+				r.bot.NotifyError(err)
+				continue
 			}
 		}
 
-		r.Bot.NotifyNewEpisode(u)
+		r.bot.NotifyNewEpisode(u)
 	}
 	log.Println(source.Name() + " updates processed.")
 }

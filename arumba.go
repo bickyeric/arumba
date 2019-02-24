@@ -1,73 +1,70 @@
 package arumba
 
 import (
+	"database/sql"
+
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/repository"
-	"github.com/bickyeric/arumba/service"
+	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/telegram"
 	"github.com/bickyeric/arumba/telegram/command"
 	"github.com/bickyeric/arumba/updater"
 )
 
-var (
-	Instance Arumba
-)
-
-func Configure() {
-	Instance = Arumba{
-		Bot: telegram.BotInstance,
-
-		ComicRepo:   repository.ComicRepository{},
-		EpisodeRepo: repository.EpisodeRepository{},
-		PageRepo:    repository.PageRepository{},
+func New(bot telegram.Bot, db *sql.DB) Arumba {
+	return Arumba{
+		bot:         bot,
+		comicRepo:   repository.NewComic(db),
+		episodeRepo: repository.NewEpisode(db),
+		pageRepo:    repository.NewPage(db),
 	}
 }
 
 type Arumba struct {
-	Bot telegram.Bot
+	bot telegram.Bot
 
-	ComicRepo   repository.ComicRepository
-	EpisodeRepo repository.EpisodeRepository
-	PageRepo    repository.PageRepository
+	comicRepo   repository.IComic
+	episodeRepo repository.IEpisode
+	pageRepo    repository.IPage
 }
 
 func (kernel Arumba) InjectTelegramStart() command.Start {
 	return command.Start{
-		Bot: kernel.Bot,
-		ComicService: service.ComicService{
-			ComicRepo:   kernel.ComicRepo,
-			EpisodeRepo: kernel.EpisodeRepo,
-			PageRepo:    kernel.PageRepo,
+		Bot: kernel.bot,
+		Reader: comic.Read{
+			ComicRepo:   kernel.comicRepo,
+			EpisodeRepo: kernel.episodeRepo,
+			PageRepo:    kernel.pageRepo,
 		},
 	}
 }
 
 func (kernel Arumba) InjectTelegramHelp() command.Help {
 	return command.Help{
-		Bot: kernel.Bot,
+		Bot: kernel.bot,
 	}
 }
 
 func (kernel Arumba) InjectTelegramRead() command.Read {
 	return command.Read{
-		Bot: kernel.Bot,
-		ComicService: service.ComicService{
-			ComicRepo:   kernel.ComicRepo,
-			EpisodeRepo: kernel.EpisodeRepo,
-			PageRepo:    kernel.PageRepo,
+		Bot: kernel.bot,
+		Reader: comic.Read{
+			ComicRepo:   kernel.comicRepo,
+			EpisodeRepo: kernel.episodeRepo,
+			PageRepo:    kernel.pageRepo,
 		},
 	}
 }
 
-func (kernel Arumba) InjectUpdateRunner() updater.Runner {
-	return updater.Runner{
-		Bot:     kernel.Bot,
-		Kendang: connection.NewKendang(),
-		Saver: episode.UpdateSaver{
-			ComicRepo:   kernel.ComicRepo,
-			EpisodeRepo: kernel.EpisodeRepo,
-			PageRepo:    kernel.PageRepo,
+func (kernel Arumba) InjectUpdateRunner() updater.IRunner {
+	return updater.NewRunner(
+		kernel.bot,
+		connection.NewKendang(),
+		episode.UpdateSaver{
+			ComicRepo:   kernel.comicRepo,
+			EpisodeRepo: kernel.episodeRepo,
+			PageRepo:    kernel.pageRepo,
 		},
-	}
+	)
 }

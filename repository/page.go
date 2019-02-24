@@ -1,7 +1,8 @@
 package repository
 
 import (
-	"github.com/bickyeric/arumba/connection"
+	"database/sql"
+
 	"github.com/bickyeric/arumba/model"
 )
 
@@ -9,12 +10,18 @@ type IPage interface {
 	FindByEpisode(episodeID, sourceID int) ([]*model.Page, error)
 }
 
-type PageRepository struct{}
+type PageRepository struct {
+	*sql.DB
+}
 
-func (r PageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page, error) {
+func NewPage(db *sql.DB) IPage {
+	return PageRepository{db}
+}
+
+func (repo PageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page, error) {
 	result := []*model.Page{}
 
-	rows, err := connection.Mysql.Query(`SELECT * FROM pages WHERE episode_id=? AND source_id=?`, episodeID, sourceID)
+	rows, err := repo.Query(`SELECT * FROM pages WHERE episode_id=? AND source_id=?`, episodeID, sourceID)
 	if err != nil {
 		return nil, err
 	}
