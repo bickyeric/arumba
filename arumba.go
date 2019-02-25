@@ -36,6 +36,7 @@ func (kernel Arumba) InjectTelegramStart() command.Start {
 			ComicRepo:   kernel.comicRepo,
 			EpisodeRepo: kernel.episodeRepo,
 			PageRepo:    kernel.pageRepo,
+			Kendang:     connection.NewKendang(),
 		},
 	}
 }

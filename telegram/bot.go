@@ -30,8 +30,7 @@ func ConfigureBot() tgbotapi.UpdatesChannel {
 		log.Fatal(err)
 	}
 
-	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
-	bot.Debug = debug
+	bot.Debug = false
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -69,14 +68,24 @@ func (bot Bot) SendErrorMessage(chatID int64) {
 }
 
 func (bot Bot) NotifyError(err error) {
-	tqMsg := tgbotapi.NewMessage(610339834, "Error nih : "+err.Error())
+	chatID, _ := strconv.ParseInt(os.Getenv("CHAT_ID"), 36, 0)
+	tqMsg := tgbotapi.NewMessage(chatID, "Error nih : "+err.Error())
 	bot.Send(tqMsg)
 }
 
 func (bot Bot) NotifyNewEpisode(update model.Update) {
 	base64 := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s_%f", update.ComicName, update.EpisodeNo)))
 	txt := fmt.Sprintf("*%s*\nEpisode Baru!!!\nCek Sekarang juga :D!!!\n[klik disini](https://telegram.me/nb_comic_bot?start=%s)", update.ComicName, base64)
-	tqMsg := tgbotapi.NewMessageToChannel(os.Getenv("TELEGRAM_CHANNEL"), txt)
+
+	var tqMsg tgbotapi.MessageConfig
+	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
+	if debug {
+		chatID, _ := strconv.Atoi(os.Getenv("CHAT_ID"))
+		tqMsg = tgbotapi.NewMessage(int64(chatID), txt)
+	} else {
+		tqMsg = tgbotapi.NewMessageToChannel(os.Getenv("TELEGRAM_CHANNEL"), txt)
+	}
+
 	tqMsg.ParseMode = "Markdown"
 
 	bot.Send(tqMsg)
@@ -93,7 +102,6 @@ func (bot Bot) SendPage(chatID int64, pages []*model.Page) {
 		params := photoParams{chatID, page.Link}
 		jsonParams, _ := json.Marshal(params)
 
-		resp, _ := http.Post(url, "application/json", bytes.NewBuffer(jsonParams))
-		log.Print(resp.Body)
+		http.Post(url, "application/json", bytes.NewBuffer(jsonParams))
 	}
 }

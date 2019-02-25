@@ -8,6 +8,7 @@ import (
 
 type IPage interface {
 	FindByEpisode(episodeID, sourceID int) ([]*model.Page, error)
+	Insert(*model.Page) error
 }
 
 type PageRepository struct {
@@ -34,4 +35,17 @@ func (repo PageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page
 		result = append(result, page)
 	}
 	return result, nil
+}
+
+func (repo PageRepository) Insert(page *model.Page) error {
+	result, err := repo.Exec("INSERT INTO pages(link, episode_id, source_id) VALUES(?,?,?)", page.Link, page.EpisodeID, page.SourceID)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	page.ID = int(id)
+	return nil
 }

@@ -2,6 +2,7 @@ package connection
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -10,6 +11,7 @@ import (
 
 type IKendang interface {
 	FetchUpdate(source string) ([]model.Update, error)
+	FetchPages(episodeLink string, sourceID int) ([]string, error)
 }
 
 type kendang struct {
@@ -42,4 +44,21 @@ func (k kendang) FetchUpdate(source string) ([]model.Update, error) {
 	}
 
 	return result, nil
+}
+
+func (k kendang) FetchPages(episodeLink string, sourceID int) ([]string, error) {
+	link := fmt.Sprintf("%s/crawl-page?link=%s&source_id=%d", k.baseURL, episodeLink, sourceID)
+	request, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := k.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	pagesLink := []string{}
+	err = json.NewDecoder(response.Body).Decode(&pagesLink)
+	return pagesLink, err
 }
