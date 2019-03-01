@@ -11,6 +11,8 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+var comicNameRequest = "OK. You want to read a comic, just give me a comic name."
+
 type Read struct {
 	Bot    telegram.Bot
 	Reader comic.Read
@@ -25,8 +27,12 @@ func (r Read) Handle(message *tgbotapi.Message) {
 	} else if comicName != "" {
 		log.Println("ada nama_comic saja")
 	} else {
-		log.Println("pengen baca aja")
+		r.requestComicName(message.Chat.ID)
 	}
+}
+
+func (r Read) requestComicName(chatID int64) {
+	r.Bot.SendReplyMessage(chatID, comicNameRequest)
 }
 
 func (r Read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {

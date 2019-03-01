@@ -8,7 +8,8 @@ import (
 )
 
 type IComic interface {
-	FindByName(name string) (*model.Comic, error)
+	FindOne(name string) (model.Comic, error)
+	Search(name string) ([]model.Comic, error)
 	Insert(*model.Comic) error
 }
 
@@ -31,14 +32,32 @@ func (repo ComicRepository) Insert(comic *model.Comic) error {
 	return nil
 }
 
-func (repo ComicRepository) FindByName(name string) (*model.Comic, error) {
-	comic := new(model.Comic)
-	query := fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`)
-	row := repo.QueryRow(query)
+func (repo ComicRepository) FindOne(name string) (model.Comic, error) {
+	row := repo.QueryRow(fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`))
+	c := model.Comic{}
 	summary := sql.NullString{}
-	err := row.Scan(&comic.ID, &comic.Name, &comic.Status, &summary, &comic.CreatedAt, &comic.UpdatedAt)
+	err := row.Scan(&c.ID, &c.Name, &c.Status, &summary, &c.CreatedAt, &c.UpdatedAt)
 	if summary.Valid {
-		comic.Summary = summary.String
+		c.Summary = summary.String
 	}
-	return comic, err
+	return c, err
+}
+
+func (repo ComicRepository) Search(name string) ([]model.Comic, error) {
+	row, err := repo.Query(fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`))
+	if err != nil {
+		return nil, err
+	}
+
+	comics := []model.Comic{}
+	for row.Next() {
+		c := model.Comic{}
+		summary := sql.NullString{}
+		row.Scan(&c.ID, &c.Name, &c.Status, &summary, &c.CreatedAt, &c.UpdatedAt)
+		if summary.Valid {
+			c.Summary = summary.String
+		}
+		comics = append(comics, c)
+	}
+	return comics, err
 }

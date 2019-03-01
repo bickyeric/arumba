@@ -3,7 +3,6 @@ package command
 import (
 	"database/sql"
 	"encoding/base64"
-	"log"
 	"strconv"
 	"strings"
 
@@ -25,7 +24,12 @@ func (s Start) Handle(message *tgbotapi.Message) {
 		return
 	}
 
-	comicName, episodeNo := s.parseArg(arg)
+	comicName, episodeNo, err := s.parseArg(arg)
+	if err != nil {
+		s.Bot.SendHelpMessage(message.Chat.ID)
+		return
+	}
+
 	pages, err := s.Reader.Perform(comicName, episodeNo)
 	if err != nil {
 		switch err {
@@ -40,15 +44,15 @@ func (s Start) Handle(message *tgbotapi.Message) {
 	s.Bot.SendPage(message.Chat.ID, pages)
 }
 
-func (s Start) parseArg(arg string) (string, float64) {
+func (s Start) parseArg(arg string) (string, float64, error) {
 	decodedArg, err := base64.StdEncoding.DecodeString(arg)
 	if err != nil {
-		log.Fatal(err)
+		return "", 0.0, err
 	}
 
 	decodedString := string(decodedArg)
 	splittedString := strings.Split(decodedString, "_")
 	episode, _ := strconv.ParseFloat(splittedString[1], 64)
 
-	return splittedString[0], episode
+	return splittedString[0], episode, nil
 }

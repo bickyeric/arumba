@@ -58,6 +58,21 @@ func (kernel Arumba) InjectTelegramRead() command.Read {
 	}
 }
 
+func (kernel Arumba) InjectTelegramFeedback() command.Feedback {
+	return command.Feedback{
+		Bot: kernel.bot,
+	}
+}
+	
+func (kernel Arumba) InjectTelegramCommon() command.Common {
+	return command.Common{
+		Bot: kernel.bot,
+		ComicSearcher: comic.Search{
+			Repo: kernel.comicRepo,
+		},
+	}
+}
+
 func (kernel Arumba) InjectUpdateRunner() updater.IRunner {
 	return updater.NewRunner(
 		kernel.bot,

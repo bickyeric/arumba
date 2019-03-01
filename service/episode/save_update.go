@@ -35,18 +35,17 @@ func (s UpdateSaver) Perform(update model.Update, sourceID int) error {
 	return s.EpisodeRepo.InsertLink(episode.ID, sourceID, update.EpisodeLink)
 }
 
-func (s UpdateSaver) getComic(name string) (*model.Comic, error) {
-	comic, err := s.ComicRepo.FindByName(name)
+func (s UpdateSaver) getComic(name string) (model.Comic, error) {
+	var comic, err = s.ComicRepo.FindOne(name)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			comic := new(model.Comic)
 			comic.Name = name
 			comic.CreatedAt = time.Now()
 			comic.UpdatedAt = time.Now()
-			return comic, s.ComicRepo.Insert(comic)
+			return comic, s.ComicRepo.Insert(&comic)
 		default:
-			return nil, err
+			return comic, err
 		}
 	}
 	return comic, nil
