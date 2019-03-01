@@ -12,8 +12,20 @@ import (
 	"github.com/bickyeric/arumba/updater"
 )
 
-func New(bot telegram.Bot, db *sql.DB) Arumba {
-	return Arumba{
+// IArumba ...
+type IArumba interface {
+	InjectTelegramStart() command.Start
+	InjectTelegramHelp() command.Help
+	InjectTelegramRead() command.Read
+	InjectTelegramFeedback() command.Feedback
+	InjectTelegramCommon() command.Common
+
+	InjectUpdateRunner() updater.IRunner
+}
+
+// New ...
+func New(bot telegram.Bot, db *sql.DB) IArumba {
+	return arumba{
 		bot:         bot,
 		comicRepo:   repository.NewComic(db),
 		episodeRepo: repository.NewEpisode(db),
@@ -21,7 +33,7 @@ func New(bot telegram.Bot, db *sql.DB) Arumba {
 	}
 }
 
-type Arumba struct {
+type arumba struct {
 	bot telegram.Bot
 
 	comicRepo   repository.IComic
@@ -29,7 +41,7 @@ type Arumba struct {
 	pageRepo    repository.IPage
 }
 
-func (kernel Arumba) InjectTelegramStart() command.Start {
+func (kernel arumba) InjectTelegramStart() command.Start {
 	return command.Start{
 		Bot: kernel.bot,
 		Reader: comic.Read{
@@ -41,13 +53,13 @@ func (kernel Arumba) InjectTelegramStart() command.Start {
 	}
 }
 
-func (kernel Arumba) InjectTelegramHelp() command.Help {
+func (kernel arumba) InjectTelegramHelp() command.Help {
 	return command.Help{
 		Bot: kernel.bot,
 	}
 }
 
-func (kernel Arumba) InjectTelegramRead() command.Read {
+func (kernel arumba) InjectTelegramRead() command.Read {
 	return command.Read{
 		Bot: kernel.bot,
 		Reader: comic.Read{
@@ -58,13 +70,13 @@ func (kernel Arumba) InjectTelegramRead() command.Read {
 	}
 }
 
-func (kernel Arumba) InjectTelegramFeedback() command.Feedback {
+func (kernel arumba) InjectTelegramFeedback() command.Feedback {
 	return command.Feedback{
 		Bot: kernel.bot,
 	}
 }
-	
-func (kernel Arumba) InjectTelegramCommon() command.Common {
+
+func (kernel arumba) InjectTelegramCommon() command.Common {
 	return command.Common{
 		Bot: kernel.bot,
 		ComicSearcher: comic.Search{
@@ -73,7 +85,7 @@ func (kernel Arumba) InjectTelegramCommon() command.Common {
 	}
 }
 
-func (kernel Arumba) InjectUpdateRunner() updater.IRunner {
+func (kernel arumba) InjectUpdateRunner() updater.IRunner {
 	return updater.NewRunner(
 		kernel.bot,
 		connection.NewKendang(),

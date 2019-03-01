@@ -16,14 +16,17 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// ...
 var (
 	BotInstance Bot
 )
 
+// Bot ...
 type Bot struct {
 	*tgbotapi.BotAPI
 }
 
+// ConfigureBot ...
 func ConfigureBot() tgbotapi.UpdatesChannel {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
@@ -47,17 +50,20 @@ func ConfigureBot() tgbotapi.UpdatesChannel {
 	return updates
 }
 
+// SendReplyMessage ...
 func (bot Bot) SendReplyMessage(chatID int64, text string) {
 	replyMsg := tgbotapi.NewMessage(chatID, text)
 	replyMsg.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true}
 	bot.Send(replyMsg)
 }
 
+// SendTextMessage ...
 func (bot Bot) SendTextMessage(chatID int64, text string) {
 	tqMsg := tgbotapi.NewMessage(chatID, text)
 	bot.Send(tqMsg)
 }
 
+// SendComicSelector ...
 func (bot Bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	tqMsg := tgbotapi.NewMessage(chatID, "Here we go, select comic below.")
 	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
@@ -73,27 +79,33 @@ func (bot Bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	log.Println(err)
 }
 
+// SendHelpMessage ...
 func (bot Bot) SendHelpMessage(chatID int64) {
 	bot.SendTextMessage(chatID, "Hai, coba deh klik /help")
 }
 
+// SendNotFoundComic ...
 func (bot Bot) SendNotFoundComic(chatID int64, comicName string) {
 	bot.SendTextMessage(chatID, "Gk nemu nih bro comic +"+comicName+" ma :(")
 }
 
+// SendNotFoundEpisode ...
 func (bot Bot) SendNotFoundEpisode(chatID int64) {
 	bot.SendTextMessage(chatID, "Gk nemu nih bro episode nya")
 }
 
+// SendErrorMessage ...
 func (bot Bot) SendErrorMessage(chatID int64) {
 	bot.SendTextMessage(chatID, "Waduh error nih bro maaf ya")
 }
 
+// NotifyError ...
 func (bot Bot) NotifyError(err error) {
 	chatID, _ := strconv.ParseInt(os.Getenv("CHAT_ID"), 36, 0)
 	bot.SendTextMessage(chatID, "Error nih : "+err.Error())
 }
 
+// NotifyNewEpisode ...
 func (bot Bot) NotifyNewEpisode(update model.Update) {
 	base64 := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s_%f", update.ComicName, update.EpisodeNo)))
 	txt := fmt.Sprintf("*%s*\nEpisode Baru!!!\nCek Sekarang juga :D!!!\n[klik disini](https://telegram.me/nb_comic_bot?start=%s)", update.ComicName, base64)
@@ -112,6 +124,7 @@ func (bot Bot) NotifyNewEpisode(update model.Update) {
 	bot.Send(tqMsg)
 }
 
+// SendPage ...
 func (bot Bot) SendPage(chatID int64, pages []*model.Page) {
 	type photoParams struct {
 		ChatID int64  `json:"chat_id"`

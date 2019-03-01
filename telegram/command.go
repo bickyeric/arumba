@@ -1,5 +1,6 @@
 package telegram
 
+// ...
 var (
 	FeedbackCommand = "feedback"
 	HelpCommand     = "help"

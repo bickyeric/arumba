@@ -13,11 +13,13 @@ import (
 
 var comicNameRequest = "OK. You want to read a comic, just give me a comic name."
 
+// Read ...
 type Read struct {
 	Bot    telegram.Bot
 	Reader comic.Read
 }
 
+// Handle ...
 func (r Read) Handle(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
 	comicName, episodeNo := r.parseArg(arg)

@@ -9,6 +9,7 @@ import (
 	"github.com/bickyeric/arumba/repository"
 )
 
+// Read ...
 type Read struct {
 	ComicRepo   repository.IComic
 	EpisodeRepo repository.IEpisode
@@ -17,6 +18,7 @@ type Read struct {
 	Kendang connection.IKendang
 }
 
+// Perform ...
 func (r Read) Perform(comicName string, episodeNo float64) ([]*model.Page, error) {
 	comic, err := r.ComicRepo.FindOne(comicName)
 	if err != nil {

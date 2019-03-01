@@ -9,6 +9,7 @@ import (
 	"github.com/bickyeric/arumba/model"
 )
 
+// IKendang ...
 type IKendang interface {
 	FetchUpdate(source string) ([]model.Update, error)
 	FetchPages(episodeLink string, sourceID int) ([]string, error)
@@ -19,6 +20,7 @@ type kendang struct {
 	baseURL string
 }
 
+// NewKendang ...
 func NewKendang() IKendang {
 	return kendang{
 		client:  http.DefaultClient,

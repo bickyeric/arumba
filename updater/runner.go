@@ -19,6 +19,7 @@ type runner struct {
 	saver   episode.UpdateSaver
 }
 
+// NewRunner ...
 func NewRunner(bot telegram.Bot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
 	return runner{
 		bot:     bot,

@@ -9,11 +9,13 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// Common ...
 type Common struct {
 	Bot           telegram.Bot
 	ComicSearcher comic.Search
 }
 
+// Handle ...
 func (c Common) Handle(message *tgbotapi.Message) {
 	if message.ReplyToMessage != nil {
 		switch message.ReplyToMessage.Text {

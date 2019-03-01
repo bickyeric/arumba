@@ -9,14 +9,17 @@ import (
 	"github.com/bickyeric/arumba/repository"
 )
 
+// ErrEpisodeExist ...
 var ErrEpisodeExist = errors.New("episode exist")
 
+// UpdateSaver ...
 type UpdateSaver struct {
 	ComicRepo   repository.IComic
 	EpisodeRepo repository.IEpisode
 	PageRepo    repository.IPage
 }
 
+// Perform ...
 func (s UpdateSaver) Perform(update model.Update, sourceID int) error {
 	comic, err := s.getComic(update.ComicName)
 	if err != nil {

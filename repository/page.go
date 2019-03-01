@@ -6,20 +6,22 @@ import (
 	"github.com/bickyeric/arumba/model"
 )
 
+// IPage ...
 type IPage interface {
 	FindByEpisode(episodeID, sourceID int) ([]*model.Page, error)
 	Insert(*model.Page) error
 }
 
-type PageRepository struct {
+type pageRepository struct {
 	*sql.DB
 }
 
+// NewPage ...
 func NewPage(db *sql.DB) IPage {
-	return PageRepository{db}
+	return pageRepository{db}
 }
 
-func (repo PageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page, error) {
+func (repo pageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page, error) {
 	result := []*model.Page{}
 
 	rows, err := repo.Query(`SELECT * FROM pages WHERE episode_id=? AND source_id=?`, episodeID, sourceID)
@@ -37,7 +39,7 @@ func (repo PageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page
 	return result, nil
 }
 
-func (repo PageRepository) Insert(page *model.Page) error {
+func (repo pageRepository) Insert(page *model.Page) error {
 	result, err := repo.Exec("INSERT INTO pages(link, episode_id, source_id) VALUES(?,?,?)", page.Link, page.EpisodeID, page.SourceID)
 	if err != nil {
 		return err

@@ -11,11 +11,13 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// Start ...
 type Start struct {
 	Bot    telegram.Bot
 	Reader comic.Read
 }
 
+// Handle ...
 func (s Start) Handle(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
 

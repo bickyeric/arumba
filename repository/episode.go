@@ -6,6 +6,7 @@ import (
 	"github.com/bickyeric/arumba/model"
 )
 
+// IEpisode ...
 type IEpisode interface {
 	FindByNo(comicID int, no float64) (*model.Episode, error)
 	GetSources(episodeID int) []int
@@ -14,27 +15,28 @@ type IEpisode interface {
 	GetLink(episodeID, sourceID int) (string, error)
 }
 
-type EpisodeRepository struct {
+type episodeRepository struct {
 	*sql.DB
 }
 
+// NewEpisode ...
 func NewEpisode(db *sql.DB) IEpisode {
-	return EpisodeRepository{db}
+	return episodeRepository{db}
 }
 
-func (repo EpisodeRepository) InsertLink(episodeID, sourceID int, link string) error {
+func (repo episodeRepository) InsertLink(episodeID, sourceID int, link string) error {
 	_, err := repo.Exec("INSERT INTO episode_source(source_id, episode_id, link) VALUES(?,?,?)", sourceID, episodeID, link)
 	return err
 }
 
-func (repo EpisodeRepository) GetLink(episodeID, sourceID int) (string, error) {
+func (repo episodeRepository) GetLink(episodeID, sourceID int) (string, error) {
 	link := ""
 	row := repo.QueryRow("SELECT link FROM episode_source WHERE source_id=? AND episode_id=?", sourceID, episodeID)
 	err := row.Scan(&link)
 	return link, err
 }
 
-func (repo EpisodeRepository) Insert(episode *model.Episode) error {
+func (repo episodeRepository) Insert(episode *model.Episode) error {
 	res, err := repo.Exec("INSERT INTO episodes(no, name, created_at, updated_at, comic_id) VALUES(?,?,?,?,?)", episode.No, episode.Name, episode.CreatedAt, episode.UpdatedAt, episode.ComicID)
 	if err != nil {
 		return err
@@ -45,14 +47,14 @@ func (repo EpisodeRepository) Insert(episode *model.Episode) error {
 	return nil
 }
 
-func (repo EpisodeRepository) FindByNo(comicID int, no float64) (*model.Episode, error) {
+func (repo episodeRepository) FindByNo(comicID int, no float64) (*model.Episode, error) {
 	episode := new(model.Episode)
 	row := repo.QueryRow("SELECT * FROM episodes WHERE comic_id=? AND no=?", comicID, no)
 	err := row.Scan(&episode.ID, &episode.No, &episode.Name, &episode.CreatedAt, &episode.UpdatedAt, &episode.ComicID)
 	return episode, err
 }
 
-func (repo EpisodeRepository) GetSources(episodeID int) []int {
+func (repo episodeRepository) GetSources(episodeID int) []int {
 	sourceIds := []int{}
 	rows, err := repo.Query("SELECT source_id FROM episode_source WHERE episode_id=?", episodeID)
 	if err != nil {

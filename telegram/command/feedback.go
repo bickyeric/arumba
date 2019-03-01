@@ -7,10 +7,12 @@ import (
 
 var feedbackRequest = "Masukan kamu sangat berarti buat kami :D"
 
+// Feedback ...
 type Feedback struct {
 	Bot telegram.Bot
 }
 
+// Handle ...
 func (f Feedback) Handle(message *tgbotapi.Message) {
 	f.Bot.SendReplyMessage(message.Chat.ID, feedbackRequest)
 }
