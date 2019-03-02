@@ -16,30 +16,52 @@ func main() {
 	gotenv.Load(".env")
 
 	db := connection.NewMysql()
-	bot := telegram.NewBot()
+	bot := arumba.NewBot()
+	kendang := connection.NewKendang()
 
-	app := arumba.New(bot, db)
-	startHandler := app.InjectTelegramStart()
-	helpHandler := app.InjectTelegramHelp()
-	readHandler := app.InjectTelegramRead()
-	feedbackHandler := app.InjectTelegramFeedback()
-	commonHandler := app.InjectTelegramCommon()
+	app := arumba.New(db)
 
 	log.Printf("Webhook run on %s", os.Getenv("PORT"))
 	go http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil)
 
+	messageHandler := telegram.NewMessageHandler(app, bot, kendang)
+
 	for update := range bot.UpdatesChannel() {
-		switch update.Message.Command() {
-		case telegram.StartCommand:
-			go startHandler.Handle(update.Message)
-		case telegram.HelpCommand:
-			go helpHandler.Handle(update.Message)
-		case telegram.ReadCommand:
-			go readHandler.Handle(update.Message)
-		case telegram.FeedbackCommand:
-			go feedbackHandler.Handle(update.Message)
-		default:
-			go commonHandler.Handle(update.Message)
+		if update.Message != nil {
+			messageHandler.Handle(update.Message)
+			continue
+		}
+		if update.EditedMessage != nil {
+			log.Println("received edited message event")
+			continue
+		}
+		if update.ChannelPost != nil {
+			log.Println("received channel post event")
+			continue
+		}
+		if update.EditedChannelPost != nil {
+			log.Println("received edited channel post event")
+			continue
+		}
+		if update.InlineQuery != nil {
+			log.Println("received inline query event")
+			continue
+		}
+		if update.ChosenInlineResult != nil {
+			log.Println("received chosen inline result event")
+			continue
+		}
+		if update.CallbackQuery != nil {
+			log.Println("received callback query event")
+			continue
+		}
+		if update.ShippingQuery != nil {
+			log.Println("received shipping query event")
+			continue
+		}
+		if update.PreCheckoutQuery != nil {
+			log.Println("received pre checkout query event")
+			continue
 		}
 	}
 }

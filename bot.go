@@ -1,4 +1,4 @@
-package telegram
+package arumba
 
 import (
 	"bytes"
@@ -82,8 +82,7 @@ func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	}
 
 	tqMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboardRow...)
-	_, err := bot.Send(tqMsg)
-	log.Println(err)
+	bot.Send(tqMsg)
 }
 
 func (bot bot) SendHelpMessage(chatID int64) {
@@ -91,7 +90,7 @@ func (bot bot) SendHelpMessage(chatID int64) {
 }
 
 func (bot bot) SendNotFoundComic(chatID int64, comicName string) {
-	bot.SendTextMessage(chatID, "Gk nemu nih bro comic +"+comicName+" ma :(")
+	bot.SendTextMessage(chatID, "Gk nemu nih bro comic "+comicName+" ma :(")
 }
 
 func (bot bot) SendNotFoundEpisode(chatID int64) {

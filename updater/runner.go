@@ -3,9 +3,9 @@ package updater
 import (
 	"log"
 
+	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
-	"github.com/bickyeric/arumba/telegram"
 )
 
 // IRunner ...
@@ -14,13 +14,13 @@ type IRunner interface {
 }
 
 type runner struct {
-	bot     telegram.IBot
+	bot     arumba.IBot
 	kendang connection.IKendang
 	saver   episode.UpdateSaver
 }
 
 // NewRunner ...
-func NewRunner(bot telegram.IBot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
+func NewRunner(bot arumba.IBot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
 	return runner{
 		bot:     bot,
 		kendang: kendang,

@@ -9,8 +9,8 @@ import (
 
 // IComic ...
 type IComic interface {
-	FindOne(name string) (model.Comic, error)
-	Search(name string) ([]model.Comic, error)
+	Find(name string) (model.Comic, error)
+	FindAll(name string) ([]model.Comic, error)
 	Insert(*model.Comic) error
 }
 
@@ -34,7 +34,7 @@ func (repo comicRepository) Insert(comic *model.Comic) error {
 	return nil
 }
 
-func (repo comicRepository) FindOne(name string) (model.Comic, error) {
+func (repo comicRepository) Find(name string) (model.Comic, error) {
 	row := repo.QueryRow(fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`))
 	c := model.Comic{}
 	summary := sql.NullString{}
@@ -45,7 +45,7 @@ func (repo comicRepository) FindOne(name string) (model.Comic, error) {
 	return c, err
 }
 
-func (repo comicRepository) Search(name string) ([]model.Comic, error) {
+func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
 	row, err := repo.Query(fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`))
 	if err != nil {
 		return nil, err

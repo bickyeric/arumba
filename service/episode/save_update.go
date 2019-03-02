@@ -39,7 +39,7 @@ func (s UpdateSaver) Perform(update model.Update, sourceID int) error {
 }
 
 func (s UpdateSaver) getComic(name string) (model.Comic, error) {
-	var comic, err = s.ComicRepo.FindOne(name)
+	var comic, err = s.ComicRepo.Find(name)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

@@ -17,5 +17,5 @@ type Search struct {
 
 // Perform ...
 func (s Search) Perform(name string) ([]model.Comic, error) {
-	return s.Repo.Search(name)
+	return s.Repo.FindAll(name)
 }

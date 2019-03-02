@@ -20,7 +20,7 @@ type Read struct {
 
 // Perform ...
 func (r Read) Perform(comicName string, episodeNo float64) ([]*model.Page, error) {
-	comic, err := r.ComicRepo.FindOne(comicName)
+	comic, err := r.ComicRepo.Find(comicName)
 	if err != nil {
 		return nil, err
 	}

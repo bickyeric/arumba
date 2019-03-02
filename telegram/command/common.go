@@ -4,21 +4,17 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
-	"github.com/bickyeric/arumba/telegram"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type common struct {
-	bot           telegram.IBot
-	comicSearcher comic.Search
+type CommonHandler struct {
+	Bot           arumba.IBot
+	ComicSearcher comic.Search
 }
 
-func Common(bot telegram.IBot, comicSearcher comic.Search) telegram.CommandHandler {
-	return common{bot, comicSearcher}
-}
-
-func (c common) Handle(message *tgbotapi.Message) {
+func (c CommonHandler) Handle(message *tgbotapi.Message) {
 	if message.ReplyToMessage != nil {
 		switch message.ReplyToMessage.Text {
 		case feedbackRequest:
@@ -30,21 +26,25 @@ func (c common) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (c common) handleReadComic(message *tgbotapi.Message) {
-	comics, err := c.comicSearcher.Perform(message.Text)
+func (c CommonHandler) handleReadComic(message *tgbotapi.Message) {
+	comics, err := c.ComicSearcher.Perform(message.Text)
 	if err != nil {
-		c.bot.NotifyError(err)
+		c.Bot.NotifyError(err)
 	}
 
-	c.bot.SendComicSelector(message.Chat.ID, comics)
+	if len(comics) < 1 {
+		c.Bot.SendNotFoundComic(message.Chat.ID, message.Text)
+	} else {
+		c.Bot.SendComicSelector(message.Chat.ID, comics)
+	}
 }
 
-func (c common) handleFeedback(message *tgbotapi.Message) {
+func (c CommonHandler) handleFeedback(message *tgbotapi.Message) {
 	replyMessage := tgbotapi.NewMessage(message.Chat.ID, "Makasih masukannya...")
 	replyMessage.ReplyToMessageID = message.MessageID
-	c.bot.Bot().Send(replyMessage)
+	c.Bot.Bot().Send(replyMessage)
 
 	chatID, _ := strconv.Atoi(os.Getenv("CHAT_ID"))
 	forwardFeedbackMessage := tgbotapi.NewForward(int64(chatID), message.Chat.ID, message.MessageID)
-	c.bot.Bot().Send(forwardFeedbackMessage)
+	c.Bot.Bot().Send(forwardFeedbackMessage)
 }
