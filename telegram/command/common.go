@@ -9,14 +9,16 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// Common ...
-type Common struct {
-	Bot           telegram.Bot
-	ComicSearcher comic.Search
+type common struct {
+	bot           telegram.IBot
+	comicSearcher comic.Search
 }
 
-// Handle ...
-func (c Common) Handle(message *tgbotapi.Message) {
+func Common(bot telegram.IBot, comicSearcher comic.Search) telegram.CommandHandler {
+	return common{bot, comicSearcher}
+}
+
+func (c common) Handle(message *tgbotapi.Message) {
 	if message.ReplyToMessage != nil {
 		switch message.ReplyToMessage.Text {
 		case feedbackRequest:
@@ -28,21 +30,21 @@ func (c Common) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (c Common) handleReadComic(message *tgbotapi.Message) {
-	comics, err := c.ComicSearcher.Perform(message.Text)
+func (c common) handleReadComic(message *tgbotapi.Message) {
+	comics, err := c.comicSearcher.Perform(message.Text)
 	if err != nil {
-		c.Bot.NotifyError(err)
+		c.bot.NotifyError(err)
 	}
 
-	c.Bot.SendComicSelector(message.Chat.ID, comics)
+	c.bot.SendComicSelector(message.Chat.ID, comics)
 }
 
-func (c Common) handleFeedback(message *tgbotapi.Message) {
+func (c common) handleFeedback(message *tgbotapi.Message) {
 	replyMessage := tgbotapi.NewMessage(message.Chat.ID, "Makasih masukannya...")
 	replyMessage.ReplyToMessageID = message.MessageID
-	c.Bot.Send(replyMessage)
+	c.bot.Bot().Send(replyMessage)
 
 	chatID, _ := strconv.Atoi(os.Getenv("CHAT_ID"))
 	forwardFeedbackMessage := tgbotapi.NewForward(int64(chatID), message.Chat.ID, message.MessageID)
-	c.Bot.Send(forwardFeedbackMessage)
+	c.bot.Bot().Send(forwardFeedbackMessage)
 }

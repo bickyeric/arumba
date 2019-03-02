@@ -14,17 +14,17 @@ import (
 
 // IArumba ...
 type IArumba interface {
-	InjectTelegramStart() command.Start
-	InjectTelegramHelp() command.Help
-	InjectTelegramRead() command.Read
-	InjectTelegramFeedback() command.Feedback
-	InjectTelegramCommon() command.Common
+	InjectTelegramStart() telegram.CommandHandler
+	InjectTelegramHelp() telegram.CommandHandler
+	InjectTelegramRead() telegram.CommandHandler
+	InjectTelegramFeedback() telegram.CommandHandler
+	InjectTelegramCommon() telegram.CommandHandler
 
 	InjectUpdateRunner() updater.IRunner
 }
 
 // New ...
-func New(bot telegram.Bot, db *sql.DB) IArumba {
+func New(bot telegram.IBot, db *sql.DB) IArumba {
 	return arumba{
 		bot:         bot,
 		comicRepo:   repository.NewComic(db),
@@ -34,55 +34,51 @@ func New(bot telegram.Bot, db *sql.DB) IArumba {
 }
 
 type arumba struct {
-	bot telegram.Bot
+	bot telegram.IBot
 
 	comicRepo   repository.IComic
 	episodeRepo repository.IEpisode
 	pageRepo    repository.IPage
 }
 
-func (kernel arumba) InjectTelegramStart() command.Start {
-	return command.Start{
-		Bot: kernel.bot,
-		Reader: comic.Read{
+func (kernel arumba) InjectTelegramStart() telegram.CommandHandler {
+	return command.Start(
+		kernel.bot,
+		comic.Read{
 			ComicRepo:   kernel.comicRepo,
 			EpisodeRepo: kernel.episodeRepo,
 			PageRepo:    kernel.pageRepo,
 			Kendang:     connection.NewKendang(),
 		},
-	}
+	)
 }
 
-func (kernel arumba) InjectTelegramHelp() command.Help {
-	return command.Help{
-		Bot: kernel.bot,
-	}
+func (kernel arumba) InjectTelegramHelp() telegram.CommandHandler {
+	return command.Help(kernel.bot)
 }
 
-func (kernel arumba) InjectTelegramRead() command.Read {
-	return command.Read{
-		Bot: kernel.bot,
-		Reader: comic.Read{
+func (kernel arumba) InjectTelegramRead() telegram.CommandHandler {
+	return command.Read(
+		kernel.bot,
+		comic.Read{
 			ComicRepo:   kernel.comicRepo,
 			EpisodeRepo: kernel.episodeRepo,
 			PageRepo:    kernel.pageRepo,
 		},
-	}
+	)
 }
 
-func (kernel arumba) InjectTelegramFeedback() command.Feedback {
-	return command.Feedback{
-		Bot: kernel.bot,
-	}
+func (kernel arumba) InjectTelegramFeedback() telegram.CommandHandler {
+	return command.Feedback(kernel.bot)
 }
 
-func (kernel arumba) InjectTelegramCommon() command.Common {
-	return command.Common{
-		Bot: kernel.bot,
-		ComicSearcher: comic.Search{
+func (kernel arumba) InjectTelegramCommon() telegram.CommandHandler {
+	return command.Common(
+		kernel.bot,
+		comic.Search{
 			Repo: kernel.comicRepo,
 		},
-	}
+	)
 }
 
 func (kernel arumba) InjectUpdateRunner() updater.IRunner {

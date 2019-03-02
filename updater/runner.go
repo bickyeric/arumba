@@ -14,13 +14,13 @@ type IRunner interface {
 }
 
 type runner struct {
-	bot     telegram.Bot
+	bot     telegram.IBot
 	kendang connection.IKendang
 	saver   episode.UpdateSaver
 }
 
 // NewRunner ...
-func NewRunner(bot telegram.Bot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
+func NewRunner(bot telegram.IBot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
 	return runner{
 		bot:     bot,
 		kendang: kendang,

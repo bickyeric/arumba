@@ -13,14 +13,16 @@ import (
 
 var comicNameRequest = "OK. You want to read a comic, just give me a comic name."
 
-// Read ...
-type Read struct {
-	Bot    telegram.Bot
-	Reader comic.Read
+type read struct {
+	bot    telegram.IBot
+	reader comic.Read
 }
 
-// Handle ...
-func (r Read) Handle(message *tgbotapi.Message) {
+func Read(bot telegram.IBot, reader comic.Read) telegram.CommandHandler {
+	return read{bot, reader}
+}
+
+func (r read) Handle(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
 	comicName, episodeNo := r.parseArg(arg)
 
@@ -33,26 +35,26 @@ func (r Read) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (r Read) requestComicName(chatID int64) {
-	r.Bot.SendReplyMessage(chatID, comicNameRequest)
+func (r read) requestComicName(chatID int64) {
+	r.bot.SendReplyMessage(chatID, comicNameRequest)
 }
 
-func (r Read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
-	pages, err := r.Reader.Perform(comicName, episodeNo)
+func (r read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
+	pages, err := r.reader.Perform(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			r.Bot.SendNotFoundEpisode(chatID)
+			r.bot.SendNotFoundEpisode(chatID)
 		default:
-			r.Bot.SendErrorMessage(chatID)
+			r.bot.SendErrorMessage(chatID)
 		}
 		return
 	}
 
-	r.Bot.SendPage(chatID, pages)
+	r.bot.SendPage(chatID, pages)
 }
 
-func (r Read) parseArg(arg string) (string, float64) {
+func (r read) parseArg(arg string) (string, float64) {
 	if arg == "" {
 		return "", -1
 	}

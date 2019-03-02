@@ -16,9 +16,9 @@ func main() {
 	gotenv.Load(".env")
 
 	db := connection.NewMysql()
-	updates := telegram.ConfigureBot()
+	bot := telegram.NewBot()
 
-	app := arumba.New(telegram.BotInstance, db)
+	app := arumba.New(bot, db)
 	startHandler := app.InjectTelegramStart()
 	helpHandler := app.InjectTelegramHelp()
 	readHandler := app.InjectTelegramRead()
@@ -28,7 +28,7 @@ func main() {
 	log.Printf("Webhook run on %s", os.Getenv("PORT"))
 	go http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil)
 
-	for update := range updates {
+	for update := range bot.UpdatesChannel() {
 		switch update.Message.Command() {
 		case telegram.StartCommand:
 			go startHandler.Handle(update.Message)
