@@ -10,6 +10,7 @@ var (
 	StartCommand    = "start"
 )
 
+// CommandHandler ...
 type CommandHandler interface {
 	Handle(message *tgbotapi.Message)
 }

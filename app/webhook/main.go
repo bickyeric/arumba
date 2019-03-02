@@ -25,6 +25,7 @@ func main() {
 	go http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil)
 
 	messageHandler := telegram.NewMessageHandler(app, bot, kendang)
+	callbackHandler := telegram.NewCallbackHandler(app, bot)
 
 	for update := range bot.UpdatesChannel() {
 		if update.Message != nil {
@@ -52,7 +53,7 @@ func main() {
 			continue
 		}
 		if update.CallbackQuery != nil {
-			log.Println("received callback query event")
+			callbackHandler.Handle(update.CallbackQuery)
 			continue
 		}
 		if update.ShippingQuery != nil {

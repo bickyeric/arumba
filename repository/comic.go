@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/bickyeric/arumba/model"
 )
@@ -35,7 +34,7 @@ func (repo comicRepository) Insert(comic *model.Comic) error {
 }
 
 func (repo comicRepository) Find(name string) (model.Comic, error) {
-	row := repo.QueryRow(fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`))
+	row := repo.QueryRow(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`)
 	c := model.Comic{}
 	summary := sql.NullString{}
 	err := row.Scan(&c.ID, &c.Name, &c.Status, &summary, &c.CreatedAt, &c.UpdatedAt)
@@ -46,7 +45,7 @@ func (repo comicRepository) Find(name string) (model.Comic, error) {
 }
 
 func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
-	row, err := repo.Query(fmt.Sprintf(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`))
+	row, err := repo.Query(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`)
 	if err != nil {
 		return nil, err
 	}

@@ -2,17 +2,20 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/bickyeric/arumba/model"
 )
 
 // IEpisode ...
 type IEpisode interface {
+	Count(comicID int) (int, error)
+	No(comicID, offset int) (float64, error)
 	FindByNo(comicID int, no float64) (*model.Episode, error)
+	GetLink(episodeID, sourceID int) (string, error)
 	GetSources(episodeID int) []int
 	Insert(*model.Episode) error
 	InsertLink(episodeID, sourceID int, link string) error
-	GetLink(episodeID, sourceID int) (string, error)
 }
 
 type episodeRepository struct {
@@ -22,6 +25,23 @@ type episodeRepository struct {
 // NewEpisode ...
 func NewEpisode(db *sql.DB) IEpisode {
 	return episodeRepository{db}
+}
+
+func (repo episodeRepository) Count(comicID int) (int, error) {
+	totalEpisode := 0
+	row := repo.QueryRow(fmt.Sprintf(`SELECT COUNT(*) FROM episodes WHERE comic_id=%d`, comicID))
+	err := row.Scan(&totalEpisode)
+	return totalEpisode, err
+}
+
+func (repo episodeRepository) No(comicID, offset int) (float64, error) {
+	var (
+		no float64 = 0.0
+	)
+
+	row := repo.QueryRow(fmt.Sprintf(`SELECT no FROM episodes WHERE comic_id=%d LIMIT %d,1`, comicID, offset))
+	err := row.Scan(&no)
+	return no, err
 }
 
 func (repo episodeRepository) InsertLink(episodeID, sourceID int, link string) error {
