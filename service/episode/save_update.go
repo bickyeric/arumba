@@ -1,16 +1,11 @@
 package episode
 
 import (
-	"database/sql"
-	"errors"
-	"time"
-
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// ErrEpisodeExist ...
-var ErrEpisodeExist = errors.New("episode exist")
 
 // UpdateSaver ...
 type UpdateSaver struct {
@@ -20,32 +15,37 @@ type UpdateSaver struct {
 }
 
 // Perform ...
-func (s UpdateSaver) Perform(update model.Update, sourceID int) error {
+func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) error {
 	comic, err := s.getComic(update.ComicName)
 	if err != nil {
 		return err
 	}
 
-	episode, err := s.getEpisode(comic.ID, update)
+	ep, err := s.getEpisode(comic.ID, update)
 	if err != nil {
 		return err
 	}
 
-	if _, err := s.EpisodeRepo.GetLink(episode.ID, sourceID); err == nil {
-		return ErrEpisodeExist
+	page, err := s.PageRepo.FindByEpisode(ep.ID, sourceID)
+	if err == nil {
+		return nil
 	}
 
-	return s.EpisodeRepo.InsertLink(episode.ID, sourceID, update.EpisodeLink)
+	page = model.Page{
+		EpisodeID: ep.ID,
+		SourceID:  sourceID,
+		Link:      update.EpisodeLink,
+	}
+
+	return s.PageRepo.Insert(&page)
 }
 
 func (s UpdateSaver) getComic(name string) (model.Comic, error) {
-	var comic, err = s.ComicRepo.Find(name)
+	comic, err := s.ComicRepo.Find(name)
 	if err != nil {
 		switch err {
-		case sql.ErrNoRows:
+		case mongo.ErrNoDocuments:
 			comic.Name = name
-			comic.CreatedAt = time.Now()
-			comic.UpdatedAt = time.Now()
 			return comic, s.ComicRepo.Insert(&comic)
 		default:
 			return comic, err
@@ -54,16 +54,14 @@ func (s UpdateSaver) getComic(name string) (model.Comic, error) {
 	return comic, nil
 }
 
-func (s UpdateSaver) getEpisode(comicID int, update model.Update) (*model.Episode, error) {
+func (s UpdateSaver) getEpisode(comicID primitive.ObjectID, update model.Update) (*model.Episode, error) {
 	episode, err := s.EpisodeRepo.FindByNo(comicID, update.EpisodeNo)
 	if err != nil {
 		switch err {
-		case sql.ErrNoRows:
+		case mongo.ErrNoDocuments:
 			episode := new(model.Episode)
 			episode.No = update.EpisodeNo
 			episode.Name = update.EpisodeName
-			episode.CreatedAt = time.Now()
-			episode.UpdatedAt = time.Now()
 			episode.ComicID = comicID
 			return episode, s.EpisodeRepo.Insert(episode)
 		default:

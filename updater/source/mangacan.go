@@ -2,6 +2,7 @@ package source
 
 import (
 	"github.com/bickyeric/arumba/updater"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Mangacan ...
@@ -13,4 +14,7 @@ var _ updater.ISource = (*Mangacan)(nil)
 func (Mangacan) Name() string { return "mangacan" }
 
 // GetID ...
-func (Mangacan) GetID() int { return 3 }
+func (Mangacan) GetID() primitive.ObjectID {
+	id, _ := primitive.ObjectIDFromHex("5c9511f561a8d04fa844b666")
+	return id
+}

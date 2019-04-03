@@ -1,53 +1,38 @@
 package repository
 
 import (
-	"database/sql"
+	"time"
 
 	"github.com/bickyeric/arumba/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // IPage ...
 type IPage interface {
-	FindByEpisode(episodeID, sourceID int) ([]*model.Page, error)
+	FindByEpisode(episodeID, sourceID primitive.ObjectID) (model.Page, error)
 	Insert(*model.Page) error
 }
 
 type pageRepository struct {
-	*sql.DB
+	coll *mongo.Collection
 }
 
 // NewPage ...
-func NewPage(db *sql.DB) IPage {
-	return pageRepository{db}
+func NewPage(db *mongo.Database) IPage {
+	return pageRepository{db.Collection("pages")}
 }
 
-func (repo pageRepository) FindByEpisode(episodeID, sourceID int) ([]*model.Page, error) {
-	result := []*model.Page{}
-
-	rows, err := repo.Query(`SELECT * FROM pages WHERE episode_id=? AND source_id=?`, episodeID, sourceID)
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		page := new(model.Page)
-		err = rows.Scan(&page.ID, &page.Link, &page.EpisodeID, &page.SourceID)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, page)
-	}
-	return result, nil
+func (repo pageRepository) FindByEpisode(episodeID, sourceID primitive.ObjectID) (model.Page, error) {
+	result := model.Page{}
+	err := repo.coll.FindOne(ctx, bson.M{"episode_id": episodeID, "source_id": sourceID}).Decode(&result)
+	return result, err
 }
 
 func (repo pageRepository) Insert(page *model.Page) error {
-	result, err := repo.Exec("INSERT INTO pages(link, episode_id, source_id) VALUES(?,?,?)", page.Link, page.EpisodeID, page.SourceID)
-	if err != nil {
-		return err
-	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-	page.ID = int(id)
-	return nil
+	page.ID = primitive.NewObjectID()
+	page.CreatedAt = time.Now()
+	_, err := repo.coll.InsertOne(ctx, page)
+	return err
 }

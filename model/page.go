@@ -1,9 +1,18 @@
 package model
 
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 // Page ...
 type Page struct {
-	ID        int
-	Link      string
-	EpisodeID int
-	SourceID  int
+	ID        primitive.ObjectID `bson:"_id"`
+	EpisodeID primitive.ObjectID `bson:"episode_id"`
+	SourceID  primitive.ObjectID `bson:"source_id"`
+	Link      string             `bson:"link"`
+	Links     []string           `bson:"links,omitempty"`
+	CreatedAt time.Time          `bson:"created_at,omitempty"`
+	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
 }

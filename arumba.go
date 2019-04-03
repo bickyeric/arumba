@@ -1,13 +1,12 @@
 package arumba
 
 import (
-	"database/sql"
-
 	"github.com/bickyeric/arumba/repository"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // New ...
-func New(db *sql.DB) Arumba {
+func New(db *mongo.Database) Arumba {
 	return Arumba{
 		ComicRepo:   repository.NewComic(db),
 		EpisodeRepo: repository.NewEpisode(db),

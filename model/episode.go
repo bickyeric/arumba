@@ -1,13 +1,17 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // Episode ...
 type Episode struct {
-	ID        int
-	No        float64
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	ComicID   int
+	ID        primitive.ObjectID `bson:"_id"`
+	No        float64            `bson:"no"`
+	Name      string             `bson:"name"`
+	CreatedAt time.Time          `bson:"created_at,omitempty"`
+	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
+	ComicID   primitive.ObjectID `bson:"comic_id"`
 }

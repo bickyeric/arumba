@@ -13,10 +13,9 @@ import (
 
 func NewMongo() (*mongo.Database, error) {
 	uri := ""
-	username := os.Getenv("DB_MONGO_USERNAME")
-	if username != "" {
+	if os.Getenv("DB_MONGO_USERNAME") != "" {
 		uri = fmt.Sprintf("mongodb://%s:%s@%s",
-			username,
+			os.Getenv("DB_MONGO_USERNAME"),
 			os.Getenv("DB_MONGO_PASSWORD"),
 			os.Getenv("DB_MONGO_HOST"))
 	} else {

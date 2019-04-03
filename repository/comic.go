@@ -2,9 +2,11 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/bickyeric/arumba/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -25,13 +27,16 @@ func NewComic(db *mongo.Database) IComic {
 }
 
 func (repo comicRepository) Insert(comic *model.Comic) error {
+	comic.ID = primitive.NewObjectID()
+	comic.CreatedAt = time.Now()
 	_, err := repo.coll.InsertOne(context.Background(), comic)
 	return err
 }
 
 func (repo comicRepository) Find(name string) (model.Comic, error) {
 	c := model.Comic{}
-	err := repo.coll.FindOne(context.Background(), bson.M{"name": "/.*" + name + ".*/"}).Decode(&c)
+	err := repo.coll.FindOne(context.Background(),
+		bson.M{"name": bson.M{"$regex": ".*" + name + ".*"}}).Decode(&c)
 	return c, err
 }
 
