@@ -1,9 +1,11 @@
 package repository
 
 import (
-	"database/sql"
+	"context"
 
 	"github.com/bickyeric/arumba/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // IComic ...
@@ -14,51 +16,35 @@ type IComic interface {
 }
 
 type comicRepository struct {
-	*sql.DB
+	coll *mongo.Collection
 }
 
 // NewComic ...
-func NewComic(db *sql.DB) IComic {
-	return comicRepository{db}
+func NewComic(db *mongo.Database) IComic {
+	return comicRepository{db.Collection("comics")}
 }
 
 func (repo comicRepository) Insert(comic *model.Comic) error {
-	res, err := repo.Exec("INSERT INTO comics(name, status, summary, created_at, updated_at) VALUES(?,?,?,?,?)", comic.Name, "", "", comic.CreatedAt, comic.UpdatedAt)
-	if err != nil {
-		return err
-	}
-
-	id, _ := res.LastInsertId()
-	comic.ID = int(id)
-	return nil
+	_, err := repo.coll.InsertOne(context.Background(), comic)
+	return err
 }
 
 func (repo comicRepository) Find(name string) (model.Comic, error) {
-	row := repo.QueryRow(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`)
 	c := model.Comic{}
-	summary := sql.NullString{}
-	err := row.Scan(&c.ID, &c.Name, &c.Status, &summary, &c.CreatedAt, &c.UpdatedAt)
-	if summary.Valid {
-		c.Summary = summary.String
-	}
+	err := repo.coll.FindOne(context.Background(), bson.M{"name": "/.*" + name + ".*/"}).Decode(&c)
 	return c, err
 }
 
 func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
-	row, err := repo.Query(`SELECT * FROM comics WHERE name LIKE '%%` + name + `%%'`)
-	if err != nil {
-		return nil, err
+	comics := []model.Comic{}
+	cur, err := repo.coll.Find(context.Background(), bson.M{"name": "/.*" + name + ".*/"})
+
+	c := model.Comic{}
+	for cur.Next(context.Background()) {
+		if err := cur.Decode(&c); err != nil {
+			return comics, err
+		}
 	}
 
-	comics := []model.Comic{}
-	for row.Next() {
-		c := model.Comic{}
-		summary := sql.NullString{}
-		row.Scan(&c.ID, &c.Name, &c.Status, &summary, &c.CreatedAt, &c.UpdatedAt)
-		if summary.Valid {
-			c.Summary = summary.String
-		}
-		comics = append(comics, c)
-	}
 	return comics, err
 }
