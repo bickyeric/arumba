@@ -40,16 +40,13 @@ func (r runner) Run(source ISource) {
 	for _, u := range updates {
 		err := r.saver.Perform(u, source.GetID())
 		if err != nil {
-			switch err {
-			case episode.ErrEpisodeExist:
-				continue
-			default:
-				r.bot.NotifyError(err)
-				continue
-			}
+			// 	if err != nil {
+			// 		r.bot.NotifyError(err)
+			// 		continue
+			// 	}
 		}
 
-		r.bot.NotifyNewEpisode(u)
+		// r.bot.NotifyNewEpisode(u)
 	}
 	log.Println(source.Name() + " updates processed.")
 }

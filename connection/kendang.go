@@ -12,7 +12,7 @@ import (
 // IKendang ...
 type IKendang interface {
 	FetchUpdate(source string) ([]model.Update, error)
-	FetchPages(episodeLink string, sourceID int) ([]string, error)
+	FetchPages(episodeLink string, sourceID string) ([]string, error)
 }
 
 type kendang struct {
@@ -48,8 +48,8 @@ func (k kendang) FetchUpdate(source string) ([]model.Update, error) {
 	return result, nil
 }
 
-func (k kendang) FetchPages(episodeLink string, sourceID int) ([]string, error) {
-	link := fmt.Sprintf("%s/crawl-page?link=%s&source_id=%d", k.baseURL, episodeLink, sourceID)
+func (k kendang) FetchPages(episodeLink string, sourceID string) ([]string, error) {
+	link := fmt.Sprintf("%s/crawl-page?link=%s&source_id=%s", k.baseURL, episodeLink, sourceID)
 	request, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		return nil, err

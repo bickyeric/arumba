@@ -13,6 +13,7 @@ import (
 type IPage interface {
 	FindByEpisode(episodeID, sourceID primitive.ObjectID) (model.Page, error)
 	Insert(*model.Page) error
+	Update(*model.Page) error
 }
 
 type pageRepository struct {
@@ -34,5 +35,11 @@ func (repo pageRepository) Insert(page *model.Page) error {
 	page.ID = primitive.NewObjectID()
 	page.CreatedAt = time.Now()
 	_, err := repo.coll.InsertOne(ctx, page)
+	return err
+}
+
+func (repo pageRepository) Update(page *model.Page) error {
+	page.UpdatedAt = time.Now()
+	_, err := repo.coll.UpdateOne(ctx, bson.M{"_id": page.ID}, page)
 	return err
 }

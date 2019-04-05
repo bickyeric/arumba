@@ -19,7 +19,7 @@ type Read struct {
 }
 
 // Perform ...
-func (r Read) Perform(comicName string, episodeNo float64) ([]*model.Page, error) {
+func (r Read) Perform(comicName string, episodeNo float64) ([]string, error) {
 	comic, err := r.ComicRepo.Find(comicName)
 	if err != nil {
 		return nil, err
@@ -35,41 +35,24 @@ func (r Read) Perform(comicName string, episodeNo float64) ([]*model.Page, error
 	rand.Seed(time.Now().Unix())
 	n := rand.Int() % len(sources)
 
-	pages, err := r.PageRepo.FindByEpisode(episode.ID, sources[n])
+	page, err := r.PageRepo.FindByEpisode(episode.ID, sources[n])
 	if err != nil {
 		return nil, err
 	}
 
-	if len(pages) < 1 {
-		pages, err = r.fetchFromKendang(episode.ID, sources[n])
+	if len(page.Links) < 1 {
+		err = r.fetchFromKendang(&page)
 	}
 
-	return pages, err
+	return page.Links, err
 }
 
-func (r Read) fetchFromKendang(episodeID, sourceID int) ([]*model.Page, error) {
-	episodeLink, err := r.EpisodeRepo.GetLink(episodeID, sourceID)
+func (r Read) fetchFromKendang(page *model.Page) error {
+	pagesLink, err := r.Kendang.FetchPages(page.Link, page.SourceID.Hex())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	pagesLink, err := r.Kendang.FetchPages(episodeLink, sourceID)
-	if err != nil {
-		return nil, err
-	}
-
-	result := []*model.Page{}
-	for _, link := range pagesLink {
-		page := model.Page{
-			Link:      link,
-			EpisodeID: episodeID,
-			SourceID:  sourceID,
-		}
-		err := r.PageRepo.Insert(&page)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, &page)
-	}
-	return result, nil
+	page.Links = pagesLink
+	return r.PageRepo.Update(page)
 }

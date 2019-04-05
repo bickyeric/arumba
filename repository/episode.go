@@ -18,10 +18,8 @@ type IEpisode interface {
 	Count(comicID int) (int, error)
 	No(comicID, offset int) (float64, error)
 	FindByNo(comicID primitive.ObjectID, no float64) (*model.Episode, error)
-	GetLink(episodeID int, sourceID primitive.ObjectID) (string, error)
-	GetSources(episodeID int) []int
+	GetSources(episodeID primitive.ObjectID) []primitive.ObjectID
 	Insert(*model.Episode) error
-	InsertLink(episodeID int, sourceID primitive.ObjectID, link string) error
 }
 
 type episodeRepository struct {
@@ -46,20 +44,6 @@ func (repo episodeRepository) No(comicID, offset int) (float64, error) {
 	return ep.No, err
 }
 
-func (repo episodeRepository) InsertLink(episodeID int, sourceID primitive.ObjectID, link string) error {
-	// 	_, err := repo.coll.UpdateOne(context.Background(), bson.M{"episode_id": episodeID, "source_id": sourceID},
-	// 		bson.M{"$set": bson.M{"link": link}})
-	// 	_, err := repo.Exec("INSERT INTO episode_source(source_id, episode_id, link) VALUES(?,?,?)", sourceID, episodeID, link)
-	return nil
-}
-
-func (repo episodeRepository) GetLink(episodeID int, sourceID primitive.ObjectID) (string, error) {
-	link := ""
-	// row := repo.QueryRow("SELECT link FROM episode_source WHERE source_id=? AND episode_id=?", sourceID, episodeID)
-	// err := row.Scan(&link)
-	return link, nil
-}
-
 func (repo episodeRepository) Insert(ep *model.Episode) error {
 	ep.ID = primitive.NewObjectID()
 	ep.CreatedAt = time.Now()
@@ -73,8 +57,8 @@ func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no float64) (
 	return ep, err
 }
 
-func (repo episodeRepository) GetSources(episodeID int) []int {
-	sourceIds := []int{}
+func (repo episodeRepository) GetSources(episodeID primitive.ObjectID) []primitive.ObjectID {
+	sourceIds := []primitive.ObjectID{}
 	// rows, err := repo.Query("SELECT source_id FROM episode_source WHERE episode_id=?", episodeID)
 	// if err != nil {
 	// 	return sourceIds

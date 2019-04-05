@@ -15,7 +15,10 @@ func main() {
 
 	gotenv.Load(".env")
 
-	db := connection.NewMysql()
+	db, err := connection.NewMongo()
+	if err != nil {
+		log.Fatal(err)
+	}
 	bot := arumba.NewBot()
 	kendang := connection.NewKendang()
 
