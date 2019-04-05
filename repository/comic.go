@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"context"
 	"time"
 
 	"github.com/bickyeric/arumba/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // IComic ...
@@ -29,27 +29,34 @@ func NewComic(db *mongo.Database) IComic {
 func (repo comicRepository) Insert(comic *model.Comic) error {
 	comic.ID = primitive.NewObjectID()
 	comic.CreatedAt = time.Now()
-	_, err := repo.coll.InsertOne(context.Background(), comic)
+	_, err := repo.coll.InsertOne(ctx, comic)
 	return err
 }
 
 func (repo comicRepository) Find(name string) (model.Comic, error) {
 	c := model.Comic{}
-	err := repo.coll.FindOne(context.Background(),
-		bson.M{"name": bson.M{"$regex": ".*" + name + ".*"}}).Decode(&c)
+	err := repo.coll.FindOne(ctx,
+		bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}}).Decode(&c)
 	return c, err
 }
 
 func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
 	comics := []model.Comic{}
-	cur, err := repo.coll.Find(context.Background(), bson.M{"name": "/.*" + name + ".*/"})
+	cur, err := repo.coll.Find(ctx,
+		bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}},
+		options.Find().SetLimit(5),
+	)
+	if err != nil {
+		return comics, err
+	}
 
 	c := model.Comic{}
-	for cur.Next(context.Background()) {
+	for cur.Next(ctx) {
 		if err := cur.Decode(&c); err != nil {
 			return comics, err
 		}
+		comics = append(comics, c)
 	}
 
-	return comics, err
+	return comics, nil
 }

@@ -13,6 +13,7 @@ import (
 
 	"github.com/bickyeric/arumba/model"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // IBot ...
@@ -20,7 +21,7 @@ type IBot interface {
 	SendReplyMessage(chatID int64, text string)
 	SendTextMessage(chatID int64, text string)
 	SendComicSelector(chatID int64, comics []model.Comic)
-	SendEpisodeSelector(chatID int64, comicID int, episodeGroup [][]float64)
+	SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, episodeGroup [][]float64)
 	SendHelpMessage(chatID int64)
 	SendNotFoundComic(chatID int64, comicName string)
 	SendNotFoundEpisode(chatID int64)
@@ -50,7 +51,7 @@ func NewBot() IBot {
 	return bot{botapi}
 }
 
-func (bot bot) SendEpisodeSelector(chatID int64, comicID int, episodeGroup [][]float64) {
+func (bot bot) SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, episodeGroup [][]float64) {
 	tqMsg := tgbotapi.NewMessage(chatID, "OK. Select episode number below :D")
 	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
 
@@ -58,10 +59,10 @@ func (bot bot) SendEpisodeSelector(chatID int64, comicID int, episodeGroup [][]f
 		base64 := ""
 		text := ""
 		if len(group) == 1 {
-			base64 = b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("select-episode_%d_%f", comicID, group[0])))
+			base64 = b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("select-episode_%s_%.1f", comicID.Hex(), group[0])))
 			text = fmt.Sprintf("%.1f", group[0])
 		} else {
-			base64 = b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("select-episode_%d_%f_%f", comicID, group[0], group[1])))
+			base64 = b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("select-episode_%s_%f_%f", comicID.Hex(), group[0], group[1])))
 			text = fmt.Sprintf("%.1f - %.1f", group[0], group[1])
 		}
 
@@ -101,7 +102,7 @@ func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
 
 	for _, comic := range comics {
-		base64 := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("read_%d", comic.ID)))
+		base64 := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("read_%s", comic.ID.Hex())))
 		keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(comic.Name, base64),
 		))

@@ -39,8 +39,8 @@ func main() {
 
 	// gocron.Every(1).Minute().Do(updater.Run, mangacan)
 
-	// mangatail := source.Mangatail{}
-	// updater.Run(mangatail)
+	mangatail := source.Mangatail{}
+	updater.Run(mangatail)
 
 	// <-gocron.Start()
 }

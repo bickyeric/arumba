@@ -1,14 +1,11 @@
 package source
 
 import (
-	"github.com/bickyeric/arumba/updater"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Mangacan ...
 type Mangacan struct{}
-
-var _ updater.ISource = (*Mangacan)(nil)
 
 // Name ...
 func (Mangacan) Name() string { return "mangacan" }

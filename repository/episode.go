@@ -15,8 +15,8 @@ var ctx = context.Background()
 
 // IEpisode ...
 type IEpisode interface {
-	Count(comicID int) (int, error)
-	No(comicID, offset int) (float64, error)
+	Count(comicID primitive.ObjectID) (int, error)
+	No(comicID primitive.ObjectID, offset int) (float64, error)
 	FindByNo(comicID primitive.ObjectID, no float64) (*model.Episode, error)
 	GetSources(episodeID primitive.ObjectID) []primitive.ObjectID
 	Insert(*model.Episode) error
@@ -31,12 +31,12 @@ func NewEpisode(db *mongo.Database) IEpisode {
 	return episodeRepository{db.Collection("episodes")}
 }
 
-func (repo episodeRepository) Count(comicID int) (int, error) {
+func (repo episodeRepository) Count(comicID primitive.ObjectID) (int, error) {
 	totalEpisode, err := repo.coll.CountDocuments(ctx, bson.M{"comic_id": comicID})
 	return int(totalEpisode), err
 }
 
-func (repo episodeRepository) No(comicID, offset int) (float64, error) {
+func (repo episodeRepository) No(comicID primitive.ObjectID, offset int) (float64, error) {
 	ep := model.Episode{}
 	res := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID},
 		options.FindOne().SetSkip(int64(offset)))

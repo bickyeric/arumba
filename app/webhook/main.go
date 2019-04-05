@@ -8,6 +8,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/telegram"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/subosito/gotenv"
 )
 
@@ -56,6 +57,8 @@ func main() {
 			continue
 		}
 		if update.CallbackQuery != nil {
+			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "dsf")
+			bot.Bot().AnswerCallbackQuery(callback)
 			callbackHandler.Handle(update.CallbackQuery)
 			continue
 		}

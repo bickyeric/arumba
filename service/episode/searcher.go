@@ -2,13 +2,14 @@ package episode
 
 import (
 	"github.com/bickyeric/arumba/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Search struct {
 	Repo repository.IEpisode
 }
 
-func (s Search) Perform(comicID int) ([][]float64, error) {
+func (s Search) Perform(comicID primitive.ObjectID) ([][]float64, error) {
 	totalEpisode, err := s.Repo.Count(comicID)
 	if err != nil {
 		return nil, err
