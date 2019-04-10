@@ -41,7 +41,9 @@ func (r runner) Run(source source.ISource) {
 	for _, u := range updates {
 		err := r.saver.Perform(u, source.GetID())
 		if err != nil {
-			if err != nil {
+			if err.Error() == "episode exists" {
+				continue
+			} else {
 				r.bot.NotifyError(err)
 				continue
 			}
