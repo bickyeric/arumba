@@ -1,6 +1,8 @@
 package episode
 
 import (
+	"errors"
+
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,7 +30,7 @@ func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) e
 
 	page, err := s.PageRepo.FindByEpisode(ep.ID, sourceID)
 	if err == nil {
-		return nil
+		return errors.New("episode exists")
 	}
 
 	page = model.Page{
