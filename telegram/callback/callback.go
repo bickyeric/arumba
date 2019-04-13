@@ -1,7 +1,7 @@
 package callback
 
-// ReadCallback ...
-var ReadCallback = "read"
+// SelectComic ...
+var SelectComicCallback = "select-comic"
 
 // SelectEpisodeCallback ...
 var SelectEpisodeCallback = "select-episode"

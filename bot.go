@@ -103,7 +103,7 @@ func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
 
 	for _, comic := range comics {
-		data := fmt.Sprintf("read_%s", comic.ID.Hex())
+		data := fmt.Sprintf("select-comic_%s", comic.ID.Hex())
 		keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(comic.Name, data),
 		))

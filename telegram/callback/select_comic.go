@@ -6,13 +6,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// ReadHandler ...
-type ReadHandler struct {
+// SelectComicHandler ...
+type SelectComicHandler struct {
 	Bot             arumba.IBot
 	EpisodeSearcher episode.Search
 }
 
-func (handler ReadHandler) Handle(chatID int64, arg string) {
+func (handler SelectComicHandler) Handle(chatID int64, arg string) {
 	id, _ := primitive.ObjectIDFromHex(arg)
 	group, err := handler.EpisodeSearcher.Perform(id)
 	if err != nil {

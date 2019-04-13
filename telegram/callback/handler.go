@@ -20,7 +20,7 @@ func NewHandler(app arumba.Arumba, bot arumba.IBot) handler {
 		bot:     bot,
 		methods: map[string]CallbackHandler{},
 	}
-	handler.methods[ReadCallback] = ReadHandler{
+	handler.methods[SelectComicCallback] = SelectComicHandler{
 		Bot: bot,
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
