@@ -1,4 +1,4 @@
-package telegram
+package command
 
 import "github.com/go-telegram-bot-api/telegram-bot-api"
 

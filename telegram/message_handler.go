@@ -9,11 +9,11 @@ import (
 )
 
 type messageHandler struct {
-	startHandler    CommandHandler
-	helpHandler     CommandHandler
-	readHandler     CommandHandler
-	feedbackHandler CommandHandler
-	commonHandler   CommandHandler
+	startHandler    command.CommandHandler
+	helpHandler     command.CommandHandler
+	readHandler     command.CommandHandler
+	feedbackHandler command.CommandHandler
+	commonHandler   command.CommandHandler
 }
 
 func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) messageHandler {
@@ -49,13 +49,13 @@ func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IK
 
 func (handler messageHandler) Handle(message *tgbotapi.Message) {
 	switch message.Command() {
-	case StartCommand:
+	case command.StartCommand:
 		go handler.startHandler.Handle(message)
-	case HelpCommand:
+	case command.HelpCommand:
 		go handler.helpHandler.Handle(message)
-	case ReadCommand:
+	case command.ReadCommand:
 		go handler.readHandler.Handle(message)
-	case FeedbackCommand:
+	case command.FeedbackCommand:
 		go handler.feedbackHandler.Handle(message)
 	default:
 		go handler.commonHandler.Handle(message)

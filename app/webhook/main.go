@@ -8,7 +8,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/telegram"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/bickyeric/arumba/telegram/callback"
 	"github.com/subosito/gotenv"
 )
 
@@ -29,46 +29,35 @@ func main() {
 	go http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil)
 
 	messageHandler := telegram.NewMessageHandler(app, bot, kendang)
-	callbackHandler := telegram.NewCallbackHandler(app, bot)
+	callback := callback.NewHandler(app, bot)
 
 	for update := range bot.UpdatesChannel() {
 		if update.Message != nil {
 			messageHandler.Handle(update.Message)
-			continue
-		}
-		if update.EditedMessage != nil {
+
+		} else if update.EditedMessage != nil {
 			log.Println("received edited message event")
-			continue
-		}
-		if update.ChannelPost != nil {
+
+		} else if update.ChannelPost != nil {
 			log.Println("received channel post event")
-			continue
-		}
-		if update.EditedChannelPost != nil {
+
+		} else if update.EditedChannelPost != nil {
 			log.Println("received edited channel post event")
-			continue
-		}
-		if update.InlineQuery != nil {
+
+		} else if update.InlineQuery != nil {
 			log.Println("received inline query event")
-			continue
-		}
-		if update.ChosenInlineResult != nil {
+
+		} else if update.ChosenInlineResult != nil {
 			log.Println("received chosen inline result event")
-			continue
-		}
-		if update.CallbackQuery != nil {
-			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "dsf")
-			bot.Bot().AnswerCallbackQuery(callback)
-			callbackHandler.Handle(update.CallbackQuery)
-			continue
-		}
-		if update.ShippingQuery != nil {
+
+		} else if update.CallbackQuery != nil {
+			callback.Handle(update.CallbackQuery)
+
+		} else if update.ShippingQuery != nil {
 			log.Println("received shipping query event")
-			continue
-		}
-		if update.PreCheckoutQuery != nil {
+
+		} else if update.PreCheckoutQuery != nil {
 			log.Println("received pre checkout query event")
-			continue
 		}
 	}
 }

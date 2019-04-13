@@ -2,7 +2,6 @@ package command
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"strconv"
 	"strings"
 
@@ -46,13 +45,7 @@ func (s StartHandler) Handle(message *tgbotapi.Message) {
 }
 
 func (s StartHandler) parseArg(arg string) (string, float64, error) {
-	decodedArg, err := base64.StdEncoding.DecodeString(arg)
-	if err != nil {
-		return "", 0.0, err
-	}
-
-	decodedString := string(decodedArg)
-	splittedString := strings.Split(decodedString, "_")
+	splittedString := strings.Split(arg, "_")
 	episode, _ := strconv.ParseFloat(splittedString[1], 64)
 
 	return splittedString[0], episode, nil

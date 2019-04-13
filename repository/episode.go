@@ -39,7 +39,7 @@ func (repo episodeRepository) Count(comicID primitive.ObjectID) (int, error) {
 func (repo episodeRepository) No(comicID primitive.ObjectID, offset int) (float64, error) {
 	ep := model.Episode{}
 	res := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID},
-		options.FindOne().SetSkip(int64(offset)))
+		options.FindOne().SetSort(bson.M{"no": 1}).SetSkip(int64(offset)))
 	err := res.Decode(&ep)
 	return ep.No, err
 }

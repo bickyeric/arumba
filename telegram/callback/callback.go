@@ -1,7 +1,10 @@
-package telegram
+package callback
 
 // ReadCallback ...
 var ReadCallback = "read"
+
+// SelectEpisodeCallback ...
+var SelectEpisodeCallback = "select-episode"
 
 // CallbackHandler ...
 type CallbackHandler interface {

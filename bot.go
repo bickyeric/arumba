@@ -9,8 +9,6 @@ import (
 	"os"
 	"strconv"
 
-	b64 "encoding/base64"
-
 	"github.com/bickyeric/arumba/model"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,7 +17,7 @@ import (
 // IBot ...
 type IBot interface {
 	SendReplyMessage(chatID int64, text string)
-	SendTextMessage(chatID int64, text string)
+	SendTextMessage(chatID int64, text string) error
 	SendComicSelector(chatID int64, comics []model.Comic)
 	SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, episodeGroup [][]float64)
 	SendHelpMessage(chatID int64)
@@ -53,25 +51,27 @@ func NewBot() IBot {
 
 func (bot bot) SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, episodeGroup [][]float64) {
 	tqMsg := tgbotapi.NewMessage(chatID, "OK. Select episode number below :D")
-	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
+	keyboardRow := tgbotapi.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tgbotapi.InlineKeyboardButton{},
+	}
 
 	for _, group := range episodeGroup {
-		base64 := ""
+		data := ""
 		text := ""
 		if len(group) == 1 {
-			base64 = b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("select-episode_%s_%.1f", comicID.Hex(), group[0])))
+			data = fmt.Sprintf("select-episode_%s_%.1f", comicID.Hex(), group[0])
 			text = fmt.Sprintf("%.1f", group[0])
 		} else {
-			base64 = b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("select-episode_%s_%f_%f", comicID.Hex(), group[0], group[1])))
+			data = fmt.Sprintf("select-episode_%s_%f_%f", comicID.Hex(), group[0], group[1])
 			text = fmt.Sprintf("%.1f - %.1f", group[0], group[1])
 		}
 
-		keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(text, base64),
+		keyboardRow.InlineKeyboard = append(keyboardRow.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(text, data),
 		))
 	}
 
-	tqMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboardRow...)
+	tqMsg.ReplyMarkup = keyboardRow
 	bot.Send(tqMsg)
 }
 
@@ -92,9 +92,10 @@ func (bot bot) SendReplyMessage(chatID int64, text string) {
 	bot.Send(replyMsg)
 }
 
-func (bot bot) SendTextMessage(chatID int64, text string) {
+func (bot bot) SendTextMessage(chatID int64, text string) error {
 	tqMsg := tgbotapi.NewMessage(chatID, text)
-	bot.Send(tqMsg)
+	_, err := bot.Send(tqMsg)
+	return err
 }
 
 func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
@@ -102,9 +103,9 @@ func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
 
 	for _, comic := range comics {
-		base64 := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("read_%s", comic.ID.Hex())))
+		data := fmt.Sprintf("read_%s", comic.ID.Hex())
 		keyboardRow = append(keyboardRow, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(comic.Name, base64),
+			tgbotapi.NewInlineKeyboardButtonData(comic.Name, data),
 		))
 	}
 
@@ -129,13 +130,13 @@ func (bot bot) SendErrorMessage(chatID int64) {
 }
 
 func (bot bot) NotifyError(err error) {
-	chatID, _ := strconv.ParseInt(os.Getenv("CHAT_ID"), 36, 0)
+	chatID, _ := strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 0)
 	bot.SendTextMessage(chatID, "Error nih : "+err.Error())
 }
 
 func (bot bot) NotifyNewEpisode(update model.Update) {
-	base64 := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s_%f", update.ComicName, update.EpisodeNo)))
-	txt := fmt.Sprintf("*%s*\nEpisode Baru!!!\nCek Sekarang juga :D!!!\n[klik disini](https://telegram.me/nb_comic_bot?start=%s)", update.ComicName, base64)
+	data := fmt.Sprintf("%s_%f", update.ComicName, update.EpisodeNo)
+	txt := fmt.Sprintf("*%s*\nEpisode Baru!!!\nCek Sekarang juga :D!!!\n[klik disini](https://telegram.me/nb_comic_bot?start=%s)", update.ComicName, data)
 
 	var tqMsg tgbotapi.MessageConfig
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
