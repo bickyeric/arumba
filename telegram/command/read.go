@@ -36,7 +36,7 @@ func (r ReadHandler) requestComicName(chatID int64) {
 }
 
 func (r ReadHandler) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
-	pages, err := r.Reader.Perform(comicName, episodeNo)
+	pages, err := r.Reader.PerformByComicName(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

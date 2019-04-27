@@ -30,7 +30,7 @@ func (s StartHandler) Handle(message *tgbotapi.Message) {
 		return
 	}
 
-	pages, err := s.Reader.Perform(comicName, episodeNo)
+	pages, err := s.Reader.PerformByComicName(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

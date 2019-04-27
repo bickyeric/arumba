@@ -15,10 +15,9 @@ var ctx = context.Background()
 
 // IEpisode ...
 type IEpisode interface {
-	Count(comicID primitive.ObjectID) (int, error)
-	No(comicID primitive.ObjectID, offset int) (float64, error)
+	Count(comicID primitive.ObjectID, bound ...float64) (int, error)
+	No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error)
 	FindByNo(comicID primitive.ObjectID, no float64) (*model.Episode, error)
-	GetSources(episodeID primitive.ObjectID) []primitive.ObjectID
 	Insert(*model.Episode) error
 }
 
@@ -31,14 +30,28 @@ func NewEpisode(db *mongo.Database) IEpisode {
 	return episodeRepository{db.Collection("episodes")}
 }
 
-func (repo episodeRepository) Count(comicID primitive.ObjectID) (int, error) {
-	totalEpisode, err := repo.coll.CountDocuments(ctx, bson.M{"comic_id": comicID})
+func (repo episodeRepository) Count(comicID primitive.ObjectID, bound ...float64) (int, error) {
+	filter := bson.M{"comic_id": comicID}
+	if len(bound) == 2 {
+		filter["no"] = bson.M{
+			"$gte": bound[0],
+			"$lte": bound[1],
+		}
+	}
+	totalEpisode, err := repo.coll.CountDocuments(ctx, filter)
 	return int(totalEpisode), err
 }
 
-func (repo episodeRepository) No(comicID primitive.ObjectID, offset int) (float64, error) {
+func (repo episodeRepository) No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error) {
 	ep := model.Episode{}
-	res := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID},
+	filter := bson.M{"comic_id": comicID}
+	if len(bound) > 0 {
+		filter["no"] = bson.M{
+			"$gte": bound[0],
+			"$lte": bound[1],
+		}
+	}
+	res := repo.coll.FindOne(ctx, filter,
 		options.FindOne().SetSort(bson.M{"no": 1}).SetSkip(int64(offset)))
 	err := res.Decode(&ep)
 	return ep.No, err
@@ -55,18 +68,4 @@ func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no float64) (
 	ep := new(model.Episode)
 	err := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID, "no": no}).Decode(ep)
 	return ep, err
-}
-
-func (repo episodeRepository) GetSources(episodeID primitive.ObjectID) []primitive.ObjectID {
-	sourceIds := []primitive.ObjectID{}
-	// rows, err := repo.Query("SELECT source_id FROM episode_source WHERE episode_id=?", episodeID)
-	// if err != nil {
-	// 	return sourceIds
-	// }
-	// for rows.Next() {
-	// 	var id int
-	// 	rows.Scan(&id)
-	// 	sourceIds = append(sourceIds, id)
-	// }
-	return sourceIds
 }

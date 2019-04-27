@@ -7,6 +7,7 @@ import (
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Read ...
@@ -18,19 +19,27 @@ type Read struct {
 	Kendang connection.IKendang
 }
 
-// Perform ...
-func (r Read) Perform(comicName string, episodeNo float64) ([]string, error) {
+// PerformByComicName ...
+func (r Read) PerformByComicName(comicName string, episodeNo float64) ([]string, error) {
 	comic, err := r.ComicRepo.Find(comicName)
 	if err != nil {
 		return nil, err
 	}
 
-	episode, err := r.EpisodeRepo.FindByNo(comic.ID, episodeNo)
+	return r.PerformByComicID(comic.ID, episodeNo)
+}
+
+// PerformByComicID ...
+func (r Read) PerformByComicID(comicID primitive.ObjectID, episodeNo float64) ([]string, error) {
+	episode, err := r.EpisodeRepo.FindByNo(comicID, episodeNo)
 	if err != nil {
 		return nil, err
 	}
 
-	sources := r.EpisodeRepo.GetSources(episode.ID)
+	sources, err := r.PageRepo.GetSources(episode.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	rand.Seed(time.Now().Unix())
 	n := rand.Int() % len(sources)

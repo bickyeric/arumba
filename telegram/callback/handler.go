@@ -2,10 +2,11 @@ package callback
 
 import (
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/bickyeric/arumba"
+	"github.com/bickyeric/arumba/connection"
+	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -15,7 +16,7 @@ type handler struct {
 	methods map[string]CallbackHandler
 }
 
-func NewHandler(app arumba.Arumba, bot arumba.IBot) handler {
+func NewHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) handler {
 	handler := handler{
 		bot:     bot,
 		methods: map[string]CallbackHandler{},
@@ -31,13 +32,18 @@ func NewHandler(app arumba.Arumba, bot arumba.IBot) handler {
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
 		},
+		Reader: comic.Read{
+			ComicRepo:   app.ComicRepo,
+			EpisodeRepo: app.EpisodeRepo,
+			PageRepo:    app.PageRepo,
+			Kendang:     kendang,
+		},
 	}
 	return handler
 }
 
 func (handler handler) Handle(event *tgbotapi.CallbackQuery) {
 	method, arg := handler.extractData(event.Data)
-	log.Println(method, arg)
 	h, ok := handler.methods[method]
 
 	if ok {
@@ -48,7 +54,7 @@ func (handler handler) Handle(event *tgbotapi.CallbackQuery) {
 }
 
 func (handler handler) extractData(data string) (string, string) {
-	arr := strings.Split(string(data), "_")
+	arr := strings.Split(data, "_")
 
-	return arr[0], arr[1]
+	return arr[0], data[len(arr[0])+1:]
 }
