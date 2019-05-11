@@ -8,6 +8,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	log "github.com/sirupsen/logrus"
 )
 
 type StartHandler struct {
@@ -21,6 +22,11 @@ func (s StartHandler) Handle(message *tgbotapi.Message) {
 
 	if arg == "" {
 		s.Bot.SendHelpMessage(message.Chat.ID)
+		log.WithFields(
+			log.Fields{
+				"chat_id": message.Chat.ID,
+			},
+		).Info("Help message sent")
 		return
 	}
 

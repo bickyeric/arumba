@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/bickyeric/arumba/model"
+	log "github.com/sirupsen/logrus"
 )
 
 // IKendang ...
@@ -56,6 +57,11 @@ func (k kendang) FetchPages(episodeLink string, sourceID string) ([]string, erro
 		return nil, err
 	}
 
+	log.WithFields(
+		log.Fields{
+			"link": link,
+		},
+	).Info("Crawling page from kendang")
 	response, err := k.client.Do(request)
 	if err != nil {
 		return nil, err

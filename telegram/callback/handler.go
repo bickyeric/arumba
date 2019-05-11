@@ -9,6 +9,7 @@ import (
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	log "github.com/sirupsen/logrus"
 )
 
 type handler struct {
@@ -43,6 +44,11 @@ func NewHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang)
 }
 
 func (handler handler) Handle(event *tgbotapi.CallbackQuery) {
+	log.WithFields(
+		log.Fields{
+			"data": event.Data,
+		},
+	).Info("Handling callback")
 	method, arg := handler.extractData(event.Data)
 	h, ok := handler.methods[method]
 

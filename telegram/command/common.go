@@ -7,6 +7,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	log "github.com/sirupsen/logrus"
 )
 
 type CommonHandler struct {
@@ -27,6 +28,11 @@ func (c CommonHandler) Handle(message *tgbotapi.Message) {
 }
 
 func (c CommonHandler) handleReadComic(message *tgbotapi.Message) {
+	contextLog := log.WithFields(
+		log.Fields{
+			"chat_id": message.Chat.ID,
+		},
+	)
 	comics, err := c.ComicSearcher.Perform(message.Text)
 	if err != nil {
 		c.Bot.NotifyError(err)
@@ -34,8 +40,10 @@ func (c CommonHandler) handleReadComic(message *tgbotapi.Message) {
 
 	if len(comics) < 1 {
 		c.Bot.SendNotFoundComic(message.Chat.ID, message.Text)
+		contextLog.Info("Not found comic name sent")
 	} else {
 		c.Bot.SendComicSelector(message.Chat.ID, comics)
+		contextLog.Info("Comic selector sent")
 	}
 }
 

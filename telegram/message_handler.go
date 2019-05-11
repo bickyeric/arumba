@@ -6,6 +6,7 @@ import (
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/telegram/command"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	log "github.com/sirupsen/logrus"
 )
 
 type messageHandler struct {
@@ -48,6 +49,12 @@ func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IK
 }
 
 func (handler messageHandler) Handle(message *tgbotapi.Message) {
+	log.WithFields(
+		log.Fields{
+			"text":    message.Text,
+			"chat_id": message.Chat.ID,
+		},
+	).Info("Handling message")
 	switch message.Command() {
 	case command.StartCommand:
 		go handler.startHandler.Handle(message)

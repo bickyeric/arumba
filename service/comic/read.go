@@ -63,5 +63,6 @@ func (r Read) fetchFromKendang(page *model.Page) error {
 	}
 
 	page.Links = pagesLink
-	return r.PageRepo.Update(page)
+	// return r.PageRepo.Update(page)
+	return nil
 }

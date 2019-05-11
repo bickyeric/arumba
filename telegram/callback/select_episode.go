@@ -1,14 +1,15 @@
 package callback
 
 import (
-	"database/sql"
 	"strconv"
 	"strings"
 
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // SelectEpisodeHandler ...
@@ -28,23 +29,48 @@ func (handler SelectEpisodeHandler) Handle(chatID int64, arg string) {
 }
 
 func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
+	contextLog := log.WithFields(
+		log.Fields{
+			"chat_id": chatID,
+		},
+	)
+
 	comicID, _ := primitive.ObjectIDFromHex(args[0])
 	episodeNo, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
 		handler.Bot.NotifyError(err)
+		contextLog.WithFields(
+			log.Fields{
+				"error": err,
+			},
+		).Warn("Error parsing float")
 	}
 	pages, err := handler.Reader.PerformByComicID(comicID, episodeNo)
 	if err != nil {
 		switch err {
-		case sql.ErrNoRows:
+		case mongo.ErrNoDocuments:
+			contextLog.WithFields(
+				log.Fields{
+					"comic_id": comicID,
+					"no":       episodeNo,
+				},
+			).Warn("Episode not found")
 			handler.Bot.SendNotFoundEpisode(chatID)
 		default:
+			contextLog.WithFields(
+				log.Fields{
+					"comic_id": comicID,
+					"no":       episodeNo,
+					"error":    err,
+				},
+			).Warn("Error reading comic")
 			handler.Bot.SendErrorMessage(chatID)
 		}
 		return
 	}
 
 	handler.Bot.SendPage(chatID, pages)
+	contextLog.Info("Page sent")
 }
 
 func (handler SelectEpisodeHandler) episodeSelector(chatID int64, args []string) {

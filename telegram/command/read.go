@@ -2,13 +2,13 @@ package command
 
 import (
 	"database/sql"
-	"log"
 	"strconv"
 	"strings"
 
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	log "github.com/sirupsen/logrus"
 )
 
 var comicNameRequest = "OK. You want to read a comic, just give me a comic name."
@@ -33,6 +33,11 @@ func (r ReadHandler) Handle(message *tgbotapi.Message) {
 
 func (r ReadHandler) requestComicName(chatID int64) {
 	r.Bot.SendReplyMessage(chatID, comicNameRequest)
+	log.WithFields(
+		log.Fields{
+			"chat_id": chatID,
+		},
+	).Info("Request comic name message sent")
 }
 
 func (r ReadHandler) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
