@@ -1,19 +1,19 @@
 package main
 
 import (
-	"log"
-
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/updater"
 	"github.com/bickyeric/arumba/updater/source"
+	log "github.com/sirupsen/logrus"
 	"github.com/subosito/gotenv"
 )
 
 func main() {
 
 	gotenv.Load(".env")
+	log.SetFormatter(&log.JSONFormatter{})
 
 	db, err := connection.NewMongo()
 	if err != nil {

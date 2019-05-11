@@ -1,12 +1,11 @@
 package updater
 
 import (
-	"log"
-
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/updater/source"
+	log "github.com/sirupsen/logrus"
 )
 
 // IRunner ...
@@ -31,10 +30,17 @@ func NewRunner(bot arumba.IBot, kendang connection.IKendang, saver episode.Updat
 
 // Run ...
 func (r runner) Run(source source.ISource) {
-	log.Println("Processing " + source.Name() + " updates...")
+	contextLogger := log.WithFields(log.Fields{
+		"source": source.Name(),
+	})
+	contextLogger.Info("Processing updates...")
+
 	updates, err := r.kendang.FetchUpdate("/" + source.Name() + "-update")
 	if err != nil {
 		r.bot.NotifyError(err)
+		contextLogger.WithFields(log.Fields{
+			"error": err.Error(),
+		}).Fatal("Error fetching updates")
 		return
 	}
 
@@ -45,11 +51,15 @@ func (r runner) Run(source source.ISource) {
 				continue
 			} else {
 				r.bot.NotifyError(err)
+				contextLogger.WithFields(log.Fields{
+					"update": u,
+					"error":  err.Error(),
+				}).Warn("Error processing update")
 				continue
 			}
 		}
 
 		r.bot.NotifyNewEpisode(u)
 	}
-	log.Println(source.Name() + " updates processed.")
+	contextLogger.Info("Updates processed...")
 }

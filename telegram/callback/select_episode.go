@@ -2,7 +2,6 @@ package callback
 
 import (
 	"database/sql"
-	"log"
 	"strconv"
 	"strings"
 
@@ -35,7 +34,6 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 		handler.Bot.NotifyError(err)
 	}
 	pages, err := handler.Reader.PerformByComicID(comicID, episodeNo)
-	log.Println(pages, err)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

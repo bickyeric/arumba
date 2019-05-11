@@ -40,14 +40,19 @@ func (repo pageRepository) Insert(page *model.Page) error {
 }
 
 func (repo pageRepository) Update(page *model.Page) error {
-	page.UpdatedAt = time.Now()
-	_, err := repo.coll.UpdateOne(ctx, bson.M{"_id": page.ID}, page)
+	_, err := repo.coll.UpdateOne(ctx, bson.M{"_id": page.ID}, bson.M{
+		"$set": bson.M{
+			"link":       page.Link,
+			"links":      page.Links,
+			"updated_at": time.Now(),
+		},
+	})
 	return err
 }
 
 func (repo pageRepository) GetSources(episodeID primitive.ObjectID) ([]primitive.ObjectID, error) {
 	ids := []primitive.ObjectID{}
-	cur, err := repo.coll.Find(ctx, bson.M{})
+	cur, err := repo.coll.Find(ctx, bson.M{"episode_id": episodeID})
 	if err != nil {
 		return ids, err
 	}

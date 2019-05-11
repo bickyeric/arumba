@@ -49,7 +49,8 @@ func (k kendang) FetchUpdate(source string) ([]model.Update, error) {
 }
 
 func (k kendang) FetchPages(episodeLink string, sourceID string) ([]string, error) {
-	link := fmt.Sprintf("%s/crawl-page?link=%s&source_id=%s", k.baseURL, episodeLink, sourceID)
+	id := k.toID(sourceID)
+	link := fmt.Sprintf("%s/crawl-page?link=%s&source_id=%d", k.baseURL, episodeLink, id)
 	request, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		return nil, err
@@ -63,4 +64,12 @@ func (k kendang) FetchPages(episodeLink string, sourceID string) ([]string, erro
 	pagesLink := []string{}
 	err = json.NewDecoder(response.Body).Decode(&pagesLink)
 	return pagesLink, err
+}
+
+func (kendang) toID(sourceID string) int {
+	switch sourceID {
+	case "5c9511f561a8d04fa844b666":
+		return 3
+	}
+	return 0
 }
