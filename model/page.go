@@ -8,11 +8,12 @@ import (
 
 // Page ...
 type Page struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	EpisodeID primitive.ObjectID `bson:"episode_id"`
-	SourceID  primitive.ObjectID `bson:"source_id"`
-	Link      string             `bson:"link"`
-	Links     []string           `bson:"links,omitempty"`
-	CreatedAt time.Time          `bson:"created_at,omitempty"`
-	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
+	ID            primitive.ObjectID `bson:"_id"`
+	EpisodeID     primitive.ObjectID `bson:"episode_id"`
+	SourceID      primitive.ObjectID `bson:"source_id"`
+	Link          string             `bson:"link"`
+	Links         []string           `bson:"links,omitempty"`
+	TelegraphLink string             `bson:"telegraph_link"`
+	CreatedAt     time.Time          `bson:"created_at,omitempty"`
+	UpdatedAt     time.Time          `bson:"updated_at,omitempty"`
 }

@@ -36,7 +36,7 @@ func (s StartHandler) Handle(message *tgbotapi.Message) {
 		return
 	}
 
-	pages, err := s.Reader.PerformByComicName(comicName, episodeNo)
+	pageURL, err := s.Reader.PerformByComicName(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -47,7 +47,7 @@ func (s StartHandler) Handle(message *tgbotapi.Message) {
 		return
 	}
 
-	s.Bot.SendPage(message.Chat.ID, pages)
+	s.Bot.SendTextMessage(message.Chat.ID, pageURL)
 }
 
 func (s StartHandler) parseArg(arg string) (string, float64, error) {

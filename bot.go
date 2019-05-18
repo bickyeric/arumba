@@ -1,11 +1,8 @@
 package arumba
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -27,7 +24,6 @@ type IBot interface {
 
 	NotifyError(err error)
 	NotifyNewEpisode(update model.Update)
-	SendPage(chatID int64, links []string)
 
 	Bot() bot
 	UpdatesChannel() tgbotapi.UpdatesChannel
@@ -150,19 +146,4 @@ func (bot bot) NotifyNewEpisode(update model.Update) {
 	tqMsg.ParseMode = "Markdown"
 
 	bot.Send(tqMsg)
-}
-
-func (bot bot) SendPage(chatID int64, links []string) {
-	type photoParams struct {
-		ChatID int64  `json:"chat_id"`
-		Photo  string `json:"photo"`
-	}
-
-	url := "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_TOKEN") + "/sendPhoto"
-	for _, link := range links {
-		params := photoParams{chatID, link}
-		jsonParams, _ := json.Marshal(params)
-
-		http.Post(url, "application/json", bytes.NewBuffer(jsonParams))
-	}
 }

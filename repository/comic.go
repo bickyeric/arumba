@@ -13,6 +13,7 @@ import (
 // IComic ...
 type IComic interface {
 	Find(name string) (model.Comic, error)
+	FindByID(id primitive.ObjectID) (model.Comic, error)
 	FindAll(name string) ([]model.Comic, error)
 	Insert(*model.Comic) error
 }
@@ -33,9 +34,13 @@ func (repo comicRepository) Insert(comic *model.Comic) error {
 	return err
 }
 
-func (repo comicRepository) Find(name string) (model.Comic, error) {
-	c := model.Comic{}
-	err := repo.coll.FindOne(ctx,
+func (repo comicRepository) FindByID(id primitive.ObjectID) (c model.Comic, err error) {
+	err = repo.coll.FindOne(ctx, bson.M{"_id": id}).Decode(&c)
+	return c, err
+}
+
+func (repo comicRepository) Find(name string) (c model.Comic, err error) {
+	err = repo.coll.FindOne(ctx,
 		bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}}).Decode(&c)
 	return c, err
 }

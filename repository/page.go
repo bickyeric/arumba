@@ -42,9 +42,10 @@ func (repo pageRepository) Insert(page *model.Page) error {
 func (repo pageRepository) Update(page *model.Page) error {
 	_, err := repo.coll.UpdateOne(ctx, bson.M{"_id": page.ID}, bson.M{
 		"$set": bson.M{
-			"link":       page.Link,
-			"links":      page.Links,
-			"updated_at": time.Now(),
+			"link":           page.Link,
+			"links":          page.Links,
+			"telegraph_link": page.TelegraphLink,
+			"updated_at":     time.Now(),
 		},
 	})
 	return err

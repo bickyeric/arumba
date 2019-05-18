@@ -4,6 +4,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/comic"
+	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/telegram/command"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
@@ -18,12 +19,8 @@ type messageHandler struct {
 }
 
 func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) messageHandler {
-	readerService := comic.Read{
-		ComicRepo:   app.ComicRepo,
-		EpisodeRepo: app.EpisodeRepo,
-		PageRepo:    app.PageRepo,
-		Kendang:     kendang,
-	}
+	telegraphCreator := telegraph.NewCreatePage()
+	readerService := comic.NewRead(app, kendang, telegraphCreator)
 	return messageHandler{
 		startHandler: command.StartHandler{
 			Bot:    bot,

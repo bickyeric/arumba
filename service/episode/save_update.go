@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var ErrEpisodeExists = errors.New("episode exists")
+
 // UpdateSaver ...
 type UpdateSaver struct {
 	ComicRepo   repository.IComic
@@ -30,7 +32,7 @@ func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) e
 
 	page, err := s.PageRepo.FindByEpisode(ep.ID, sourceID)
 	if err == nil {
-		return errors.New("episode exists")
+		return err
 	}
 
 	page = model.Page{

@@ -45,7 +45,8 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 			},
 		).Warn("Error parsing float")
 	}
-	pages, err := handler.Reader.PerformByComicID(comicID, episodeNo)
+
+	pageURL, err := handler.Reader.PerformByComicID(comicID, episodeNo)
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:
@@ -69,7 +70,7 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 		return
 	}
 
-	handler.Bot.SendPage(chatID, pages)
+	handler.Bot.SendTextMessage(chatID, pageURL)
 	contextLog.Info("Page sent")
 }
 

@@ -1,59 +1,104 @@
 package comic
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
+	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
+	"github.com/bickyeric/arumba/service/telegraph"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Read ...
 type Read struct {
+	SourceRepo  repository.ISource
 	ComicRepo   repository.IComic
 	EpisodeRepo repository.IEpisode
 	PageRepo    repository.IPage
 
-	Kendang connection.IKendang
+	Kendang     connection.IKendang
+	PageCreator telegraph.CreatePage
+}
+
+// NewRead ...
+func NewRead(app arumba.Arumba, kendang connection.IKendang, pageCreator telegraph.CreatePage) Read {
+	return Read{
+		SourceRepo:  app.SourceRepo,
+		ComicRepo:   app.ComicRepo,
+		EpisodeRepo: app.EpisodeRepo,
+		PageRepo:    app.PageRepo,
+		Kendang:     kendang,
+		PageCreator: pageCreator,
+	}
 }
 
 // PerformByComicName ...
-func (r Read) PerformByComicName(comicName string, episodeNo float64) ([]string, error) {
+func (r Read) PerformByComicName(comicName string, episodeNo float64) (string, error) {
 	comic, err := r.ComicRepo.Find(comicName)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return r.PerformByComicID(comic.ID, episodeNo)
 }
 
 // PerformByComicID ...
-func (r Read) PerformByComicID(comicID primitive.ObjectID, episodeNo float64) ([]string, error) {
-	episode, err := r.EpisodeRepo.FindByNo(comicID, episodeNo)
+func (r Read) PerformByComicID(id primitive.ObjectID, episodeNo float64) (string, error) {
+	comic, err := r.ComicRepo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	sources, err := r.PageRepo.GetSources(episode.ID)
+	episode, err := r.EpisodeRepo.FindByNo(comic.ID, episodeNo)
 	if err != nil {
-		return nil, err
+		return "", err
+	}
+
+	sourceIDs, err := r.PageRepo.GetSources(episode.ID)
+	if err != nil {
+		return "", err
 	}
 
 	rand.Seed(time.Now().Unix())
-	n := rand.Int() % len(sources)
+	n := rand.Int() % len(sourceIDs)
 
-	page, err := r.PageRepo.FindByEpisode(episode.ID, sources[n])
+	source, err := r.SourceRepo.FindByID(sourceIDs[n])
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
+	page, err := r.PageRepo.FindByEpisode(episode.ID, source.ID)
+	if err != nil {
+		return "", err
+	}
+
+	if page.TelegraphLink != "" {
+		return page.TelegraphLink, nil
+	}
+
+	err = r.generateTelegraphURL(source, comic, *episode, &page)
+
+	return page.TelegraphLink, err
+}
+
+func (r Read) generateTelegraphURL(source model.Source, comic model.Comic, episode model.Episode, page *model.Page) (err error) {
 	if len(page.Links) < 1 {
-		err = r.fetchFromKendang(&page)
+		if err = r.fetchFromKendang(page); err != nil {
+			return err
+		}
 	}
 
-	return page.Links, err
+	url, err := r.PageCreator.Perform(source.Name, fmt.Sprintf("%s %.1f | %s", comic.Name, episode.No, episode.Name), page.Links)
+	if err != nil {
+		return err
+	}
+
+	page.TelegraphLink = url
+	return r.PageRepo.Update(page)
 }
 
 func (r Read) fetchFromKendang(page *model.Page) error {
@@ -63,6 +108,5 @@ func (r Read) fetchFromKendang(page *model.Page) error {
 	}
 
 	page.Links = pagesLink
-	// return r.PageRepo.Update(page)
-	return nil
+	return r.PageRepo.Update(page)
 }

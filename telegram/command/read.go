@@ -41,7 +41,7 @@ func (r ReadHandler) requestComicName(chatID int64) {
 }
 
 func (r ReadHandler) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
-	pages, err := r.Reader.PerformByComicName(comicName, episodeNo)
+	pageURL, err := r.Reader.PerformByComicName(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -52,7 +52,7 @@ func (r ReadHandler) readComicEpisode(chatID int64, comicName string, episodeNo 
 		return
 	}
 
-	r.Bot.SendPage(chatID, pages)
+	r.Bot.SendTextMessage(chatID, pageURL)
 }
 
 func (r ReadHandler) parseArg(arg string) (string, float64) {

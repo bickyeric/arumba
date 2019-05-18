@@ -8,6 +8,7 @@ import (
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
+	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,6 +19,7 @@ type handler struct {
 }
 
 func NewHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) handler {
+	telegraphCreator := telegraph.NewCreatePage()
 	handler := handler{
 		bot:     bot,
 		methods: map[string]CallbackHandler{},
@@ -33,12 +35,7 @@ func NewHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang)
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
 		},
-		Reader: comic.Read{
-			ComicRepo:   app.ComicRepo,
-			EpisodeRepo: app.EpisodeRepo,
-			PageRepo:    app.PageRepo,
-			Kendang:     kendang,
-		},
+		Reader: comic.NewRead(app, kendang, telegraphCreator),
 	}
 	return handler
 }
