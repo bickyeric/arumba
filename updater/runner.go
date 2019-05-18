@@ -1,6 +1,8 @@
 package updater
 
 import (
+	"time"
+
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
@@ -30,10 +32,11 @@ func NewRunner(bot arumba.IBot, kendang connection.IKendang, saver episode.Updat
 
 // Run ...
 func (r runner) Run(source source.ISource) {
+	start := time.Now()
 	contextLogger := log.WithFields(log.Fields{
 		"source": source.Name(),
 	})
-	contextLogger.Info("Processing updates...")
+	contextLogger.Info("Processing updates")
 
 	updates, err := r.kendang.FetchUpdate("/" + source.Name() + "-update")
 	if err != nil {
@@ -61,5 +64,9 @@ func (r runner) Run(source source.ISource) {
 
 		r.bot.NotifyNewEpisode(u)
 	}
-	contextLogger.Info("Updates processed...")
+
+	elapsed := time.Since(start)
+	contextLogger.WithFields(log.Fields{
+		"duration": elapsed.Seconds(),
+	}).Info("Updates processed")
 }
