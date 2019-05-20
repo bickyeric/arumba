@@ -73,8 +73,7 @@ func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) (
 		return page, err
 	}
 
-	// return page, s.PageRepo.Insert(&page)
-	return page, nil
+	return page, s.PageRepo.Insert(&page)
 }
 
 func (s UpdateSaver) generateTelegraphPage(source model.Source, comic model.Comic, episode model.Episode, page *model.Page) error {
