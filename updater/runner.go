@@ -6,6 +6,7 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
+	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/updater/source"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,11 +23,11 @@ type runner struct {
 }
 
 // NewRunner ...
-func NewRunner(bot arumba.IBot, kendang connection.IKendang, saver episode.UpdateSaver) IRunner {
+func NewRunner(bot arumba.IBot, kendang connection.IKendang, app arumba.Arumba, pageCreator telegraph.CreatePage) IRunner {
 	return runner{
 		bot:     bot,
 		kendang: kendang,
-		saver:   saver,
+		saver:   episode.NewSaveUpdate(app, kendang, pageCreator),
 	}
 }
 
@@ -43,12 +44,12 @@ func (r runner) Run(source source.ISource) {
 		r.bot.NotifyError(err)
 		contextLogger.WithFields(log.Fields{
 			"error": err.Error(),
-		}).Fatal("Error fetching updates")
+		}).Warn("Error fetching updates")
 		return
 	}
 
 	for _, u := range updates {
-		err := r.saver.Perform(u, source.GetID())
+		page, err := r.saver.Perform(u, source.GetID())
 		if err != nil {
 			if err == episode.ErrEpisodeExists {
 				continue
@@ -62,7 +63,7 @@ func (r runner) Run(source source.ISource) {
 			}
 		}
 
-		r.bot.NotifyNewEpisode(u)
+		r.bot.NotifyNewEpisode(page)
 	}
 
 	elapsed := time.Since(start)

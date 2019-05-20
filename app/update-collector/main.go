@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
-	"github.com/bickyeric/arumba/service/episode"
+	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/updater"
 	"github.com/bickyeric/arumba/updater/source"
 	log "github.com/sirupsen/logrus"
@@ -22,25 +22,16 @@ func main() {
 
 	bot := arumba.NewBot()
 	kendang := connection.NewKendang()
+	telegraphPageCreator := telegraph.NewCreatePage()
 
 	app := arumba.New(db)
-	updater := updater.NewRunner(
-		bot,
-		kendang,
-		episode.UpdateSaver{
-			ComicRepo:   app.ComicRepo,
-			EpisodeRepo: app.EpisodeRepo,
-			PageRepo:    app.PageRepo,
-		},
-	)
+	updater := updater.NewRunner(bot, kendang, app, telegraphPageCreator)
 
-	mangacan := source.Mangacan{}
-	updater.Run(mangacan)
+	updater.Run(source.Mangacan{})
 
 	// gocron.Every(1).Minute().Do(updater.Run, mangacan)
 
-	mangatail := source.Mangatail{}
-	updater.Run(mangatail)
+	// updater.Run(source.Mangatail{})
 
 	// <-gocron.Start()
 }

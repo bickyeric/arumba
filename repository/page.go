@@ -35,6 +35,7 @@ func (repo pageRepository) FindByEpisode(episodeID, sourceID primitive.ObjectID)
 func (repo pageRepository) Insert(page *model.Page) error {
 	page.ID = primitive.NewObjectID()
 	page.CreatedAt = time.Now()
+	page.UpdatedAt = time.Now()
 	_, err := repo.coll.InsertOne(ctx, page)
 	return err
 }

@@ -33,7 +33,6 @@ func NewMongo() (*mongo.Database, error) {
 		return nil, err
 	}
 
-	ctx, _ = context.WithTimeout(context.Background(), 2*time.Second)
 	if err = client.Ping(ctx, readpref.Primary()); err != nil {
 		return nil, err
 	}

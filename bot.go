@@ -23,7 +23,7 @@ type IBot interface {
 	SendErrorMessage(chatID int64)
 
 	NotifyError(err error)
-	NotifyNewEpisode(update model.Update)
+	NotifyNewEpisode(model.Page)
 
 	Bot() bot
 	UpdatesChannel() tgbotapi.UpdatesChannel
@@ -130,9 +130,8 @@ func (bot bot) NotifyError(err error) {
 	bot.SendTextMessage(chatID, "Error nih : "+err.Error())
 }
 
-func (bot bot) NotifyNewEpisode(update model.Update) {
-	data := fmt.Sprintf("%s_%f", update.ComicName, update.EpisodeNo)
-	txt := fmt.Sprintf("*%s*\nEpisode Baru!!!\nCek Sekarang juga :D!!!\n[klik disini](https://telegram.me/nb_comic_bot?start=%s)", update.ComicName, data)
+func (bot bot) NotifyNewEpisode(page model.Page) {
+	txt := "[Klik disini](https://telegram.me/nb_comic_bot?start=%s)\n" + page.TelegraphLink
 
 	var tqMsg tgbotapi.MessageConfig
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
