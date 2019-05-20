@@ -6,6 +6,7 @@ import (
 	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/updater"
 	"github.com/bickyeric/arumba/updater/source"
+	"github.com/jasonlvhit/gocron"
 	log "github.com/sirupsen/logrus"
 	"github.com/subosito/gotenv"
 )
@@ -27,11 +28,12 @@ func main() {
 	app := arumba.New(db)
 	updater := updater.NewRunner(bot, kendang, app, telegraphPageCreator)
 
-	updater.Run(source.Mangacan{})
+	// updater.Run(source.Mangacan{})
 
-	// gocron.Every(1).Minute().Do(updater.Run, mangacan)
+	gocron.Every(1).Minute().Do(updater.Run, source.Mangacan{})
+	// gocron.Every(1).Minute().Do(updater.Run, source.Mangatail{})
 
 	// updater.Run(source.Mangatail{})
 
-	// <-gocron.Start()
+	<-gocron.Start()
 }

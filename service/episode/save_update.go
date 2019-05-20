@@ -60,7 +60,7 @@ func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) (
 
 	existing, err := s.PageRepo.FindByEpisode(ep.ID, source.ID)
 	if err == nil {
-		return existing, nil
+		return existing, ErrEpisodeExists
 	}
 
 	page.Link = update.EpisodeLink
