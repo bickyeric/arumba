@@ -131,15 +131,13 @@ func (bot bot) NotifyError(err error) {
 }
 
 func (bot bot) NotifyNewEpisode(page model.Page) {
-	txt := "[Klik disini](https://telegram.me/nb_comic_bot?start=%s)\n" + page.TelegraphLink
-
 	var tqMsg tgbotapi.MessageConfig
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 	if debug {
 		chatID, _ := strconv.Atoi(os.Getenv("CHAT_ID"))
-		tqMsg = tgbotapi.NewMessage(int64(chatID), txt)
+		tqMsg = tgbotapi.NewMessage(int64(chatID), page.TelegraphLink)
 	} else {
-		tqMsg = tgbotapi.NewMessageToChannel(os.Getenv("TELEGRAM_CHANNEL"), txt)
+		tqMsg = tgbotapi.NewMessageToChannel(os.Getenv("TELEGRAM_CHANNEL"), page.TelegraphLink)
 	}
 
 	tqMsg.ParseMode = "Markdown"

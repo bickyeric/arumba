@@ -76,6 +76,8 @@ func (kendang) toID(sourceID string) int {
 	switch sourceID {
 	case "5c9511f561a8d04fa844b666":
 		return 3
+	case "5c89e1cb5cff252ae5db8f1e":
+		return 2
 	}
 	return 0
 }
