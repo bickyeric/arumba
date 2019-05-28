@@ -9,11 +9,11 @@ import (
 )
 
 type createPageParam struct {
-	AccessToken string `json:"access_token"`
-	Title       string `json:"title"`
-	Author      string `json:"author_name"`
-	AuthorURL   string `json:"author_url"`
-	Content     []node `json:"content"`
+	AccessToken string        `json:"access_token"`
+	Title       string        `json:"title"`
+	Author      string        `json:"author_name"`
+	AuthorURL   string        `json:"author_url"`
+	Content     []interface{} `json:"content"`
 }
 
 type attrs struct {
@@ -88,7 +88,7 @@ func (cp CreatePage) buildParam(source, title string, images []string) (param cr
 	param.AccessToken = cp.token
 	param.Title = title
 	param.Author = source
-	param.AuthorURL = "http://www.google.co.id"
+	param.AuthorURL = "https://t.me/arumba_channel"
 
 	for _, link := range images {
 		param.Content = append(param.Content, node{
@@ -104,5 +104,29 @@ func (cp CreatePage) buildParam(source, title string, images []string) (param cr
 		})
 	}
 
+	param.Content = append(param.Content, cp.footer())
+
 	return param
+}
+
+func (CreatePage) footer() interface{} {
+	return map[string]interface{}{
+		"tag": "p",
+		"children": []interface{}{
+			"Check out the ",
+			map[string]interface{}{
+				"tag": "a",
+				"attrs": map[string]interface{}{
+					"href": "https://t.me/arumba_bot",
+				},
+				"children": []interface{}{
+					map[string]interface{}{
+						"tag":      "strong",
+						"children": []string{"@Arumba"},
+					},
+				},
+			},
+			" for more comics and episodes...",
+		},
+	}
 }

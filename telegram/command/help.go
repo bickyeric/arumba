@@ -10,5 +10,5 @@ type HelpHandler struct {
 }
 
 func (h HelpHandler) Handle(message *tgbotapi.Message) {
-	h.Bot.SendTextMessage(message.Chat.ID, "Join channel t.me/nbcomic, untuk selalu update comic terbaru dari berbagai sumber :D\n\n klik /feedback untuk ngasih feedback atau masukan ke developer :D")
+	h.Bot.SendTextMessage(message.Chat.ID, "Join channel t.me/arumba_channel, untuk selalu update comic terbaru dari berbagai sumber :D\n\n klik /feedback untuk ngasih feedback atau masukan ke developer :D")
 }
