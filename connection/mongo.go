@@ -3,6 +3,7 @@ package connection
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func NewMongo() (*mongo.Database, error) {
+func NewMongo() *mongo.Database {
 	uri := ""
 	if os.Getenv("DB_MONGO_USERNAME") != "" {
 		uri = fmt.Sprintf("mongodb://%s:%s@%s",
@@ -25,17 +26,17 @@ func NewMongo() (*mongo.Database, error) {
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
-		return nil, err
+		log.Fatal("MongoDB: " + err.Error())
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	if err := client.Connect(ctx); err != nil {
-		return nil, err
+		log.Fatal("Failed connecting to MongoDB")
 	}
 
 	if err = client.Ping(ctx, readpref.Primary()); err != nil {
-		return nil, err
+		log.Fatal("MongoDB is not listening...")
 	}
 
-	return client.Database(os.Getenv("DB_MONGO_DATABASE")), nil
+	return client.Database(os.Getenv("DB_MONGO_DATABASE"))
 }

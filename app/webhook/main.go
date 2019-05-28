@@ -14,14 +14,8 @@ func main() {
 	gotenv.Load(".env")
 	log.SetFormatter(&log.JSONFormatter{})
 
-	db, err := connection.NewMongo()
-	if err != nil {
-		log.WithFields(
-			log.Fields{
-				"error": err,
-			},
-		).Fatal("Error connection to database")
-	}
+	db := connection.NewMongo()
+
 	bot := arumba.NewBot()
 	kendang := connection.NewKendang()
 
