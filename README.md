@@ -1,3 +1,5 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/7c866acd4c69b94e56cd/maintainability)](https://codeclimate.com/github/bickyeric/arumba/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/7c866acd4c69b94e56cd/test_coverage)](https://codeclimate.com/github/bickyeric/arumba/test_coverage)
 # Arumba
 
 ## Architecture Diagram
