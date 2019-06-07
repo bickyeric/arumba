@@ -32,10 +32,7 @@ func NewKendang() IKendang {
 func (k kendang) FetchUpdate(source string) ([]model.Update, error) {
 	result := make([]model.Update, 0)
 
-	request, err := http.NewRequest("GET", k.baseURL+source, nil)
-	if err != nil {
-		return nil, err
-	}
+	request, _ := http.NewRequest("GET", k.baseURL+source, nil)
 
 	response, err := k.client.Do(request)
 	if err != nil {
@@ -52,10 +49,7 @@ func (k kendang) FetchUpdate(source string) ([]model.Update, error) {
 func (k kendang) FetchPages(episodeLink string, sourceID string) ([]string, error) {
 	id := k.toID(sourceID)
 	link := fmt.Sprintf("%s/crawl-page?link=%s&source_id=%d", k.baseURL, episodeLink, id)
-	request, err := http.NewRequest("GET", link, nil)
-	if err != nil {
-		return nil, err
-	}
+	request, _ := http.NewRequest("GET", link, nil)
 
 	log.WithFields(
 		log.Fields{

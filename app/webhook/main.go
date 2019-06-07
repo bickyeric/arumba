@@ -4,7 +4,6 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/telegram"
-	"github.com/bickyeric/arumba/telegram/callback"
 	log "github.com/sirupsen/logrus"
 	"github.com/subosito/gotenv"
 )
@@ -23,12 +22,12 @@ func main() {
 
 	log.Info("Webhook is running...")
 
-	messageHandler := telegram.NewMessageHandler(app, bot, kendang)
-	callback := callback.NewHandler(app, bot, kendang)
+	message := telegram.NewMessageHandler(app, bot, kendang)
+	callback := telegram.NewCallbackHandler(app, bot, kendang)
 
 	for update := range bot.UpdatesChannel() {
 		if update.Message != nil {
-			messageHandler.Handle(update.Message)
+			message.Handle(update.Message)
 
 		} else if update.EditedMessage != nil {
 			log.Info("received edited message event")

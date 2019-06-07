@@ -1,4 +1,4 @@
-package command
+package message
 
 import "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -8,9 +8,10 @@ var (
 	HelpCommand     = "help"
 	ReadCommand     = "read"
 	StartCommand    = "start"
+	GenericCommand  = "generic"
 )
 
-// CommandHandler ...
-type CommandHandler interface {
+// Handler ...
+type Handler interface {
 	Handle(message *tgbotapi.Message)
 }

@@ -1,4 +1,4 @@
-package command
+package message
 
 import (
 	"os"
@@ -10,12 +10,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type CommonHandler struct {
+type GenericHandler struct {
 	Bot           arumba.IBot
 	ComicSearcher comic.Search
 }
 
-func (c CommonHandler) Handle(message *tgbotapi.Message) {
+func (c GenericHandler) Handle(message *tgbotapi.Message) {
 	if message.ReplyToMessage != nil {
 		switch message.ReplyToMessage.Text {
 		case feedbackRequest:
@@ -27,7 +27,7 @@ func (c CommonHandler) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (c CommonHandler) handleReadComic(message *tgbotapi.Message) {
+func (c GenericHandler) handleReadComic(message *tgbotapi.Message) {
 	contextLog := log.WithFields(
 		log.Fields{
 			"chat_id": message.Chat.ID,
@@ -47,7 +47,7 @@ func (c CommonHandler) handleReadComic(message *tgbotapi.Message) {
 	}
 }
 
-func (c CommonHandler) handleFeedback(message *tgbotapi.Message) {
+func (c GenericHandler) handleFeedback(message *tgbotapi.Message) {
 	replyMessage := tgbotapi.NewMessage(message.Chat.ID, "Makasih masukannya...")
 	replyMessage.ReplyToMessageID = message.MessageID
 	c.Bot.Bot().Send(replyMessage)

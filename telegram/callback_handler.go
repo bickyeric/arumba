@@ -1,4 +1,4 @@
-package callback
+package telegram
 
 import (
 	"errors"
@@ -9,28 +9,29 @@ import (
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/service/telegraph"
+	"github.com/bickyeric/arumba/telegram/callback"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
 )
 
 type handler struct {
 	bot     arumba.IBot
-	methods map[string]CallbackHandler
+	methods map[string]callback.Handler
 }
 
-func NewHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) handler {
+func NewCallbackHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) handler {
 	telegraphCreator := telegraph.NewCreatePage()
 	handler := handler{
 		bot:     bot,
-		methods: map[string]CallbackHandler{},
+		methods: map[string]callback.Handler{},
 	}
-	handler.methods[SelectComicCallback] = SelectComicHandler{
+	handler.methods[callback.SelectComicCallback] = callback.SelectComicHandler{
 		Bot: bot,
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
 		},
 	}
-	handler.methods[SelectEpisodeCallback] = SelectEpisodeHandler{
+	handler.methods[callback.SelectEpisodeCallback] = callback.SelectEpisodeHandler{
 		Bot: bot,
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
