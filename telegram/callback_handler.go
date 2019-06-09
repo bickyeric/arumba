@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/bickyeric/arumba"
@@ -14,50 +13,46 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type handler struct {
-	bot     arumba.IBot
-	methods map[string]callback.Handler
-}
+type CallbackHandler map[string]callback.Handler
 
-func NewCallbackHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) handler {
+func NewCallbackHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKendang) CallbackHandler {
 	telegraphCreator := telegraph.NewCreatePage()
-	handler := handler{
-		bot:     bot,
-		methods: map[string]callback.Handler{},
-	}
-	handler.methods[callback.SelectComicCallback] = callback.SelectComicHandler{
-		Bot: bot,
+	handlers := map[string]callback.Handler{}
+	handlers[callback.SelectComicCallback] = callback.SelectComicHandler{
+		Bot:      bot,
+		Notifier: bot,
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
 		},
 	}
-	handler.methods[callback.SelectEpisodeCallback] = callback.SelectEpisodeHandler{
+	handlers[callback.SelectEpisodeCallback] = callback.SelectEpisodeHandler{
 		Bot: bot,
 		EpisodeSearcher: episode.Search{
 			Repo: app.EpisodeRepo,
 		},
 		Reader: comic.NewRead(app, kendang, telegraphCreator),
 	}
-	return handler
+	return handlers
 }
 
-func (handler handler) Handle(event *tgbotapi.CallbackQuery) {
-	log.WithFields(
+func (handler CallbackHandler) Handle(event *tgbotapi.CallbackQuery) {
+	contextLog := log.WithFields(
 		log.Fields{
 			"data": event.Data,
 		},
-	).Info("Handling callback")
+	)
+	contextLog.Info("Handling callback")
 	method, arg := handler.extractData(event.Data)
-	h, ok := handler.methods[method]
+	h, ok := handler[method]
 
 	if ok {
 		h.Handle(event.Message.Chat.ID, arg)
 	} else {
-		handler.bot.NotifyError(errors.New("command not found : " + method))
+		contextLog.Warn("command not found : " + method)
 	}
 }
 
-func (handler handler) extractData(data string) (string, string) {
+func (handler CallbackHandler) extractData(data string) (string, string) {
 	arr := strings.Split(data, "_")
 
 	return arr[0], data[len(arr[0])+1:]

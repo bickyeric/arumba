@@ -10,51 +10,47 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type messageHandler struct {
-	commands map[string]message.Handler
-}
+type MessageHandler map[string]message.Handler
 
 // NewMessageHandler ...
-func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) messageHandler {
+func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) MessageHandler {
 	telegraphCreator := telegraph.NewCreatePage()
 	readerService := comic.NewRead(app, kendang, telegraphCreator)
-	handler := messageHandler{
-		commands: map[string]message.Handler{},
-	}
+	handlers := map[string]message.Handler{}
 
-	handler.commands[message.StartCommand] = message.StartHandler{
+	handlers[message.StartCommand] = message.StartHandler{
 		Bot:    bot,
 		Reader: readerService,
 	}
 
-	handler.commands[message.HelpCommand] = message.HelpHandler{
+	handlers[message.HelpCommand] = message.HelpHandler{
 		Bot: bot,
 	}
 
-	handler.commands[message.ReadCommand] = message.ReadHandler{
+	handlers[message.ReadCommand] = message.ReadHandler{
 		Bot:    bot,
 		Reader: readerService,
 	}
 
-	handler.commands[message.FeedbackCommand] = message.FeedbackHandler{
+	handlers[message.FeedbackCommand] = message.FeedbackHandler{
 		Bot: bot,
 	}
 
-	handler.commands[message.FollowCommand] = message.FollowHandler{
+	handlers[message.FollowCommand] = message.FollowHandler{
 		Bot: bot,
 	}
 
-	handler.commands[message.GenericCommand] = message.GenericHandler{
+	handlers[message.GenericCommand] = message.GenericHandler{
 		Bot: bot,
 		ComicSearcher: comic.Search{
 			Repo: app.ComicRepo,
 		},
 	}
 
-	return handler
+	return handlers
 }
 
-func (handler messageHandler) Handle(m *tgbotapi.Message) {
+func (handler MessageHandler) Handle(m *tgbotapi.Message) {
 	log.WithFields(
 		log.Fields{
 			"text":    m.Text,
@@ -62,10 +58,10 @@ func (handler messageHandler) Handle(m *tgbotapi.Message) {
 		},
 	).Info("Handling message")
 
-	h, ok := handler.commands[m.Command()]
+	h, ok := handler[m.Command()]
 	if ok {
 		h.Handle(m)
 	} else {
-		handler.commands[message.GenericCommand].Handle(m)
+		handler[message.GenericCommand].Handle(m)
 	}
 }
