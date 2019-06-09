@@ -12,6 +12,7 @@ import (
 
 type GenericHandler struct {
 	Bot           arumba.IBot
+	Notifier      arumba.BotNotifier
 	ComicSearcher comic.Search
 }
 
@@ -35,7 +36,7 @@ func (c GenericHandler) handleReadComic(message *tgbotapi.Message) {
 	)
 	comics, err := c.ComicSearcher.Perform(message.Text)
 	if err != nil {
-		c.Bot.NotifyError(err)
+		c.Notifier.NotifyError(err)
 	}
 
 	if len(comics) < 1 {

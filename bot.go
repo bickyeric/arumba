@@ -11,6 +11,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// BotNotifier ...
+type BotNotifier interface {
+	NotifyError(err error)
+	NotifyNewEpisode(model.Page)
+}
+
 // IBot ...
 type IBot interface {
 	SendReplyMessage(chatID int64, text string)
@@ -21,20 +27,15 @@ type IBot interface {
 	SendNotFoundComic(chatID int64, comicName string)
 	SendNotFoundEpisode(chatID int64)
 	SendErrorMessage(chatID int64)
-
-	NotifyError(err error)
-	NotifyNewEpisode(model.Page)
-
-	Bot() bot
-	UpdatesChannel() tgbotapi.UpdatesChannel
+	Bot() Bot
 }
 
-type bot struct {
+type Bot struct {
 	*tgbotapi.BotAPI
 }
 
 // NewBot ...
-func NewBot() IBot {
+func NewBot() Bot {
 	botapi, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_TOKEN"))
 	if err != nil {
 		log.Fatal(err)
@@ -42,10 +43,10 @@ func NewBot() IBot {
 
 	botapi.Debug = false
 
-	return bot{botapi}
+	return Bot{botapi}
 }
 
-func (bot bot) SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, episodeGroup [][]float64) {
+func (bot Bot) SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, episodeGroup [][]float64) {
 	tqMsg := tgbotapi.NewMessage(chatID, "OK. Select episode number below :D")
 	keyboardRow := tgbotapi.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tgbotapi.InlineKeyboardButton{},
@@ -71,30 +72,30 @@ func (bot bot) SendEpisodeSelector(chatID int64, comicID primitive.ObjectID, epi
 	bot.Send(tqMsg)
 }
 
-func (bot bot) UpdatesChannel() tgbotapi.UpdatesChannel {
+func (bot Bot) UpdatesChannel() tgbotapi.UpdatesChannel {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates, _ := bot.GetUpdatesChan(u)
 	return updates
 }
 
-func (bot bot) Bot() bot {
+func (bot Bot) Bot() Bot {
 	return bot
 }
 
-func (bot bot) SendReplyMessage(chatID int64, text string) {
+func (bot Bot) SendReplyMessage(chatID int64, text string) {
 	replyMsg := tgbotapi.NewMessage(chatID, text)
 	replyMsg.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true}
 	bot.Send(replyMsg)
 }
 
-func (bot bot) SendTextMessage(chatID int64, text string) error {
+func (bot Bot) SendTextMessage(chatID int64, text string) error {
 	tqMsg := tgbotapi.NewMessage(chatID, text)
 	_, err := bot.Send(tqMsg)
 	return err
 }
 
-func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
+func (bot Bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	tqMsg := tgbotapi.NewMessage(chatID, "Here we go, select comic below.")
 	keyboardRow := [][]tgbotapi.InlineKeyboardButton{}
 
@@ -109,28 +110,28 @@ func (bot bot) SendComicSelector(chatID int64, comics []model.Comic) {
 	bot.Send(tqMsg)
 }
 
-func (bot bot) SendHelpMessage(chatID int64) {
+func (bot Bot) SendHelpMessage(chatID int64) {
 	bot.SendTextMessage(chatID, "Hai, coba deh klik /help")
 }
 
-func (bot bot) SendNotFoundComic(chatID int64, comicName string) {
+func (bot Bot) SendNotFoundComic(chatID int64, comicName string) {
 	bot.SendTextMessage(chatID, "Gk nemu nih bro comic "+comicName+" ma :(")
 }
 
-func (bot bot) SendNotFoundEpisode(chatID int64) {
+func (bot Bot) SendNotFoundEpisode(chatID int64) {
 	bot.SendTextMessage(chatID, "Gk nemu nih bro episode nya")
 }
 
-func (bot bot) SendErrorMessage(chatID int64) {
+func (bot Bot) SendErrorMessage(chatID int64) {
 	bot.SendTextMessage(chatID, "Waduh error nih bro maaf ya")
 }
 
-func (bot bot) NotifyError(err error) {
+func (bot Bot) NotifyError(err error) {
 	chatID, _ := strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 0)
 	bot.SendTextMessage(chatID, "Error nih : "+err.Error())
 }
 
-func (bot bot) NotifyNewEpisode(page model.Page) {
+func (bot Bot) NotifyNewEpisode(page model.Page) {
 	var tqMsg tgbotapi.MessageConfig
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 	if debug {

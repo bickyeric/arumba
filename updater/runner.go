@@ -17,17 +17,17 @@ type IRunner interface {
 }
 
 type runner struct {
-	bot     arumba.IBot
-	kendang connection.IKendang
-	saver   episode.UpdateSaver
+	notifier arumba.BotNotifier
+	kendang  connection.IKendang
+	saver    episode.UpdateSaver
 }
 
 // NewRunner ...
-func NewRunner(bot arumba.IBot, kendang connection.IKendang, app arumba.Arumba, pageCreator telegraph.PageCreator) IRunner {
+func NewRunner(bot arumba.Bot, kendang connection.IKendang, app arumba.Arumba, pageCreator telegraph.PageCreator) IRunner {
 	return runner{
-		bot:     bot,
-		kendang: kendang,
-		saver:   episode.NewSaveUpdate(app, kendang, pageCreator),
+		notifier: bot,
+		kendang:  kendang,
+		saver:    episode.NewSaveUpdate(app, kendang, pageCreator),
 	}
 }
 
@@ -41,7 +41,7 @@ func (r runner) Run(source source.ISource) {
 
 	updates, err := r.kendang.FetchUpdate("/" + source.Name() + "-update")
 	if err != nil {
-		r.bot.NotifyError(err)
+		r.notifier.NotifyError(err)
 		contextLogger.WithFields(log.Fields{
 			"error": err.Error(),
 		}).Warn("Error fetching updates")
@@ -54,7 +54,7 @@ func (r runner) Run(source source.ISource) {
 			if err == episode.ErrEpisodeExists {
 				continue
 			} else {
-				r.bot.NotifyError(err)
+				r.notifier.NotifyError(err)
 				contextLogger.WithFields(log.Fields{
 					"update": u,
 					"error":  err.Error(),
@@ -63,7 +63,7 @@ func (r runner) Run(source source.ISource) {
 			}
 		}
 
-		r.bot.NotifyNewEpisode(page)
+		r.notifier.NotifyNewEpisode(page)
 	}
 
 	elapsed := time.Since(start)

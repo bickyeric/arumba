@@ -15,6 +15,7 @@ import (
 // SelectEpisodeHandler ...
 type SelectEpisodeHandler struct {
 	Bot             arumba.IBot
+	Notifier        arumba.BotNotifier
 	EpisodeSearcher episode.Search
 	Reader          comic.Read
 }
@@ -38,7 +39,7 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 	comicID, _ := primitive.ObjectIDFromHex(args[0])
 	episodeNo, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
-		handler.Bot.NotifyError(err)
+		handler.Notifier.NotifyError(err)
 		contextLog.WithFields(
 			log.Fields{
 				"error": err,
@@ -78,16 +79,16 @@ func (handler SelectEpisodeHandler) episodeSelector(chatID int64, args []string)
 	comicID, _ := primitive.ObjectIDFromHex(args[0])
 	lower, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
-		handler.Bot.NotifyError(err)
+		handler.Notifier.NotifyError(err)
 	}
 	upper, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		handler.Bot.NotifyError(err)
+		handler.Notifier.NotifyError(err)
 	}
 
 	group, err := handler.EpisodeSearcher.Perform(comicID, lower, upper)
 	if err != nil {
-		handler.Bot.NotifyError(err)
+		handler.Notifier.NotifyError(err)
 	}
 	handler.Bot.SendEpisodeSelector(chatID, comicID, group)
 }

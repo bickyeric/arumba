@@ -10,6 +10,7 @@ import (
 // SelectComicHandler ...
 type SelectComicHandler struct {
 	Bot             arumba.IBot
+	Notifier        arumba.BotNotifier
 	EpisodeSearcher episode.Search
 }
 
@@ -23,7 +24,7 @@ func (handler SelectComicHandler) Handle(chatID int64, arg string) {
 	id, _ := primitive.ObjectIDFromHex(arg)
 	group, err := handler.EpisodeSearcher.Perform(id)
 	if err != nil {
-		handler.Bot.NotifyError(err)
+		handler.Notifier.NotifyError(err)
 		contextLog.WithFields(
 			log.Fields{"error": err},
 		).Warn("Error searching episodes")
