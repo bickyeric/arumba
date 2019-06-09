@@ -13,39 +13,27 @@ import (
 type MessageHandler map[string]message.Handler
 
 // NewMessageHandler ...
-func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) MessageHandler {
+func NewMessageHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKendang) MessageHandler {
 	telegraphCreator := telegraph.NewCreatePage()
 	readerService := comic.NewRead(app, kendang, telegraphCreator)
 	handlers := map[string]message.Handler{}
 
-	handlers[message.StartCommand] = message.StartHandler{
-		Bot:    bot,
-		Reader: readerService,
-	}
+	handlers[message.StartCommand] = message.NewStart(bot, readerService)
 
-	handlers[message.HelpCommand] = message.HelpHandler{
-		Bot: bot,
-	}
+	handlers[message.HelpCommand] = message.NewHelp(bot)
 
-	handlers[message.ReadCommand] = message.ReadHandler{
-		Bot:    bot,
-		Reader: readerService,
-	}
+	handlers[message.ReadCommand] = message.NewRead(bot, readerService)
 
-	handlers[message.FeedbackCommand] = message.FeedbackHandler{
-		Bot: bot,
-	}
+	handlers[message.FeedbackCommand] = message.NewFeedback(bot)
 
-	handlers[message.FollowCommand] = message.FollowHandler{
-		Bot: bot,
-	}
+	handlers[message.FollowCommand] = message.NewFollow(bot)
 
-	handlers[message.GenericCommand] = message.GenericHandler{
-		Bot: bot,
-		ComicSearcher: comic.Search{
+	handlers[message.GenericCommand] = message.NewGeneric(
+		bot, bot,
+		comic.Search{
 			Repo: app.ComicRepo,
 		},
-	}
+	)
 
 	return handlers
 }

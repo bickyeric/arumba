@@ -5,10 +5,15 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type HelpHandler struct {
-	Bot arumba.IBot
+type help struct {
+	bot arumba.IBot
 }
 
-func (h HelpHandler) Handle(message *tgbotapi.Message) {
-	h.Bot.SendTextMessage(message.Chat.ID, "Join channel t.me/arumba_channel, untuk selalu update comic terbaru dari berbagai sumber :D\n\nGunakan /feedback untuk ngasih feedback atau masukan ke developer :D")
+// NewHelp ...
+func NewHelp(bot arumba.Bot) Handler {
+	return help{bot}
+}
+
+func (h help) Handle(message *tgbotapi.Message) {
+	h.bot.SendTextMessage(message.Chat.ID, "Join channel t.me/arumba_channel, untuk selalu update comic terbaru dari berbagai sumber :D\n\nGunakan /feedback untuk ngasih feedback atau masukan ke developer :D")
 }

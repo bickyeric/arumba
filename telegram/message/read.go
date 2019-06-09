@@ -13,12 +13,17 @@ import (
 
 var comicNameRequest = "OK. You want to read a comic, just give me a comic name."
 
-type ReadHandler struct {
-	Bot    arumba.IBot
-	Reader comic.Read
+type read struct {
+	bot    arumba.IBot
+	reader comic.Read
 }
 
-func (r ReadHandler) Handle(message *tgbotapi.Message) {
+// NewRead ...
+func NewRead(bot arumba.Bot, reader comic.Read) Handler {
+	return read{bot, reader}
+}
+
+func (r read) Handle(message *tgbotapi.Message) {
 	arg := message.CommandArguments()
 	comicName, episodeNo := r.parseArg(arg)
 
@@ -31,8 +36,8 @@ func (r ReadHandler) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (r ReadHandler) requestComicName(chatID int64) {
-	r.Bot.SendReplyMessage(chatID, comicNameRequest)
+func (r read) requestComicName(chatID int64) {
+	r.bot.SendReplyMessage(chatID, comicNameRequest)
 	log.WithFields(
 		log.Fields{
 			"chat_id": chatID,
@@ -40,22 +45,22 @@ func (r ReadHandler) requestComicName(chatID int64) {
 	).Info("Request comic name message sent")
 }
 
-func (r ReadHandler) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
-	pageURL, err := r.Reader.PerformByComicName(comicName, episodeNo)
+func (r read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
+	pageURL, err := r.reader.PerformByComicName(comicName, episodeNo)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			r.Bot.SendNotFoundEpisode(chatID)
+			r.bot.SendNotFoundEpisode(chatID)
 		default:
-			r.Bot.SendErrorMessage(chatID)
+			r.bot.SendErrorMessage(chatID)
 		}
 		return
 	}
 
-	r.Bot.SendTextMessage(chatID, pageURL)
+	r.bot.SendTextMessage(chatID, pageURL)
 }
 
-func (r ReadHandler) parseArg(arg string) (string, float64) {
+func (r read) parseArg(arg string) (string, float64) {
 	if arg == "" {
 		return "", -1
 	}

@@ -7,10 +7,17 @@ import (
 
 var feedbackRequest = "Masukan kamu sangat berarti buat kami :D"
 
-type FeedbackHandler struct {
-	Bot arumba.IBot
+type feedback struct {
+	bot arumba.IBot
 }
 
-func (f FeedbackHandler) Handle(message *tgbotapi.Message) {
-	f.Bot.SendReplyMessage(message.Chat.ID, feedbackRequest)
+// NewFeedback ...
+func NewFeedback(bot arumba.Bot) Handler {
+	return feedback{
+		bot: bot,
+	}
+}
+
+func (f feedback) Handle(message *tgbotapi.Message) {
+	f.bot.SendReplyMessage(message.Chat.ID, feedbackRequest)
 }

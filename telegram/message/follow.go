@@ -6,13 +6,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// FollowHandler ...
-type FollowHandler struct {
-	Bot arumba.IBot
+type follow struct {
+	bot arumba.IBot
 }
 
-// Handle ...
-func (f FollowHandler) Handle(message *tgbotapi.Message) {
+// NewFollow ...
+func NewFollow(bot arumba.Bot) Handler {
+	return follow{bot}
+}
+
+func (f follow) Handle(message *tgbotapi.Message) {
 	comicName := message.CommandArguments()
 
 	if comicName == "" {
@@ -22,10 +25,10 @@ func (f FollowHandler) Handle(message *tgbotapi.Message) {
 	}
 }
 
-func (f FollowHandler) showFollowed(chatID int64) {
+func (f follow) showFollowed(chatID int64) {
 	log.Println("showing followed comic")
 }
 
-func (f FollowHandler) follow(chatID int64, comicName string) {
+func (f follow) follow(chatID int64, comicName string) {
 	log.Println("following new comic")
 }
