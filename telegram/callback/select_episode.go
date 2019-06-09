@@ -7,29 +7,41 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// SelectEpisodeHandler ...
-type SelectEpisodeHandler struct {
-	Bot             arumba.IBot
-	Notifier        arumba.BotNotifier
-	EpisodeSearcher episode.Search
-	Reader          comic.Read
+type selectEpisode struct {
+	bot             arumba.IBot
+	notifier        arumba.BotNotifier
+	episodeSearcher episode.Search
+	reader          comic.Read
 }
 
-func (handler SelectEpisodeHandler) Handle(chatID int64, arg string) {
+// NewSelectEpisode ...
+func NewSelectEpisode(
+	bot arumba.IBot,
+	notifier arumba.BotNotifier,
+	episodeSearcher episode.Search,
+	reader comic.Read,
+) Handler {
+	return selectEpisode{bot, notifier, episodeSearcher, reader}
+}
+
+func (handler selectEpisode) Handle(event *tgbotapi.CallbackQuery) {
+	_, arg := ExtractData(event.Data)
 	args := strings.Split(arg, "_")
 	if len(args) == 2 {
-		handler.readComic(chatID, args)
+		handler.readComic(event.Message.Chat.ID, args)
 	} else {
-		handler.episodeSelector(chatID, args)
+		handler.episodeSelector(event.Message.Chat.ID, args)
+
 	}
 }
 
-func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
+func (handler selectEpisode) readComic(chatID int64, args []string) {
 	contextLog := log.WithFields(
 		log.Fields{
 			"chat_id": chatID,
@@ -39,7 +51,7 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 	comicID, _ := primitive.ObjectIDFromHex(args[0])
 	episodeNo, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
-		handler.Notifier.NotifyError(err)
+		handler.notifier.NotifyError(err)
 		contextLog.WithFields(
 			log.Fields{
 				"error": err,
@@ -47,7 +59,7 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 		).Warn("Error parsing float")
 	}
 
-	pageURL, err := handler.Reader.PerformByComicID(comicID, episodeNo)
+	pageURL, err := handler.reader.PerformByComicID(comicID, episodeNo)
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:
@@ -57,7 +69,7 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 					"no":       episodeNo,
 				},
 			).Warn("Episode not found")
-			handler.Bot.SendNotFoundEpisode(chatID)
+			handler.bot.SendNotFoundEpisode(chatID)
 		default:
 			contextLog.WithFields(
 				log.Fields{
@@ -66,29 +78,29 @@ func (handler SelectEpisodeHandler) readComic(chatID int64, args []string) {
 					"error":    err,
 				},
 			).Warn("Error reading comic")
-			handler.Bot.SendErrorMessage(chatID)
+			handler.bot.SendErrorMessage(chatID)
 		}
 		return
 	}
 
-	handler.Bot.SendTextMessage(chatID, pageURL)
+	handler.bot.SendTextMessage(chatID, pageURL)
 	contextLog.Info("Page sent")
 }
 
-func (handler SelectEpisodeHandler) episodeSelector(chatID int64, args []string) {
+func (handler selectEpisode) episodeSelector(chatID int64, args []string) {
 	comicID, _ := primitive.ObjectIDFromHex(args[0])
 	lower, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
-		handler.Notifier.NotifyError(err)
+		handler.notifier.NotifyError(err)
 	}
 	upper, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		handler.Notifier.NotifyError(err)
+		handler.notifier.NotifyError(err)
 	}
 
-	group, err := handler.EpisodeSearcher.Perform(comicID, lower, upper)
+	group, err := handler.episodeSearcher.Perform(comicID, lower, upper)
 	if err != nil {
-		handler.Notifier.NotifyError(err)
+		handler.notifier.NotifyError(err)
 	}
-	handler.Bot.SendEpisodeSelector(chatID, comicID, group)
+	handler.bot.SendEpisodeSelector(chatID, comicID, group)
 }

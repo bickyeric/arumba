@@ -1,5 +1,11 @@
 package callback
 
+import (
+	"strings"
+
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
 // SelectComicCallback ...
 var SelectComicCallback = "select-comic"
 
@@ -8,5 +14,12 @@ var SelectEpisodeCallback = "select-episode"
 
 // Handler ...
 type Handler interface {
-	Handle(chatID int64, arg string)
+	Handle(event *tgbotapi.CallbackQuery)
+}
+
+// ExtractData ...
+func ExtractData(data string) (string, string) {
+	arr := strings.Split(data, "_")
+
+	return arr[0], data[len(arr[0])+1:]
 }

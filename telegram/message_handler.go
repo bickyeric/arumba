@@ -10,13 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type MessageHandler map[string]message.Handler
+type messageHandler map[string]message.Handler
 
 // NewMessageHandler ...
-func NewMessageHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKendang) MessageHandler {
+func NewMessageHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKendang) message.Handler {
 	telegraphCreator := telegraph.NewCreatePage()
 	readerService := comic.NewRead(app, kendang, telegraphCreator)
-	handlers := map[string]message.Handler{}
+	handlers := messageHandler{}
 
 	handlers[message.StartCommand] = message.NewStart(bot, readerService)
 
@@ -38,7 +38,7 @@ func NewMessageHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKe
 	return handlers
 }
 
-func (handler MessageHandler) Handle(m *tgbotapi.Message) {
+func (handler messageHandler) Handle(m *tgbotapi.Message) {
 	log.WithFields(
 		log.Fields{
 			"text":    m.Text,

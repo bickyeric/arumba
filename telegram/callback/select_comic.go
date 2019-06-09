@@ -3,32 +3,42 @@ package callback
 import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/episode"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// SelectComicHandler ...
-type SelectComicHandler struct {
-	Bot             arumba.IBot
-	Notifier        arumba.BotNotifier
-	EpisodeSearcher episode.Search
+type selectComic struct {
+	bot             arumba.IBot
+	notifier        arumba.BotNotifier
+	episodeSearcher episode.Search
 }
 
-func (handler SelectComicHandler) Handle(chatID int64, arg string) {
+// NewSelectComic ...
+func NewSelectComic(
+	bot arumba.IBot,
+	notifier arumba.BotNotifier,
+	episodeSearcher episode.Search,
+) Handler {
+	return selectComic{bot, notifier, episodeSearcher}
+}
+
+func (handler selectComic) Handle(event *tgbotapi.CallbackQuery) {
 	contextLog := log.WithFields(
 		log.Fields{
-			"chat_id": chatID,
+			"chat_id": event.Message.Chat.ID,
 		},
 	)
 
+	_, arg := ExtractData(event.Data)
 	id, _ := primitive.ObjectIDFromHex(arg)
-	group, err := handler.EpisodeSearcher.Perform(id)
+	group, err := handler.episodeSearcher.Perform(id)
 	if err != nil {
-		handler.Notifier.NotifyError(err)
+		handler.notifier.NotifyError(err)
 		contextLog.WithFields(
 			log.Fields{"error": err},
 		).Warn("Error searching episodes")
 	}
-	handler.Bot.SendEpisodeSelector(chatID, id, group)
+	handler.bot.SendEpisodeSelector(event.Message.Chat.ID, id, group)
 	contextLog.Info("Episode selector sent")
 }
