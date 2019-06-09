@@ -41,14 +41,17 @@ type createPageResponse struct {
 	} `json:"result"`
 }
 
-// CreatePage ...
+type PageCreator interface {
+	Perform(source, title string, images []string) (string, error)
+}
+
 type CreatePage struct {
 	client *http.Client
 	token  string
 }
 
 // NewCreatePage ...
-func NewCreatePage() CreatePage {
+func NewCreatePage() PageCreator {
 	return CreatePage{
 		client: http.DefaultClient,
 		token:  os.Getenv("TELEGRAPH_ACCESS_TOKEN"),

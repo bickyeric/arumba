@@ -24,11 +24,11 @@ type UpdateSaver struct {
 	PageRepo    repository.IPage
 
 	Kendang    connection.IKendang
-	CreatePage telegraph.CreatePage
+	CreatePage telegraph.PageCreator
 }
 
 // NewSaveUpdate ...
-func NewSaveUpdate(app arumba.Arumba, kendang connection.IKendang, pageCreator telegraph.CreatePage) UpdateSaver {
+func NewSaveUpdate(app arumba.Arumba, kendang connection.IKendang, pageCreator telegraph.PageCreator) UpdateSaver {
 	return UpdateSaver{
 		SourceRepo:  app.SourceRepo,
 		ComicRepo:   app.ComicRepo,

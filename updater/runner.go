@@ -23,7 +23,7 @@ type runner struct {
 }
 
 // NewRunner ...
-func NewRunner(bot arumba.IBot, kendang connection.IKendang, app arumba.Arumba, pageCreator telegraph.CreatePage) IRunner {
+func NewRunner(bot arumba.IBot, kendang connection.IKendang, app arumba.Arumba, pageCreator telegraph.PageCreator) IRunner {
 	return runner{
 		bot:     bot,
 		kendang: kendang,

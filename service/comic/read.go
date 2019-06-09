@@ -21,11 +21,11 @@ type Read struct {
 	PageRepo    repository.IPage
 
 	Kendang     connection.IKendang
-	PageCreator telegraph.CreatePage
+	PageCreator telegraph.PageCreator
 }
 
 // NewRead ...
-func NewRead(app arumba.Arumba, kendang connection.IKendang, pageCreator telegraph.CreatePage) Read {
+func NewRead(app arumba.Arumba, kendang connection.IKendang, pageCreator telegraph.PageCreator) Read {
 	return Read{
 		SourceRepo:  app.SourceRepo,
 		ComicRepo:   app.ComicRepo,
