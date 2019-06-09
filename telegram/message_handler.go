@@ -14,6 +14,7 @@ type messageHandler struct {
 	commands map[string]message.Handler
 }
 
+// NewMessageHandler ...
 func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IKendang) messageHandler {
 	telegraphCreator := telegraph.NewCreatePage()
 	readerService := comic.NewRead(app, kendang, telegraphCreator)
@@ -36,6 +37,10 @@ func NewMessageHandler(app arumba.Arumba, bot arumba.IBot, kendang connection.IK
 	}
 
 	handler.commands[message.FeedbackCommand] = message.FeedbackHandler{
+		Bot: bot,
+	}
+
+	handler.commands[message.FollowCommand] = message.FollowHandler{
 		Bot: bot,
 	}
 
