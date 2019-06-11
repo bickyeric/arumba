@@ -12,15 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-type ClientOptioner interface {
-	ApplyURI(string) *options.ClientOptions
-}
-
-var (
-	NewClient                    = mongo.NewClient
-	ClientOptions ClientOptioner = options.Client()
-)
-
 func NewMongo() *mongo.Database {
 	uri := ""
 	if os.Getenv("DB_MONGO_USERNAME") != "" {
@@ -33,7 +24,7 @@ func NewMongo() *mongo.Database {
 			os.Getenv("DB_MONGO_HOST"))
 	}
 
-	client, err := NewClient(ClientOptions.ApplyURI(uri))
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal("MongoDB: " + err.Error())
 	}

@@ -15,5 +15,9 @@ func NewHelp(bot arumba.Bot) Handler {
 }
 
 func (h help) Handle(message *tgbotapi.Message) {
-	h.bot.SendTextMessage(message.Chat.ID, "Join channel t.me/arumba_channel, untuk selalu update comic terbaru dari berbagai sumber :D\n\nGunakan /feedback untuk ngasih feedback atau masukan ke developer :D")
+	text := "Join channel t.me/arumba_channel, untuk selalu update comic terbaru dari berbagai sumber :D"
+	text = text + "\n\nGunakan /read untuk membaca komik"
+	text = text + "\nGunakan /feedback untuk ngasih feedback atau masukan ke developer :D"
+	text = text + "\nGunakan /help untuk menampilkan panduan ini."
+	h.bot.SendTextMessage(message.Chat.ID, text)
 }
