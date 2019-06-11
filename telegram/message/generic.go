@@ -13,13 +13,13 @@ import (
 type generic struct {
 	bot           arumba.IBot
 	notifier      arumba.BotNotifier
-	comicSearcher comic.Search
+	comicSearcher comic.Searcher
 }
 
 // NewGeneric ...
 func NewGeneric(bot arumba.Bot,
 	notifier arumba.BotNotifier,
-	comicSearcher comic.Search) Handler {
+	comicSearcher comic.Searcher) Handler {
 	return generic{
 		bot:           bot,
 		notifier:      bot,

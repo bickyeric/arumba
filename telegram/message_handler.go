@@ -30,9 +30,7 @@ func NewMessageHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKe
 
 	handlers[message.GenericCommand] = message.NewGeneric(
 		bot, bot,
-		comic.Search{
-			Repo: app.ComicRepo,
-		},
+		comic.NewSearch(app.ComicRepo),
 	)
 
 	return handlers

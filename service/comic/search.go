@@ -5,12 +5,20 @@ import (
 	"github.com/bickyeric/arumba/repository"
 )
 
-// Search ...
-type Search struct {
-	Repo repository.IComic
+// Searcher ...
+type Searcher interface {
+	Perform(name string) ([]model.Comic, error)
 }
 
-// Perform ...
-func (s Search) Perform(name string) ([]model.Comic, error) {
-	return s.Repo.FindAll(name)
+// NewSearch ...
+func NewSearch(repo repository.IComic) Searcher {
+	return search{repo}
+}
+
+type search struct {
+	repo repository.IComic
+}
+
+func (s search) Perform(name string) ([]model.Comic, error) {
+	return s.repo.FindAll(name)
 }

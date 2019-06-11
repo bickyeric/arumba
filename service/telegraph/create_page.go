@@ -93,6 +93,7 @@ func (cp CreatePage) buildParam(source, title string, images []string) (param cr
 	param.Author = source
 	param.AuthorURL = "https://t.me/arumba_channel"
 
+	i := 1
 	for _, link := range images {
 		param.Content = append(param.Content, node{
 			Tag: "figure",
@@ -105,9 +106,13 @@ func (cp CreatePage) buildParam(source, title string, images []string) (param cr
 				},
 			},
 		})
+		if i == 3 {
+			param.Content = append(param.Content, cp.footer())
+			i = 0
+		} else {
+			i++
+		}
 	}
-
-	param.Content = append(param.Content, cp.footer())
 
 	return param
 }
