@@ -20,15 +20,11 @@ func NewCallbackHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IK
 	handlers := callbackHandler{}
 	handlers[callback.SelectComicCallback] = callback.NewSelectComic(
 		bot, bot,
-		episode.Search{
-			Repo: app.EpisodeRepo,
-		},
+		episode.NewSearch(app.EpisodeRepo),
 	)
 	handlers[callback.SelectEpisodeCallback] = callback.NewSelectEpisode(
 		bot, bot,
-		episode.Search{
-			Repo: app.EpisodeRepo,
-		},
+		episode.NewSearch(app.EpisodeRepo),
 		comic.NewRead(app, kendang, telegraphCreator),
 	)
 	return handlers

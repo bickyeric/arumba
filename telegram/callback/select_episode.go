@@ -16,7 +16,7 @@ import (
 type selectEpisode struct {
 	bot             arumba.IBot
 	notifier        arumba.BotNotifier
-	episodeSearcher episode.Search
+	episodeSearcher episode.Searcher
 	reader          comic.Read
 }
 
@@ -24,7 +24,7 @@ type selectEpisode struct {
 func NewSelectEpisode(
 	bot arumba.IBot,
 	notifier arumba.BotNotifier,
-	episodeSearcher episode.Search,
+	episodeSearcher episode.Searcher,
 	reader comic.Read,
 ) Handler {
 	return selectEpisode{bot, notifier, episodeSearcher, reader}

@@ -11,14 +11,14 @@ import (
 type selectComic struct {
 	bot             arumba.IBot
 	notifier        arumba.BotNotifier
-	episodeSearcher episode.Search
+	episodeSearcher episode.Searcher
 }
 
 // NewSelectComic ...
 func NewSelectComic(
 	bot arumba.IBot,
 	notifier arumba.BotNotifier,
-	episodeSearcher episode.Search,
+	episodeSearcher episode.Searcher,
 ) Handler {
 	return selectComic{bot, notifier, episodeSearcher}
 }

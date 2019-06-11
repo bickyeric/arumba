@@ -5,14 +5,23 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Search ...
-type Search struct {
-	Repo repository.IEpisode
+// Searcher ...
+type Searcher interface {
+	Perform(comicID primitive.ObjectID, bound ...float64) ([][]float64, error)
+}
+
+// NewSearch ...
+func NewSearch(repo repository.IEpisode) Searcher {
+	return search{repo}
+}
+
+type search struct {
+	repo repository.IEpisode
 }
 
 // Perform ...
-func (s Search) Perform(comicID primitive.ObjectID, bound ...float64) ([][]float64, error) {
-	totalEpisode, err := s.Repo.Count(comicID, bound...)
+func (s search) Perform(comicID primitive.ObjectID, bound ...float64) ([][]float64, error) {
+	totalEpisode, err := s.repo.Count(comicID, bound...)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +35,7 @@ func (s Search) Perform(comicID primitive.ObjectID, bound ...float64) ([][]float
 			continue
 		}
 		noRange := []float64{}
-		no, err := s.Repo.No(comicID, index, bound...)
+		no, err := s.repo.No(comicID, index, bound...)
 		if err != nil {
 			return nil, err
 		}
@@ -34,7 +43,7 @@ func (s Search) Perform(comicID primitive.ObjectID, bound ...float64) ([][]float
 
 		index += member
 		if member > 1 {
-			no, err := s.Repo.No(comicID, index-1, bound...)
+			no, err := s.repo.No(comicID, index-1, bound...)
 			if err != nil {
 				return nil, err
 			}

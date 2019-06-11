@@ -30,7 +30,7 @@ func (r read) Handle(message *tgbotapi.Message) {
 	if comicName != "" && episodeNo > -1 {
 		r.readComicEpisode(message.Chat.ID, comicName, episodeNo)
 	} else if comicName != "" {
-		log.Println("ada nama_comic saja")
+		r.readComic(message.Chat.ID, comicName)
 	} else {
 		r.requestComicName(message.Chat.ID)
 	}
@@ -43,6 +43,10 @@ func (r read) requestComicName(chatID int64) {
 			"chat_id": chatID,
 		},
 	).Info("Request comic name message sent")
+}
+
+func (r read) readComic(chatID int64, comicName string) {
+	log.Println("ada nama_comic saja")
 }
 
 func (r read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
