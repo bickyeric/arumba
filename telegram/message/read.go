@@ -7,6 +7,7 @@ import (
 
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/service/comic"
+	"github.com/bickyeric/arumba/service/episode"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
 )
@@ -14,13 +15,15 @@ import (
 var comicNameRequest = "OK. You want to read a comic, just give me a comic name."
 
 type read struct {
-	bot    arumba.IBot
-	reader comic.Read
+	bot             arumba.IBot
+	reader          comic.Read
+	finder          comic.Finder
+	episodeSearcher episode.Searcher
 }
 
 // NewRead ...
-func NewRead(bot arumba.Bot, reader comic.Read) Handler {
-	return read{bot, reader}
+func NewRead(bot arumba.Bot, reader comic.Read, finder comic.Finder, episodeSearcher episode.Searcher) Handler {
+	return read{bot, reader, finder, episodeSearcher}
 }
 
 func (r read) Handle(message *tgbotapi.Message) {
@@ -46,7 +49,27 @@ func (r read) requestComicName(chatID int64) {
 }
 
 func (r read) readComic(chatID int64, comicName string) {
-	log.Println("ada nama_comic saja")
+	contextLog := log.WithFields(
+		log.Fields{
+			"chat_id": chatID,
+		},
+	)
+	comic, err := r.finder.Perform(comicName)
+	if err != nil {
+		contextLog.WithFields(
+			log.Fields{"error": err},
+		).Warn("Error finding comic")
+		return
+	}
+	group, err := r.episodeSearcher.Perform(comic.ID)
+	if err != nil {
+		contextLog.WithFields(
+			log.Fields{"error": err},
+		).Warn("Error searching episodes")
+		return
+	}
+	r.bot.SendEpisodeSelector(chatID, comic.ID, group)
+	contextLog.Info("Episode selector sent")
 }
 
 func (r read) readComicEpisode(chatID int64, comicName string, episodeNo float64) {
