@@ -1,11 +1,10 @@
 package telegraph
 
 import (
-	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
 	"os"
+
+	"github.com/bickyeric/arumba/connection"
 )
 
 type createPageParam struct {
@@ -45,40 +44,29 @@ type PageCreator interface {
 	Perform(source, title string, images []string) (string, error)
 }
 
-type CreatePage struct {
-	client *http.Client
-	token  string
+type createPage struct {
+	network connection.NetworkInterface
+	token   string
 }
 
 // NewCreatePage ...
 func NewCreatePage() PageCreator {
-	return CreatePage{
-		client: http.DefaultClient,
-		token:  os.Getenv("TELEGRAPH_ACCESS_TOKEN"),
+	return createPage{
+		network: connection.NewNetwork("https://api.telegra.ph/"),
+		token:   os.Getenv("TELEGRAPH_ACCESS_TOKEN"),
 	}
 }
 
 // Perform ...
-func (cp CreatePage) Perform(source, title string, images []string) (string, error) {
+func (cp createPage) Perform(source, title string, images []string) (string, error) {
 	param := cp.buildParam(source, title, images)
-	jsonParam, err := json.Marshal(param)
+	jsonParam, _ := json.Marshal(param)
+
+	body, err := cp.network.POST("createPage", jsonParam)
 	if err != nil {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", "https://api.telegra.ph/createPage", bytes.NewBuffer(jsonParam))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := cp.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	body, _ := ioutil.ReadAll(res.Body)
 	createPageResponse := createPageResponse{}
 	if err := json.Unmarshal(body, &createPageResponse); err != nil {
 		return "", err
@@ -87,7 +75,7 @@ func (cp CreatePage) Perform(source, title string, images []string) (string, err
 	return createPageResponse.Result.URL, nil
 }
 
-func (cp CreatePage) buildParam(source, title string, images []string) (param createPageParam) {
+func (cp createPage) buildParam(source, title string, images []string) (param createPageParam) {
 	param.AccessToken = cp.token
 	param.Title = title
 	param.Author = source
@@ -117,7 +105,7 @@ func (cp CreatePage) buildParam(source, title string, images []string) (param cr
 	return param
 }
 
-func (CreatePage) footer() interface{} {
+func (createPage) footer() interface{} {
 	return map[string]interface{}{
 		"tag": "p",
 		"children": []interface{}{
