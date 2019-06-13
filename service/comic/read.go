@@ -11,25 +11,24 @@ import (
 
 // Read ...
 type Read struct {
-	SourceRepo  repository.ISource
-	ComicRepo   repository.IComic
-	EpisodeRepo repository.IEpisode
-	PageRepo    repository.IPage
+	sourceRepo  repository.ISource
+	comicRepo   repository.IComic
+	episodeRepo repository.IEpisode
+	pageRepo    repository.IPage
 }
 
 // NewRead ...
 func NewRead(app arumba.Arumba) Read {
 	return Read{
-		SourceRepo:  app.SourceRepo,
-		ComicRepo:   app.ComicRepo,
-		EpisodeRepo: app.EpisodeRepo,
-		PageRepo:    app.PageRepo,
+		sourceRepo:  app.SourceRepo,
+		episodeRepo: app.EpisodeRepo,
+		pageRepo:    app.PageRepo,
 	}
 }
 
 // PerformByComicName ...
 func (r Read) PerformByComicName(comicName string, episodeNo float64) (string, error) {
-	comic, err := r.ComicRepo.Find(comicName)
+	comic, err := r.comicRepo.Find(comicName)
 	if err != nil {
 		return "", err
 	}
@@ -38,18 +37,13 @@ func (r Read) PerformByComicName(comicName string, episodeNo float64) (string, e
 }
 
 // PerformByComicID ...
-func (r Read) PerformByComicID(id primitive.ObjectID, episodeNo float64) (string, error) {
-	comic, err := r.ComicRepo.FindByID(id)
+func (r Read) PerformByComicID(comicID primitive.ObjectID, episodeNo float64) (string, error) {
+	episode, err := r.episodeRepo.FindByNo(comicID, episodeNo)
 	if err != nil {
 		return "", err
 	}
 
-	episode, err := r.EpisodeRepo.FindByNo(comic.ID, episodeNo)
-	if err != nil {
-		return "", err
-	}
-
-	sourceIDs, err := r.PageRepo.GetSources(episode.ID)
+	sourceIDs, err := r.pageRepo.GetSources(episode.ID)
 	if err != nil {
 		return "", err
 	}
@@ -57,11 +51,11 @@ func (r Read) PerformByComicID(id primitive.ObjectID, episodeNo float64) (string
 	rand.Seed(time.Now().Unix())
 	n := rand.Int() % len(sourceIDs)
 
-	source, err := r.SourceRepo.FindByID(sourceIDs[n])
+	source, err := r.sourceRepo.FindByID(sourceIDs[n])
 	if err != nil {
 		return "", err
 	}
 
-	page, err := r.PageRepo.FindByEpisode(episode.ID, source.ID)
+	page, err := r.pageRepo.FindByEpisode(episode.ID, source.ID)
 	return page.TelegraphLink, err
 }
