@@ -2,10 +2,8 @@ package telegram
 
 import (
 	"github.com/bickyeric/arumba"
-	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
-	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/telegram/message"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	log "github.com/sirupsen/logrus"
@@ -14,9 +12,8 @@ import (
 type messageHandler map[string]message.Handler
 
 // NewMessageHandler ...
-func NewMessageHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKendang) message.Handler {
-	telegraphCreator := telegraph.NewCreatePage()
-	readerService := comic.NewRead(app, kendang, telegraphCreator)
+func NewMessageHandler(app arumba.Arumba, bot arumba.Bot) message.Handler {
+	readerService := comic.NewRead(app)
 	finderService := comic.NewFinder(app.ComicRepo)
 
 	handlers := messageHandler{}

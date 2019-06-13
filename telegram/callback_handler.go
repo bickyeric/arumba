@@ -2,10 +2,8 @@ package telegram
 
 import (
 	"github.com/bickyeric/arumba"
-	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/comic"
 	"github.com/bickyeric/arumba/service/episode"
-	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/telegram/callback"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -15,8 +13,7 @@ import (
 type callbackHandler map[string]callback.Handler
 
 // NewCallbackHandler ...
-func NewCallbackHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IKendang) callback.Handler {
-	telegraphCreator := telegraph.NewCreatePage()
+func NewCallbackHandler(app arumba.Arumba, bot arumba.Bot) callback.Handler {
 	handlers := callbackHandler{}
 	handlers[callback.SelectComicCallback] = callback.NewSelectComic(
 		bot, bot,
@@ -25,7 +22,7 @@ func NewCallbackHandler(app arumba.Arumba, bot arumba.Bot, kendang connection.IK
 	handlers[callback.SelectEpisodeCallback] = callback.NewSelectEpisode(
 		bot, bot,
 		episode.NewSearch(app.EpisodeRepo),
-		comic.NewRead(app, kendang, telegraphCreator),
+		comic.NewRead(app),
 	)
 	return handlers
 }

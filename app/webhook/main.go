@@ -16,14 +16,13 @@ func main() {
 	db := connection.NewMongo()
 
 	bot := arumba.NewBot()
-	kendang := connection.NewKendang()
 
 	app := arumba.New(db)
 
 	log.Info("Webhook is running...")
 
-	message := telegram.NewMessageHandler(app, bot, kendang)
-	callback := telegram.NewCallbackHandler(app, bot, kendang)
+	message := telegram.NewMessageHandler(app, bot)
+	callback := telegram.NewCallbackHandler(app, bot)
 
 	for update := range bot.UpdatesChannel() {
 		if update.Message != nil {
