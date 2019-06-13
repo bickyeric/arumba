@@ -27,29 +27,29 @@ func main() {
 	for update := range bot.UpdatesChannel() {
 		if update.Message != nil {
 			message.Handle(update.Message)
-
-		} else if update.EditedMessage != nil {
+		}
+		if update.EditedMessage != nil {
 			log.Info("received edited message event")
-
-		} else if update.ChannelPost != nil {
+		}
+		if update.ChannelPost != nil {
 			log.Info("received channel post event")
-
-		} else if update.EditedChannelPost != nil {
+		}
+		if update.EditedChannelPost != nil {
 			log.Info("received edited channel post event")
-
-		} else if update.InlineQuery != nil {
+		}
+		if update.InlineQuery != nil {
 			log.Info("received inline query event")
-
-		} else if update.ChosenInlineResult != nil {
+		}
+		if update.ChosenInlineResult != nil {
 			log.Info("received chosen inline result event")
-
-		} else if update.CallbackQuery != nil {
+		}
+		if update.CallbackQuery != nil {
 			callback.Handle(update.CallbackQuery)
-
-		} else if update.ShippingQuery != nil {
+		}
+		if update.ShippingQuery != nil {
 			log.Info("received shipping query event")
-
-		} else if update.PreCheckoutQuery != nil {
+		}
+		if update.PreCheckoutQuery != nil {
 			log.Info("received pre checkout query event")
 		}
 	}
