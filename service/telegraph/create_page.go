@@ -40,6 +40,7 @@ type createPageResponse struct {
 	} `json:"result"`
 }
 
+// PageCreator ...
 type PageCreator interface {
 	Perform(source, title string, images []string) (string, error)
 }
@@ -52,7 +53,7 @@ type createPage struct {
 // NewCreatePage ...
 func NewCreatePage() PageCreator {
 	return createPage{
-		network: connection.NewNetwork("https://api.telegra.ph/"),
+		network: connection.TelegraphNetwork,
 		token:   os.Getenv("TELEGRAPH_ACCESS_TOKEN"),
 	}
 }

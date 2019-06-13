@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+// ...
+var (
+	TelegraphNetwork = NewNetwork("https://api.telegra.ph/")
+)
+
 // NetworkInterface ...
 type NetworkInterface interface {
 	POST(link string, body []byte) ([]byte, error)
