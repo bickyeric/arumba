@@ -6,4 +6,5 @@ stages:
 unit_tests:
   stage: test
   script:
+    - pwd
     - make test
