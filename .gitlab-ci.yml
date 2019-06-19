@@ -7,4 +7,5 @@ unit_tests:
   stage: test
   script:
     - pwd
+    - echo $CI_PROJECT_DIR
     - make test
