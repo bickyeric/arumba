@@ -1,0 +1,9 @@
+image: golang:1.12
+
+stages:
+  - test
+
+unit_tests:
+  stage: test
+  script:
+    - make test
