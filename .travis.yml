@@ -25,5 +25,6 @@ jobs:
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
     - stage: deploy
       name: "Deploy to VPS"
+      before_script: sshpass -p $password ssh -t $usernamehost 'service webhook start'
       script:
         - echo 1
