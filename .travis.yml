@@ -23,7 +23,7 @@ script:
 before_deploy:
   - make build
 
-deploy:
+after_deploy:
   - ls -l
 
 after_script:
