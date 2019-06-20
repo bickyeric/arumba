@@ -17,7 +17,7 @@ before_script:
   - ./cc-test-reporter before-build
 
 script:
-  - echo $password
+  - ls
   - dep ensure
   - go test -coverprofile=c.out ./...
 
