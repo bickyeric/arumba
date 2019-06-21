@@ -40,7 +40,7 @@ func (repo comicRepository) FindByID(id primitive.ObjectID) (c model.Comic, err 
 }
 
 func (repo comicRepository) Find(name string) (c model.Comic, err error) {
-	err = repo.coll.FindOne(ctx, bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}}).Decode(&c)
+	err = repo.coll.FindOne(ctx, bson.M{"name": name}).Decode(&c)
 	return c, err
 }
 

@@ -10,20 +10,16 @@ go:
 
 jobs:
   include:
-    # - stage: "Tests"
-    #   name: "Unit Test"
-    #   install:
-    #     - go get -u github.com/golang/dep/cmd/dep
-    #     - dep ensure
-    #   before_script:
-    #     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    #     - chmod +x ./cc-test-reporter
-    #     - ./cc-test-reporter before-build
-    #   script:
-    #     - go test -coverprofile=c.out ./...
-    #   after_script:
-    #     - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-    - stage: deploy
-      name: "Deploy to VPS"
-      before_script: sudo apt-get install sshpass
-      script: sshpass -p $password ssh -t $usernamehost 'service webhook start'
+    - stage: "Tests"
+      name: "Unit Test"
+      install:
+        - go get -u github.com/golang/dep/cmd/dep
+        - dep ensure
+      before_script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+      script:
+        - go test -coverprofile=c.out ./...
+      after_script:
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
