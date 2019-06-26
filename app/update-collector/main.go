@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
-	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/updater"
 	"github.com/bickyeric/arumba/updater/source"
 	"github.com/jasonlvhit/gocron"
@@ -20,10 +19,9 @@ func main() {
 
 	bot := arumba.NewBot()
 	kendang := connection.NewKendang()
-	telegraphPageCreator := telegraph.NewCreatePage()
 
 	app := arumba.New(db)
-	updater := updater.NewRunner(bot, kendang, app, telegraphPageCreator)
+	updater := updater.NewRunner(bot, kendang, app)
 
 	// updater.Run(source.Mangacan{})
 
