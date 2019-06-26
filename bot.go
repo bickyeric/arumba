@@ -1,6 +1,7 @@
 package arumba
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,10 +12,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var (
+	Send = func(c tgbotapi.Chattable) (tgbotapi.Message, error) {
+		return tgbotapi.Message{}, errors.New("Not Implemented")
+	}
+)
+
 // BotNotifier ...
 type BotNotifier interface {
 	NotifyError(err error)
-	NotifyNewEpisode(model.Page)
+	NotifyNewEpisode(comicName, link string, no int)
 }
 
 // IBot ...
@@ -42,6 +49,8 @@ func NewBot() Bot {
 	}
 
 	botapi.Debug = false
+
+	Send = botapi.Send
 
 	return Bot{botapi}
 }
@@ -131,17 +140,20 @@ func (bot Bot) NotifyError(err error) {
 	bot.SendTextMessage(chatID, "Error nih : "+err.Error())
 }
 
-func (bot Bot) NotifyNewEpisode(page model.Page) {
+func (bot Bot) NotifyNewEpisode(comicName, link string, no int) {
 	var tqMsg tgbotapi.MessageConfig
+
+	txt := comicName + "\n"
+	txt = txt + fmt.Sprintf("❤️ [%d](%s) ❤️ New", no, link)
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 	if debug {
 		chatID, _ := strconv.Atoi(os.Getenv("CHAT_ID"))
-		tqMsg = tgbotapi.NewMessage(int64(chatID), page.TelegraphLink)
+		tqMsg = tgbotapi.NewMessage(int64(chatID), txt)
 	} else {
-		tqMsg = tgbotapi.NewMessageToChannel(os.Getenv("TELEGRAM_CHANNEL"), page.TelegraphLink)
+		tqMsg = tgbotapi.NewMessageToChannel(os.Getenv("TELEGRAM_CHANNEL"), txt)
 	}
 
 	tqMsg.ParseMode = "Markdown"
 
-	bot.Send(tqMsg)
+	Send(tqMsg)
 }

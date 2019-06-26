@@ -57,5 +57,5 @@ func (r Read) PerformByComicID(comicID primitive.ObjectID, episodeNo float64) (s
 	}
 
 	page, err := r.pageRepo.FindByEpisode(episode.ID, source.ID)
-	return page.TelegraphLink, err
+	return page.Link, err
 }

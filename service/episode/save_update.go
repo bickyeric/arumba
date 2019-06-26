@@ -2,13 +2,11 @@ package episode
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
-	"github.com/bickyeric/arumba/service/telegraph"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -17,30 +15,31 @@ import (
 var ErrEpisodeExists = errors.New("episode exists")
 
 // UpdateSaver ...
-type UpdateSaver struct {
+type UpdateSaver interface {
+	Perform(update model.Update, sourceID primitive.ObjectID) (page model.Page, err error)
+}
+
+type saveUpdate struct {
 	SourceRepo  repository.ISource
 	ComicRepo   repository.IComic
 	EpisodeRepo repository.IEpisode
 	PageRepo    repository.IPage
 
-	Kendang    connection.IKendang
-	CreatePage telegraph.PageCreator
+	Kendang connection.IKendang
 }
 
 // NewSaveUpdate ...
-func NewSaveUpdate(app arumba.Arumba, kendang connection.IKendang, pageCreator telegraph.PageCreator) UpdateSaver {
-	return UpdateSaver{
+func NewSaveUpdate(app arumba.Arumba, kendang connection.IKendang) UpdateSaver {
+	return saveUpdate{
 		SourceRepo:  app.SourceRepo,
 		ComicRepo:   app.ComicRepo,
 		EpisodeRepo: app.EpisodeRepo,
 		PageRepo:    app.PageRepo,
 		Kendang:     kendang,
-		CreatePage:  pageCreator,
 	}
 }
 
-// Perform ...
-func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) (page model.Page, err error) {
+func (s saveUpdate) Perform(update model.Update, sourceID primitive.ObjectID) (page model.Page, err error) {
 	source, err := s.SourceRepo.FindByID(sourceID)
 	if err != nil {
 		return page, err
@@ -65,37 +64,10 @@ func (s UpdateSaver) Perform(update model.Update, sourceID primitive.ObjectID) (
 
 	page.Link = update.EpisodeLink
 
-	if err := s.fetchFromKendang(&page); err != nil {
-		return page, err
-	}
-
-	if err := s.generateTelegraphPage(source, comic, *ep, &page); err != nil {
-		return page, err
-	}
-
 	return page, s.PageRepo.Insert(&page)
 }
 
-func (s UpdateSaver) generateTelegraphPage(source model.Source, comic model.Comic, episode model.Episode, page *model.Page) error {
-	url, err := s.CreatePage.Perform(source.Name, fmt.Sprintf("%s %.1f | %s", comic.Name, episode.No, episode.Name), page.Links)
-	if err != nil {
-		return err
-	}
-	page.TelegraphLink = url
-	return nil
-}
-
-func (s UpdateSaver) fetchFromKendang(page *model.Page) error {
-	pagesLink, err := s.Kendang.FetchPages(page.Link, page.SourceID.Hex())
-	if err != nil {
-		return err
-	}
-
-	page.Links = pagesLink
-	return nil
-}
-
-func (s UpdateSaver) getComic(name string) (model.Comic, error) {
+func (s saveUpdate) getComic(name string) (model.Comic, error) {
 	comic, err := s.ComicRepo.Find(name)
 	if err != nil {
 		switch err {
@@ -109,7 +81,7 @@ func (s UpdateSaver) getComic(name string) (model.Comic, error) {
 	return comic, nil
 }
 
-func (s UpdateSaver) getEpisode(comicID primitive.ObjectID, update model.Update) (*model.Episode, error) {
+func (s saveUpdate) getEpisode(comicID primitive.ObjectID, update model.Update) (*model.Episode, error) {
 	episode, err := s.EpisodeRepo.FindByNo(comicID, update.EpisodeNo)
 	if err != nil {
 		switch err {

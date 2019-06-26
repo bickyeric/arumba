@@ -6,7 +6,6 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/service/episode"
-	"github.com/bickyeric/arumba/service/telegraph"
 	"github.com/bickyeric/arumba/updater/source"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,11 +22,11 @@ type runner struct {
 }
 
 // NewRunner ...
-func NewRunner(bot arumba.Bot, kendang connection.IKendang, app arumba.Arumba, pageCreator telegraph.PageCreator) IRunner {
+func NewRunner(bot arumba.BotNotifier, kendang connection.IKendang, app arumba.Arumba) IRunner {
 	return runner{
 		notifier: bot,
 		kendang:  kendang,
-		saver:    episode.NewSaveUpdate(app, kendang, pageCreator),
+		saver:    episode.NewSaveUpdate(app, kendang),
 	}
 }
 
@@ -49,7 +48,7 @@ func (r runner) Run(source source.ISource) {
 	}
 
 	for _, u := range updates {
-		page, err := r.saver.Perform(u, source.GetID())
+		_, err := r.saver.Perform(u, source.GetID())
 		if err != nil {
 			if err == episode.ErrEpisodeExists {
 				continue
@@ -63,7 +62,7 @@ func (r runner) Run(source source.ISource) {
 			}
 		}
 
-		r.notifier.NotifyNewEpisode(page)
+		r.notifier.NotifyNewEpisode(u.ComicName, u.EpisodeLink, int(u.EpisodeNo))
 	}
 
 	elapsed := time.Since(start)
