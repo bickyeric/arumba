@@ -23,12 +23,13 @@ func main() {
 	app := arumba.New(db)
 	updater := updater.NewRunner(bot, kendang, app)
 
-	// updater.Run(source.Mangacan{})
-
 	gocron.Every(1).Minute().Do(updater.Run, source.Mangacan{})
 	gocron.Every(1).Minute().Do(updater.Run, source.Mangatail{})
+	gocron.Every(1).Minute().Do(updater.Run, source.Komikcast{})
+	gocron.Every(1).Minute().Do(updater.Run, source.Komikindo{})
+	gocron.Every(1).Minute().Do(updater.Run, source.Mangaku{})
 
-	// updater.Run(source.Mangatail{})
+	// updater.Run(source.Mangaku{})
 
 	<-gocron.Start()
 }
