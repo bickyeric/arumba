@@ -4,7 +4,6 @@ import (
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/updater"
-	"github.com/bickyeric/arumba/updater/source"
 	"github.com/jasonlvhit/gocron"
 	log "github.com/sirupsen/logrus"
 	"github.com/subosito/gotenv"
@@ -21,14 +20,11 @@ func main() {
 	kendang := connection.NewKendang()
 
 	app := arumba.New(db)
-	updater := updater.NewRunner(bot, kendang, app)
+	updateRunner := updater.NewRunner(bot, kendang, app)
 
-	gocron.Every(1).Minute().Do(updater.Run, source.Mangacan{})
-	gocron.Every(1).Minute().Do(updater.Run, source.Mangatail{})
-	gocron.Every(1).Minute().Do(updater.Run, source.Komikcast{})
-	gocron.Every(1).Minute().Do(updater.Run, source.Komikindo{})
-	gocron.Every(1).Minute().Do(updater.Run, source.Mangaku{})
-
+	for _, s := range updater.Sources {
+		gocron.Every(1).Minute().Do(updateRunner.Run, s)
+	}
 	// updater.Run(source.Mangaku{})
 
 	<-gocron.Start()
