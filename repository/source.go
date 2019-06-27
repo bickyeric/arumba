@@ -10,6 +10,7 @@ import (
 // ISource ...
 type ISource interface {
 	FindByID(id primitive.ObjectID) (model.Source, error)
+	Insert(s model.Source) error
 }
 
 type sourceRepository struct {
@@ -19,6 +20,11 @@ type sourceRepository struct {
 // NewSource ...
 func NewSource(db *mongo.Database) ISource {
 	return sourceRepository{db.Collection("sources")}
+}
+
+func (repo sourceRepository) Insert(s model.Source) error {
+	_, err := repo.coll.InsertOne(ctx, s)
+	return err
 }
 
 func (repo sourceRepository) FindByID(id primitive.ObjectID) (source model.Source, err error) {
