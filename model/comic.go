@@ -10,7 +10,6 @@ import (
 type Comic struct {
 	ID        primitive.ObjectID `bson:"_id"`
 	Name      string             `bson:"name"`
-	Follower  []int64            `bson:"follower"`
 	CreatedAt time.Time          `bson:"created_at,omitempty"`
 	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
 }

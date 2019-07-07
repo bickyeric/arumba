@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
@@ -18,8 +20,10 @@ func main() {
 	repo := repository.NewSource(db)
 	for _, s := range updater.Sources {
 		source := model.Source{
-			ID:   s.GetID(),
-			Name: s.Name(),
+			ID:        s.GetID(),
+			Name:      s.Name(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		err := repo.Insert(source)

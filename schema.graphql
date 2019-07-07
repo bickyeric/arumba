@@ -1,0 +1,34 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Source {
+  id: ID!
+  name: String!
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+type Comic {
+  id: ID!
+  name: String!
+  episodes: [ Episode! ]!
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+type Episode {
+  id: ID!
+  no: Float!
+  name: String!
+  comic: Comic!
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+type Query {
+  comics(skip: Int! = 0, limit: Int! = 50): [ Comic ]
+  sources(skip: Int! = 0, limit: Int! = 50): [ Source ]
+}
+
+scalar Timestamp
