@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+// NewMongo ...
 func NewMongo() *mongo.Database {
 	uri := ""
 	if os.Getenv("DB_MONGO_USERNAME") != "" {
@@ -24,17 +23,12 @@ func NewMongo() *mongo.Database {
 			os.Getenv("DB_MONGO_HOST"))
 	}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal("MongoDB: " + err.Error())
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	if err := client.Connect(ctx); err != nil {
-		log.Fatal("Failed connecting to MongoDB")
-	}
-
-	if err = client.Ping(ctx, readpref.Primary()); err != nil {
+	if err = client.Ping(context.TODO(), nil); err != nil {
 		log.Fatal("MongoDB is not listening...")
 	}
 
