@@ -12,6 +12,7 @@ import (
 
 // IComic ...
 type IComic interface {
+	All() ([]*model.Comic, error)
 	Find(name string) (model.Comic, error)
 	FindByID(id primitive.ObjectID) (model.Comic, error)
 	FindAll(name string) ([]model.Comic, error)
@@ -25,6 +26,24 @@ type comicRepository struct {
 // NewComic ...
 func NewComic(db *mongo.Database) IComic {
 	return comicRepository{db.Collection("comics")}
+}
+
+func (repo comicRepository) All() ([]*model.Comic, error) {
+	comics := []*model.Comic{}
+	cur, err := repo.coll.Find(ctx, bson.M{})
+	if err != nil {
+		return comics, err
+	}
+
+	for cur.Next(ctx) {
+		c := model.Comic{}
+		if err := cur.Decode(&c); err != nil {
+			return comics, err
+		}
+		comics = append(comics, &c)
+	}
+
+	return comics, nil
 }
 
 func (repo comicRepository) Insert(comic *model.Comic) error {

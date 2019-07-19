@@ -34,6 +34,21 @@ func (m *MockIComic) EXPECT() *MockIComicMockRecorder {
 	return m.recorder
 }
 
+// All mocks base method
+func (m *MockIComic) All() ([]*model.Comic, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "All")
+	ret0, _ := ret[0].([]*model.Comic)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// All indicates an expected call of All
+func (mr *MockIComicMockRecorder) All() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "All", reflect.TypeOf((*MockIComic)(nil).All))
+}
+
 // Find mocks base method
 func (m *MockIComic) Find(arg0 string) (model.Comic, error) {
 	m.ctrl.T.Helper()

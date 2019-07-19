@@ -1,0 +1,25 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- schema.graphql
+exec:
+  filename: generated/generated.go
+model:
+  filename: models_gen.go
+resolver:
+  filename: resolver.go
+  type: Resolver
+autobind: []
+
+models:
+  Comic:
+    model: github.com/bickyeric/arumba/model.Comic
+  Episode:
+    model: github.com/bickyeric/arumba/model.Episode
+  Source:
+    model: github.com/bickyeric/arumba/model.Source
+  Timestamp:
+    model: github.com/bickyeric/arumba/model.Timestamp

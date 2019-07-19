@@ -11,6 +11,7 @@ import (
 type ISource interface {
 	FindByID(id primitive.ObjectID) (model.Source, error)
 	Insert(s model.Source) error
+	All() ([]*model.Source, error)
 }
 
 type sourceRepository struct {
@@ -20,6 +21,24 @@ type sourceRepository struct {
 // NewSource ...
 func NewSource(db *mongo.Database) ISource {
 	return sourceRepository{db.Collection("sources")}
+}
+
+func (repo sourceRepository) All() ([]*model.Source, error) {
+	sources := []*model.Source{}
+	cur, err := repo.coll.Find(ctx, bson.M{})
+	if err != nil {
+		return sources, err
+	}
+
+	for cur.Next(ctx) {
+		s := model.Source{}
+		if err := cur.Decode(&s); err != nil {
+			return sources, err
+		}
+		sources = append(sources, &s)
+	}
+
+	return sources, nil
 }
 
 func (repo sourceRepository) Insert(s model.Source) error {

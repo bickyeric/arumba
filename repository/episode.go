@@ -19,6 +19,7 @@ type IEpisode interface {
 	No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error)
 	FindByNo(comicID primitive.ObjectID, no float64) (*model.Episode, error)
 	Insert(*model.Episode) error
+	AllByComicID(comicID primitive.ObjectID) ([]*model.Episode, error)
 }
 
 type episodeRepository struct {
@@ -28,6 +29,24 @@ type episodeRepository struct {
 // NewEpisode ...
 func NewEpisode(db *mongo.Database) IEpisode {
 	return episodeRepository{db.Collection("episodes")}
+}
+
+func (repo episodeRepository) AllByComicID(comicID primitive.ObjectID) ([]*model.Episode, error) {
+	episodes := []*model.Episode{}
+	cur, err := repo.coll.Find(ctx, bson.M{"comic_id": comicID})
+	if err != nil {
+		return episodes, err
+	}
+
+	for cur.Next(ctx) {
+		e := model.Episode{}
+		if err := cur.Decode(&e); err != nil {
+			return episodes, err
+		}
+		episodes = append(episodes, &e)
+	}
+
+	return episodes, nil
 }
 
 func (repo episodeRepository) Count(comicID primitive.ObjectID, bound ...float64) (int, error) {
