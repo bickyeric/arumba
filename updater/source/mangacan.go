@@ -12,6 +12,6 @@ func (Mangacan) Name() string { return "mangacan" }
 
 // GetID ...
 func (Mangacan) GetID() primitive.ObjectID {
-	id, _ := primitive.ObjectIDFromHex("5c9511f561a8d04fa844b666")
+	id, _ := primitive.ObjectIDFromHex("5daddd4b73b1d018e959c85b")
 	return id
 }

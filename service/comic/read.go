@@ -38,7 +38,7 @@ func (r Read) PerformByComicName(comicName string, episodeNo float64) (string, e
 
 // PerformByComicID ...
 func (r Read) PerformByComicID(comicID primitive.ObjectID, episodeNo float64) (string, error) {
-	episode, err := r.episodeRepo.FindByNo(comicID, episodeNo)
+	episode, err := r.episodeRepo.FindByNo(comicID, 0)
 	if err != nil {
 		return "", err
 	}

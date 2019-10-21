@@ -2,8 +2,9 @@ package model
 
 // Update ...
 type Update struct {
-	ComicName   string  `json:"comic_name"`
-	EpisodeLink string  `json:"episode_link"`
-	EpisodeName string  `json:"episode_name"`
-	EpisodeNo   float64 `json:"episode_no"`
+	ComicName   string `json:"comicName"`
+	EpisodeLink string `json:"episodeLink"`
+	EpisodeName string `json:"episodeName"`
+	EpisodeNo   int    `json:"episodeNo"`
+	SourceID    string `json:"sourceID"`
 }

@@ -26,7 +26,7 @@ func NewRunner(bot arumba.BotNotifier, kendang connection.IKendang, app arumba.A
 	return runner{
 		notifier: bot,
 		kendang:  kendang,
-		saver:    episode.NewSaveUpdate(app, kendang),
+		saver:    episode.NewSaveUpdate(app),
 	}
 }
 

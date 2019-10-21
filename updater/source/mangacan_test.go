@@ -14,5 +14,5 @@ func TestMangacanName(t *testing.T) {
 
 func TestMangacanID(t *testing.T) {
 	s := source.Mangacan{}
-	assert.Equal(t, "5c9511f561a8d04fa844b666", s.GetID().Hex())
+	assert.Equal(t, "5daddd4b73b1d018e959c85b", s.GetID().Hex())
 }

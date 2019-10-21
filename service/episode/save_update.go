@@ -1,10 +1,11 @@
 package episode
 
+//go:generate mockgen -destination mock/save_update.go -package=mock -source save_update.go
+
 import (
 	"errors"
 
 	"github.com/bickyeric/arumba"
-	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,18 +25,15 @@ type saveUpdate struct {
 	ComicRepo   repository.IComic
 	EpisodeRepo repository.IEpisode
 	PageRepo    repository.IPage
-
-	Kendang connection.IKendang
 }
 
 // NewSaveUpdate ...
-func NewSaveUpdate(app arumba.Arumba, kendang connection.IKendang) UpdateSaver {
+func NewSaveUpdate(app arumba.Arumba) UpdateSaver {
 	return saveUpdate{
 		SourceRepo:  app.SourceRepo,
 		ComicRepo:   app.ComicRepo,
 		EpisodeRepo: app.EpisodeRepo,
 		PageRepo:    app.PageRepo,
-		Kendang:     kendang,
 	}
 }
 

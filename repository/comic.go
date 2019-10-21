@@ -1,6 +1,9 @@
 package repository
 
+//go:generate mockgen -destination mock/comic.go -package=mock -source comic.go
+
 import (
+	"context"
 	"time"
 
 	"github.com/bickyeric/arumba/model"
@@ -14,6 +17,7 @@ import (
 type IComic interface {
 	Find(name string) (model.Comic, error)
 	FindByID(id primitive.ObjectID) (model.Comic, error)
+	FindByName(context.Context, string) (model.Comic, error)
 	FindAll(name string) ([]model.Comic, error)
 	Insert(*model.Comic) error
 }
@@ -40,6 +44,11 @@ func (repo comicRepository) FindByID(id primitive.ObjectID) (c model.Comic, err 
 }
 
 func (repo comicRepository) Find(name string) (c model.Comic, err error) {
+	err = repo.coll.FindOne(ctx, bson.M{"name": name}).Decode(&c)
+	return c, err
+}
+
+func (repo comicRepository) FindByName(ctx context.Context, name string) (c model.Comic, err error) {
 	err = repo.coll.FindOne(ctx, bson.M{"name": name}).Decode(&c)
 	return c, err
 }

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"os"
+
 	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/telegram"
@@ -9,11 +12,12 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 
 	gotenv.Load(".env")
 	log.SetFormatter(&log.JSONFormatter{})
 
-	db := connection.NewMongo()
+	db := connection.NewMongo(ctx).Database(os.Getenv("DB_MONGO_DATABASE"))
 
 	bot := arumba.NewBot()
 

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"os"
+
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
@@ -13,7 +16,7 @@ func main() {
 	gotenv.Load(".env")
 	log.SetFormatter(&log.JSONFormatter{})
 
-	db := connection.NewMongo()
+	db := connection.NewMongo(context.Background()).Database(os.Getenv("DB_MONGO_DATABASE"))
 
 	repo := repository.NewSource(db)
 	for _, s := range updater.Sources {

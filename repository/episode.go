@@ -17,7 +17,7 @@ var ctx = context.Background()
 type IEpisode interface {
 	Count(comicID primitive.ObjectID, bound ...float64) (int, error)
 	No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error)
-	FindByNo(comicID primitive.ObjectID, no float64) (*model.Episode, error)
+	FindByNo(comicID primitive.ObjectID, no int) (*model.Episode, error)
 	Insert(*model.Episode) error
 }
 
@@ -54,7 +54,7 @@ func (repo episodeRepository) No(comicID primitive.ObjectID, offset int, bound .
 	res := repo.coll.FindOne(ctx, filter,
 		options.FindOne().SetSort(bson.M{"no": 1}).SetSkip(int64(offset)))
 	err := res.Decode(&ep)
-	return ep.No, err
+	return 0, err
 }
 
 func (repo episodeRepository) Insert(ep *model.Episode) error {
@@ -64,7 +64,7 @@ func (repo episodeRepository) Insert(ep *model.Episode) error {
 	return err
 }
 
-func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no float64) (*model.Episode, error) {
+func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no int) (*model.Episode, error) {
 	ep := new(model.Episode)
 	err := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID, "no": no}).Decode(ep)
 	return ep, err
