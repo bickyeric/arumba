@@ -9,7 +9,7 @@ import (
 
 // Interface ...
 type Interface interface {
-	OnHandle(c echo.Context) error
+	OnHandle(echo.Context) error
 }
 
 type kendang struct {
