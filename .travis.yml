@@ -4,10 +4,8 @@ language: go
 env:
   global:
     - CC_TEST_REPORTER_ID=952378579defa9eccff85ba58c9eef7cd9e3c4746456d59fe55d5c02aa73d426
-
-go:
-  - "1.11.x"
-
+services:
+  - docker
 jobs:
   include:
     - stage: "Tests"
@@ -23,3 +21,8 @@ jobs:
         - go test -coverprofile=c.out ./...
       after_script:
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+    - stage: "Build"
+      name: "Build Images"
+      script:
+        - make build
