@@ -5,7 +5,6 @@ package episode
 import (
 	"errors"
 
-	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,12 +27,15 @@ type saveUpdate struct {
 }
 
 // NewSaveUpdate ...
-func NewSaveUpdate(app arumba.Arumba) UpdateSaver {
+func NewSaveUpdate(sourceRepo repository.ISource,
+	comicRepo repository.IComic,
+	episodeRepo repository.IEpisode,
+	pageRepo repository.IPage) UpdateSaver {
 	return saveUpdate{
-		SourceRepo:  app.SourceRepo,
-		ComicRepo:   app.ComicRepo,
-		EpisodeRepo: app.EpisodeRepo,
-		PageRepo:    app.PageRepo,
+		SourceRepo:  sourceRepo,
+		ComicRepo:   comicRepo,
+		EpisodeRepo: episodeRepo,
+		PageRepo:    pageRepo,
 	}
 }
 
@@ -67,32 +69,23 @@ func (s saveUpdate) Perform(update model.Update, sourceID primitive.ObjectID) (p
 
 func (s saveUpdate) getComic(name string) (model.Comic, error) {
 	comic, err := s.ComicRepo.Find(name)
-	if err != nil {
-		switch err {
-		case mongo.ErrNoDocuments:
-			comic.Name = name
-			return comic, s.ComicRepo.Insert(&comic)
-		default:
-			return comic, err
-		}
+	if err == mongo.ErrNoDocuments {
+		comic.Name = name
+		err = s.ComicRepo.Insert(&comic)
 	}
-	return comic, nil
+
+	return comic, err
 }
 
 func (s saveUpdate) getEpisode(comicID primitive.ObjectID, update model.Update) (*model.Episode, error) {
 	episode, err := s.EpisodeRepo.FindByNo(comicID, update.EpisodeNo)
-	if err != nil {
-		switch err {
-		case mongo.ErrNoDocuments:
-			episode := new(model.Episode)
-			episode.No = update.EpisodeNo
-			episode.Name = update.EpisodeName
-			episode.ComicID = comicID
-			return episode, s.EpisodeRepo.Insert(episode)
-		default:
-			return nil, err
-		}
+	if err == mongo.ErrNoDocuments {
+		episode := new(model.Episode)
+		episode.No = update.EpisodeNo
+		episode.Name = update.EpisodeName
+		episode.ComicID = comicID
+		err = s.EpisodeRepo.Insert(episode)
 	}
 
-	return episode, nil
+	return episode, err
 }

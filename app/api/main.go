@@ -6,23 +6,37 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bickyeric/arumba"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/controller"
+	"github.com/bickyeric/arumba/repository"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/subosito/gotenv"
 )
 
+func init() {
+	gotenv.Load(".env")
+}
+
 func main() {
 	ctx := context.Background()
-	gotenv.Load(".env")
 
+	// region    ************************** CONNECTION **************************
 	client := connection.NewMongo(ctx)
 	db := client.Database(os.Getenv("DB_MONGO_DATABASE"))
-	app := arumba.New(db)
-	saver := episode.NewSaveUpdate(app)
+	// endregion    ************************** CONNECTION **************************
+
+	// region    ************************** REPO **************************
+	sourceRepo := repository.NewSource(db)
+	comicRepo := repository.NewComic(db)
+	episodeRepo := repository.NewEpisode(db)
+	pageRepo := repository.NewPage(db)
+	// endregion    ************************** REPO **************************
+
+	// region    ************************** SERVICE **************************
+	saver := episode.NewSaveUpdate(sourceRepo, comicRepo, episodeRepo, pageRepo)
+	// endregion    ************************** SERVICE **************************
 
 	e := echo.New()
 	e.Use(middleware.Logger())
