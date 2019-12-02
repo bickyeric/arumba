@@ -5,15 +5,9 @@ jobs:
       - image: circleci/golang:latest
 
     steps:
-      - checkout
-
       - run:
-          name: Greeting
-          command: echo Hello, world.
-
-      - run:
-          name: Print the Current Time
-          command: date
+          name: DOCKER
+          command: docker version
 
       - run:
           name: SSH
