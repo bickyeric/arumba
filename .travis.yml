@@ -29,3 +29,8 @@ jobs:
         - dep ensure
       script:
         - make build
+
+    - stage: "Deployment"
+      name: "Deploy"
+      script:
+        - ssh -V
