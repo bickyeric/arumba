@@ -10,9 +10,5 @@ jobs:
             - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
 
       - run:
-          name: SSH
-          command: ssh $SSH_USER@$SSH_HOST "date"
-
-      - run:
           name: DOCKER
           command: DOCKER_HOST=ssh://$SSH_USER@$SSH_HOST docker ps
