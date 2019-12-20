@@ -1,5 +1,13 @@
 version: 2
 jobs:
+  test:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - checkout
+      - run: go mod tidy
+      - run: go test ./...
+
   build:
     docker:
       - image: circleci/golang:latest
@@ -18,3 +26,8 @@ jobs:
           command: |
             go mod tidy
       - run: make build
+
+workflows:
+  version: 2
+  test_only:
+    - test
