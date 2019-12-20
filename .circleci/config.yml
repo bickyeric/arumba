@@ -1,34 +1,57 @@
+# version: 2
+# jobs:
+#   test:
+#     docker:
+#       - image: circleci/golang:latest
+#     steps:
+#       - checkout
+#       - run: go mod tidy
+#       - run: go test ./...
+
+#   build:
+#     docker:
+#       - image: circleci/golang:latest
+#     steps:
+#       - add_ssh_keys:
+#           fingerprints:
+#             - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
+#       - run:
+#           name: Setup Known Host
+#           command: |
+#             ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+
+#       - checkout
+#       - run:
+#           name: Setup
+#           command: |
+#             go mod tidy
+#       - run: make build
+
+# workflows:
+#   version: 2
+#   test_and_build:
+#     - test
+#     - build
+
 version: 2
 jobs:
-  test:
+  one:
     docker:
-      - image: circleci/golang:latest
+      - image: circleci/ruby:2.4.1
     steps:
       - checkout
-      - run: go mod tidy
-      - run: go test ./...
-
-  build:
+      - run: echo "A first hello"
+      - run: sleep 25
+  two:
     docker:
-      - image: circleci/golang:latest
+      - image: circleci/ruby:2.4.1
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
-      - run:
-          name: Setup Known Host
-          command: |
-            ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-
       - checkout
-      - run:
-          name: Setup
-          command: |
-            go mod tidy
-      - run: make build
-
+      - run: echo "A more familiar hi"
+      - run: sleep 15
 workflows:
   version: 2
-  test_and_build:
-    - test
-    - build
+  one_and_two:
+    jobs:
+      - one
+      - two
