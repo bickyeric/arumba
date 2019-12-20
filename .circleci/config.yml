@@ -2,8 +2,6 @@ jobs:
   build:
     docker:
       - image: circleci/golang:latest
-    branches:
-      only: master
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -47,6 +45,9 @@ workflows:
       - test
       - build:
           type: approval
+          filters:
+            branches:
+              only: master
           requires:
             - test
       - deploy:
