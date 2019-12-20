@@ -13,5 +13,5 @@ jobs:
           command: ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
 
       - run: docker ps
-      - run: ls
+      - run: pwd -P
       - run: make build
