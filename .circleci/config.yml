@@ -11,7 +11,7 @@ jobs:
       - run:
           name: add known host
           command: ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-
+      - checkout
       - run: docker ps
       - run: pwd -P
       - run: make build
