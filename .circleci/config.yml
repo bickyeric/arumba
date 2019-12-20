@@ -1,33 +1,23 @@
-# jobs:
-#   test:
-#     docker:
-#       - image: circleci/golang:latest
-#     steps:
-#       - checkout
-#       - run: go mod tidy
-#       - run: go test ./...
-
-#   build:
-#     docker:
-#       - image: circleci/golang:latest
-#     steps:
-#       - add_ssh_keys:
-#           fingerprints:
-#             - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
-#       - run:
-#           name: Setup Known Host
-#           command: |
-#             ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-
-#       - checkout
-#       - run:
-#           name: Setup
-#           command: |
-#             go mod tidy
-#       - run: make build
-
-version: 2
 jobs:
+  build:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
+      - run:
+          name: Setup Known Host
+          command: |
+            ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+
+      - checkout
+      - run:
+          name: Setup
+          command: |
+            go mod tidy
+      - run: make build
+
   test:
     docker:
       - image: circleci/golang:latest
@@ -36,12 +26,17 @@ jobs:
       - run: go mod tidy
       - run: make test
 
-  build:
+  deploy:
     docker:
       - image: circleci/golang:latest
     steps:
-      - checkout
-      - run: echo "A more familiar hi"
+      - add_ssh_keys:
+          fingerprints:
+            - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
+      - run:
+          name: Setup Known Host
+          command: |
+            ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
 
 workflows:
   version: 2
@@ -49,5 +44,9 @@ workflows:
     jobs:
       - test
       - build:
+          type: approval
           requires:
             - test
+      - deploy:
+          requires:
+            - build
