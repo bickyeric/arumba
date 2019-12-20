@@ -1,4 +1,3 @@
-# version: 2
 # jobs:
 #   test:
 #     docker:
@@ -30,10 +29,15 @@
 version: 2
 jobs:
   test:
+    docker:
+      - image: circleci/golang:latest
     steps:
       - checkout
-      - run: echo "A first hello"
+      - run: go mod tidy
+      - run: go test ./...
   build:
+    docker:
+      - image: circleci/golang:latest
     steps:
       - checkout
       - run: echo "A more familiar hi"
