@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:latest
-
+    working_directory: /go/src/github.com/bickyeric/arumba
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -12,10 +12,5 @@ jobs:
           name: add known host
           command: ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
 
-      - run:
-          name: DOCKER
-          command: DOCKER_HOST=ssh://$SSH_USER@$SSH_HOST docker ps
-
-      - run:
-          name: ls
-          command: ls
+      - run: docker ps
+      - run: make build
