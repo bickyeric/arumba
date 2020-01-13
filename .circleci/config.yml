@@ -10,9 +10,9 @@ jobs:
             go mod tidy
       - run: make build
       - run:
-        command: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-          make push
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+            make push
 
   test:
     docker:
