@@ -9,6 +9,9 @@ build:
 test:
 	go test ./... -cover -count=1
 
+push:
+	docker push bickyeric/arumba:$(VERSION)
+
 deploy:
 	envsubst < deploy/template.yml > deploy.yml
 	docker stack deploy --compose-file deploy.yml arumba
