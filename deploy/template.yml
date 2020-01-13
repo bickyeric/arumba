@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  api:
+    image: bickyeric/arumba:${VERSION}
+    ports:
+      - "1907:1907"
+    environment:
+      DB_MONGO_HOST: ${DB_MONGO_HOST}
+      DB_MONGO_DATABASE: ${DB_MONGO_DATABASE}
