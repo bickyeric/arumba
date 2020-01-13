@@ -45,6 +45,10 @@ func main() {
 
 	kendang := controller.NewKendang(saver)
 	e.POST("/kendang/webhook", kendang.OnHandle)
+	e.GET("/", func(c echo.Context) error {
+		c.String(200, "OK")
+		return nil
+	})
 
 	e.Logger.Fatal(e.Start(":1907"))
 
