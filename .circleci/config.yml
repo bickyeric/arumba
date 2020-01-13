@@ -51,12 +51,8 @@ workflows:
     jobs:
       - test
       - build:
-          branches:
-            only: master
           requires:
             - test
       - deploy:
-          branches:
-            only: master
           requires:
             - build
