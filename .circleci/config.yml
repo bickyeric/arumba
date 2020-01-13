@@ -45,9 +45,9 @@ workflows:
       - test
       - build:
           type: approval
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master
           requires:
             - test
       - deploy:

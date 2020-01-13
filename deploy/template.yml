@@ -1,0 +1,7 @@
+version: '3'
+
+service:
+  api:
+    image: bickyeric/arumba:${VERSION}
+    ports:
+      - "1907:1907"

@@ -1,3 +1,5 @@
+.PHONY: deploy
+
 export VERSION ?= $(shell git show -q --format=%h)
 
 build:
@@ -6,3 +8,7 @@ build:
 
 test:
 	go test ./... -cover -count=1
+
+deploy:
+	envsubst < deploy/template.yml > deploy.yml
+	docker stack deploy --compose-file deploy.yml arumba
