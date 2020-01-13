@@ -37,6 +37,7 @@ jobs:
           name: Setup Known Host
           command: |
             ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+            sudo apt install gettext
       - checkout
       - run: make deploy
 
@@ -46,7 +47,6 @@ workflows:
     jobs:
       - test
       - build:
-          type: approval
           requires:
             - test
       - deploy:
