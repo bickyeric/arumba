@@ -37,6 +37,7 @@ jobs:
           name: Setup Known Host
           command: |
             ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+            make deploy
 
 workflows:
   version: 2
@@ -45,9 +46,6 @@ workflows:
       - test
       - build:
           type: approval
-          # filters:
-          #   branches:
-          #     only: master
           requires:
             - test
       - deploy:
