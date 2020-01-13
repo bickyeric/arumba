@@ -37,7 +37,8 @@ jobs:
           name: Setup Known Host
           command: |
             ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-            make deploy
+      - checkout
+      - run: make deploy
 
 workflows:
   version: 2
