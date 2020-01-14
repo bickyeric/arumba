@@ -1,5 +1,4 @@
 .env
 vendor
 output
-api
 deploy.yml
