@@ -51,8 +51,12 @@ workflows:
     jobs:
       - test
       - build:
+          filters:
+            only: master
           requires:
             - test
       - deploy:
+          filters:
+            only: master
           requires:
             - build
