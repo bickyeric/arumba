@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	apiMiddleware "github.com/bickyeric/arumba/api/middleware"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/controller"
 	"github.com/bickyeric/arumba/repository"
@@ -42,6 +43,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
+	e.Use(apiMiddleware.ErrorHandler)
 
 	kendang := controller.NewKendang(saver)
 	e.POST("/kendang/webhook", kendang.OnHandle)
