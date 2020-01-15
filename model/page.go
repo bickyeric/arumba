@@ -8,10 +8,10 @@ import (
 
 // Page ...
 type Page struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	EpisodeID primitive.ObjectID `bson:"episode_id"`
-	SourceID  primitive.ObjectID `bson:"source_id"`
-	Link      string             `bson:"link"`
-	CreatedAt time.Time          `bson:"created_at,omitempty"`
-	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
+	ID        primitive.ObjectID `json:"ID" bson:"_id"`
+	EpisodeID primitive.ObjectID `json:"episodeID" bson:"episode_id"`
+	SourceID  primitive.ObjectID `json:"sourceID" bson:"source_id"`
+	Link      string             `json:"link" bson:"link"`
+	CreatedAt time.Time          `json:"createdAt" bson:"created_at,omitempty"`
+	UpdatedAt time.Time          `json:"updatedAt" bson:"updated_at,omitempty"`
 }

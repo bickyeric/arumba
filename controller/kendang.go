@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"net/http"
+
+	"github.com/bickyeric/arumba/api"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/labstack/echo"
@@ -24,16 +27,23 @@ func NewKendang(saver episode.UpdateSaver) Interface {
 }
 
 func (ctrl *kendang) OnHandle(c echo.Context) error {
-	data := model.Update{}
+	var data model.Update
 	if err := c.Bind(&data); err != nil {
 		return err
 	}
 
 	sourceID, err := primitive.ObjectIDFromHex(data.SourceID)
 	if err != nil {
-		return err
+		return api.NewHTTPError(err, http.StatusBadRequest, "sourceID is invalid ObjectID")
 	}
 
-	_, err = ctrl.saver.Perform(data, sourceID)
-	return err
+	page, err := ctrl.saver.Perform(data, sourceID)
+	switch err {
+	case nil:
+		return c.JSON(http.StatusCreated, page)
+	case episode.ErrEpisodeExists:
+		return c.JSON(http.StatusOK, "ok")
+	default:
+		return err
+	}
 }
