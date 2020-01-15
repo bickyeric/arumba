@@ -80,7 +80,7 @@ func (s saveUpdate) getComic(name string) (model.Comic, error) {
 func (s saveUpdate) getEpisode(comicID primitive.ObjectID, update model.Update) (*model.Episode, error) {
 	episode, err := s.EpisodeRepo.FindByNo(comicID, update.EpisodeNo)
 	if err == mongo.ErrNoDocuments {
-		episode := new(model.Episode)
+		episode = new(model.Episode)
 		episode.No = update.EpisodeNo
 		episode.Name = update.EpisodeName
 		episode.ComicID = comicID
