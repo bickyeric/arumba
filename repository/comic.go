@@ -20,7 +20,7 @@ type IComic interface {
 	FindByName(context.Context, string) (model.Comic, error)
 	FindAll(name string) ([]model.Comic, error)
 	Insert(*model.Comic) error
-	Interface
+	CreateIndex(context.Context) error
 }
 
 type comicRepository struct {
