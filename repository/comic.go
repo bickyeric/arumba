@@ -20,6 +20,7 @@ type IComic interface {
 	FindByName(context.Context, string) (model.Comic, error)
 	FindAll(name string) ([]model.Comic, error)
 	Insert(*model.Comic) error
+	Interface
 }
 
 type comicRepository struct {
@@ -72,4 +73,14 @@ func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
 	}
 
 	return comics, nil
+}
+
+func (repo comicRepository) CreateIndex(ctx context.Context) error {
+	models := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{"name", 1}},
+			Options: options.Index().SetName("name").SetBackground(true).SetUnique(true),
+		},
+	}
+	return createIndex(ctx, repo.coll, models)
 }

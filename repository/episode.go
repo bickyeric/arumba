@@ -19,6 +19,7 @@ type IEpisode interface {
 	No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error)
 	FindByNo(comicID primitive.ObjectID, no int) (*model.Episode, error)
 	Insert(*model.Episode) error
+	Interface
 }
 
 type episodeRepository struct {
@@ -68,4 +69,13 @@ func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no int) (*mod
 	ep := new(model.Episode)
 	err := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID, "no": no}).Decode(ep)
 	return ep, err
+}
+
+func (repo episodeRepository) CreateIndex(ctx context.Context) error {
+	models := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{"comic_id", 1}, {"no", 1}},
+			Options: options.Index().SetBackground(true).SetUnique(true)},
+	}
+	return createIndex(ctx, repo.coll, models)
 }
