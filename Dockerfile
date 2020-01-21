@@ -1,4 +1,4 @@
 FROM alpine:latest
 
-COPY arumba /usr/local/bin/arumba
+COPY bin /usr/local/bin
 CMD ["arumba"]
