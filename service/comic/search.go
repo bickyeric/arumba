@@ -1,5 +1,7 @@
 package comic
 
+//go:generate mockgen -destination mock/search.go -package=mock -source search.go
+
 import (
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"

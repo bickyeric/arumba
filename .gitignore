@@ -3,3 +3,4 @@ vendor
 output
 arumba
 deploy.yml
+bin
