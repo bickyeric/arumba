@@ -35,6 +35,7 @@ func NewComic(db *mongo.Database) IComic {
 func (repo comicRepository) Insert(comic *model.Comic) error {
 	comic.ID = primitive.NewObjectID()
 	comic.CreatedAt = time.Now()
+	comic.UpdatedAt = comic.CreatedAt
 	_, err := repo.coll.InsertOne(ctx, comic)
 	return err
 }
