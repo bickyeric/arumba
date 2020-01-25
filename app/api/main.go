@@ -6,12 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/bickyeric/arumba/api/handler"
+	"github.com/99designs/gqlgen/handler"
 	apiMiddleware "github.com/bickyeric/arumba/api/middleware"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/controller"
+	"github.com/bickyeric/arumba/generated"
 	"github.com/bickyeric/arumba/repository"
-	comicSvc "github.com/bickyeric/arumba/service/comic"
+	"github.com/bickyeric/arumba/resolver"
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -39,7 +40,6 @@ func main() {
 
 	// region    ************************** SERVICE **************************
 	saver := episode.NewSaveUpdate(sourceRepo, comicRepo, episodeRepo, pageRepo)
-	comicSearcher := comicSvc.NewSearch(comicRepo)
 	// endregion    ************************** SERVICE **************************
 
 	e := echo.New()
@@ -50,8 +50,11 @@ func main() {
 
 	kendang := controller.NewKendang(saver)
 	e.POST("/kendang/webhook", kendang.OnHandle)
-	searcher := handler.NewSearch(comicSearcher)
-	e.GET("/search", searcher.OnHandle)
+
+	query := resolver.NewQuery(comicRepo)
+	r := resolver.New(query)
+	e.GET("/", echo.WrapHandler(handler.Playground("GraphQL playground", "/query")))
+	e.POST("/query", echo.WrapHandler(handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: r}))))
 
 	e.Logger.Fatal(e.Start(":1907"))
 

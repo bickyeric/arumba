@@ -3,6 +3,9 @@ module github.com/bickyeric/arumba
 go 1.12
 
 require (
+	github.com/99designs/gqlgen v0.10.2
+	github.com/DataDog/zstd v1.4.4 // indirect
+	github.com/bickyeric/bonang v0.0.0-20191102125915-f5204013a14d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
@@ -21,6 +24,7 @@ require (
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.1.0 // indirect
+	github.com/vektah/gqlparser v1.2.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc // indirect
 	go.mongodb.org/mongo-driver v1.2.1
