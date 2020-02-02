@@ -56,7 +56,7 @@ func (repo comicRepository) FindByName(ctx context.Context, name string) (c mode
 }
 
 func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
-	comics := []model.Comic{}
+	var comics []model.Comic
 	cur, err := repo.coll.Find(ctx,
 		bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}},
 		options.Find().SetLimit(5),
@@ -65,8 +65,8 @@ func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
 		return comics, err
 	}
 
-	c := model.Comic{}
 	for cur.Next(ctx) {
+		c := model.Comic{}
 		if err := cur.Decode(&c); err != nil {
 			return comics, err
 		}

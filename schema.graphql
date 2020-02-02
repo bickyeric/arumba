@@ -1,0 +1,12 @@
+type Query {
+  comics(name: String!): [ Comic! ]!
+}
+
+type Comic {
+  id: ID!
+  name: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+scalar Timestamp

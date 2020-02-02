@@ -47,7 +47,7 @@ jobs:
 
 workflows:
   version: 2
-  one_and_two:
+  production:
     jobs:
       - test
       - build:
