@@ -22,7 +22,7 @@ func (h search) OnHandle(c echo.Context) error {
 		return api.NewHTTPError(nil, http.StatusUnprocessableEntity, "q is not provided")
 	}
 
-	comics, err := h.svc.Perform(q)
+	comics, err := h.svc.Perform(c.Request().Context(), q)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -16,6 +17,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+var ctx = context.Background()
 
 type searchSuite struct {
 	suite.Suite
@@ -45,7 +48,7 @@ func (s *searchSuite) TestOk() {
 		},
 	}
 
-	s.mockedSearcher.EXPECT().Perform("one piece").Return(expected, nil)
+	s.mockedSearcher.EXPECT().Perform(ctx, "one piece").Return(expected, nil)
 	req := httptest.NewRequest(http.MethodGet, "/search?q=one%20piece", nil)
 	req.Header.Set("Content-Type", echo.MIMEApplicationJSON)
 	c := s.e.NewContext(req, s.rec)
@@ -74,7 +77,7 @@ func (s *searchSuite) TestBlankQuery() {
 
 func (s *searchSuite) TestUnexpectedError() {
 	expectedErr := errors.New("unexpected-error")
-	s.mockedSearcher.EXPECT().Perform("one piece").Return(nil, expectedErr)
+	s.mockedSearcher.EXPECT().Perform(ctx, "one piece").Return(nil, expectedErr)
 	req := httptest.NewRequest(http.MethodGet, "/search?q=one%20piece", nil)
 	req.Header.Set("Content-Type", echo.MIMEApplicationJSON)
 	c := s.e.NewContext(req, s.rec)

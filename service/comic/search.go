@@ -3,13 +3,15 @@ package comic
 //go:generate mockgen -destination mock/search.go -package=mock -source search.go
 
 import (
+	"context"
+
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
 )
 
 // Searcher ...
 type Searcher interface {
-	Perform(name string) ([]model.Comic, error)
+	Perform(ctx context.Context, name string) ([]model.Comic, error)
 }
 
 // NewSearch ...
@@ -21,6 +23,6 @@ type search struct {
 	repo repository.IComic
 }
 
-func (s search) Perform(name string) ([]model.Comic, error) {
-	return s.repo.FindAll(name, 20, 0)
+func (s search) Perform(ctx context.Context, name string) ([]model.Comic, error) {
+	return s.repo.FindAll(ctx, name, 20, 0)
 }

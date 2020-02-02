@@ -1,10 +1,19 @@
 type Query {
-  comics(name: String!, first: Int = 10, offset: Int): [ Comic! ]!
+  comics(name: String!, first: Int, offset: Int): [ Comic! ]!
+  episodes(comicId: ID!, first: Int, offset: Int): [ Episode! ]!
 }
 
 type Comic {
   id: ID!
   name: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+type Episode {
+  id: ID!
+  name: String!
+  no: Int!
   createdAt: Timestamp!
   updatedAt: Timestamp!
 }

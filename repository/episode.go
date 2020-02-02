@@ -1,5 +1,7 @@
 package repository
 
+//go:generate mockgen -destination mock/episode.go -package=mock -source episode.go
+
 import (
 	"context"
 	"time"
@@ -15,11 +17,10 @@ var ctx = context.Background()
 
 // IEpisode ...
 type IEpisode interface {
-	Count(comicID primitive.ObjectID, bound ...float64) (int, error)
-	No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error)
 	FindByNo(comicID primitive.ObjectID, no int) (*model.Episode, error)
+	FindAll(ctx context.Context, comicID primitive.ObjectID, first, offset int) ([]model.Episode, error)
 	Insert(*model.Episode) error
-	Interface
+	CreateIndex(context.Context) error
 }
 
 type episodeRepository struct {
@@ -31,36 +32,23 @@ func NewEpisode(db *mongo.Database) IEpisode {
 	return episodeRepository{db.Collection("episodes")}
 }
 
-func (repo episodeRepository) Count(comicID primitive.ObjectID, bound ...float64) (int, error) {
-	filter := bson.M{"comic_id": comicID}
-	if len(bound) == 2 {
-		filter["no"] = bson.M{
-			"$gte": bound[0],
-			"$lte": bound[1],
-		}
+func (repo episodeRepository) FindAll(ctx context.Context, comicID primitive.ObjectID, first, offset int) ([]model.Episode, error) {
+	var episodes []model.Episode
+	cur, err := repo.coll.Find(ctx,
+		bson.M{"comic_id": comicID},
+		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)),
+	)
+	if err != nil {
+		return episodes, err
 	}
-	totalEpisode, err := repo.coll.CountDocuments(ctx, filter)
-	return int(totalEpisode), err
-}
-
-func (repo episodeRepository) No(comicID primitive.ObjectID, offset int, bound ...float64) (float64, error) {
-	ep := model.Episode{}
-	filter := bson.M{"comic_id": comicID}
-	if len(bound) > 0 {
-		filter["no"] = bson.M{
-			"$gte": bound[0],
-			"$lte": bound[1],
-		}
-	}
-	res := repo.coll.FindOne(ctx, filter,
-		options.FindOne().SetSort(bson.M{"no": 1}).SetSkip(int64(offset)))
-	err := res.Decode(&ep)
-	return 0, err
+	err = cur.All(ctx, &episodes)
+	return episodes, err
 }
 
 func (repo episodeRepository) Insert(ep *model.Episode) error {
 	ep.ID = primitive.NewObjectID()
 	ep.CreatedAt = time.Now()
+	ep.UpdatedAt = ep.CreatedAt
 	_, err := repo.coll.InsertOne(ctx, ep)
 	return err
 }

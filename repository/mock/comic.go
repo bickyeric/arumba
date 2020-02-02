@@ -81,18 +81,18 @@ func (mr *MockIComicMockRecorder) FindByName(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // FindAll mocks base method
-func (m *MockIComic) FindAll(name string, first, offset int) ([]model.Comic, error) {
+func (m *MockIComic) FindAll(ctx context.Context, name string, first, offset int) ([]model.Comic, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", name, first, offset)
+	ret := m.ctrl.Call(m, "FindAll", ctx, name, first, offset)
 	ret0, _ := ret[0].([]model.Comic)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll
-func (mr *MockIComicMockRecorder) FindAll(name, first, offset interface{}) *gomock.Call {
+func (mr *MockIComicMockRecorder) FindAll(ctx, name, first, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockIComic)(nil).FindAll), name, first, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockIComic)(nil).FindAll), ctx, name, first, offset)
 }
 
 // Insert mocks base method

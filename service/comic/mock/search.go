@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	model "github.com/bickyeric/arumba/model"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -34,16 +35,16 @@ func (m *MockSearcher) EXPECT() *MockSearcherMockRecorder {
 }
 
 // Perform mocks base method
-func (m *MockSearcher) Perform(name string) ([]model.Comic, error) {
+func (m *MockSearcher) Perform(ctx context.Context, name string) ([]model.Comic, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Perform", name)
+	ret := m.ctrl.Call(m, "Perform", ctx, name)
 	ret0, _ := ret[0].([]model.Comic)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Perform indicates an expected call of Perform
-func (mr *MockSearcherMockRecorder) Perform(name interface{}) *gomock.Call {
+func (mr *MockSearcherMockRecorder) Perform(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Perform", reflect.TypeOf((*MockSearcher)(nil).Perform), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Perform", reflect.TypeOf((*MockSearcher)(nil).Perform), ctx, name)
 }

@@ -51,7 +51,7 @@ func main() {
 	kendang := controller.NewKendang(saver)
 	e.POST("/kendang/webhook", kendang.OnHandle)
 
-	query := resolver.NewQuery(comicRepo)
+	query := resolver.NewQuery(comicRepo, episodeRepo)
 	r := resolver.New(query)
 	e.GET("/", echo.WrapHandler(handler.Playground("GraphQL playground", "/query")))
 	e.POST("/query", echo.WrapHandler(handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: r}))))
