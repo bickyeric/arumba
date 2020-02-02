@@ -18,7 +18,7 @@ type IComic interface {
 	Find(name string) (model.Comic, error)
 	FindByID(id primitive.ObjectID) (model.Comic, error)
 	FindByName(context.Context, string) (model.Comic, error)
-	FindAll(name string) ([]model.Comic, error)
+	FindAll(name string, first, offset int) ([]model.Comic, error)
 	Insert(*model.Comic) error
 	CreateIndex(context.Context) error
 }
@@ -55,11 +55,11 @@ func (repo comicRepository) FindByName(ctx context.Context, name string) (c mode
 	return c, err
 }
 
-func (repo comicRepository) FindAll(name string) ([]model.Comic, error) {
+func (repo comicRepository) FindAll(name string, first, offset int) ([]model.Comic, error) {
 	var comics []model.Comic
 	cur, err := repo.coll.Find(ctx,
 		bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}},
-		options.Find().SetLimit(5),
+		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)),
 	)
 	if err != nil {
 		return comics, err

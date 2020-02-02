@@ -22,5 +22,5 @@ type search struct {
 }
 
 func (s search) Perform(name string) ([]model.Comic, error) {
-	return s.repo.FindAll(name)
+	return s.repo.FindAll(name, 20, 0)
 }

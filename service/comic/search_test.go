@@ -25,7 +25,7 @@ func TestPerform(t *testing.T) {
 	defer ctrl.Finish()
 
 	comicRepo := mock.NewMockIComic(ctrl)
-	comicRepo.EXPECT().FindAll("One Piece").Return([]model.Comic{model.Comic{Name: "One Piece"}}, nil)
+	comicRepo.EXPECT().FindAll("One Piece", 20, 0).Return([]model.Comic{model.Comic{Name: "One Piece"}}, nil)
 
 	searcher := comic.NewSearch(comicRepo)
 	comics, err := searcher.Perform("One Piece")

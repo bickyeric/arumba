@@ -35,20 +35,6 @@ func (m *MockIComic) EXPECT() *MockIComicMockRecorder {
 	return m.recorder
 }
 
-// CreateIndex mocks base method
-func (m *MockIComic) CreateIndex(arg0 context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateIndex", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateIndex indicates an expected call of CreateIndex
-func (mr *MockIComicMockRecorder) CreateIndex(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndex", reflect.TypeOf((*MockIComic)(nil).CreateIndex), arg0)
-}
-
 // Find mocks base method
 func (m *MockIComic) Find(name string) (model.Comic, error) {
 	m.ctrl.T.Helper()
@@ -95,18 +81,18 @@ func (mr *MockIComicMockRecorder) FindByName(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // FindAll mocks base method
-func (m *MockIComic) FindAll(name string) ([]model.Comic, error) {
+func (m *MockIComic) FindAll(name string, first, offset int) ([]model.Comic, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", name)
+	ret := m.ctrl.Call(m, "FindAll", name, first, offset)
 	ret0, _ := ret[0].([]model.Comic)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll
-func (mr *MockIComicMockRecorder) FindAll(name interface{}) *gomock.Call {
+func (mr *MockIComicMockRecorder) FindAll(name, first, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockIComic)(nil).FindAll), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockIComic)(nil).FindAll), name, first, offset)
 }
 
 // Insert mocks base method
@@ -121,4 +107,18 @@ func (m *MockIComic) Insert(arg0 *model.Comic) error {
 func (mr *MockIComicMockRecorder) Insert(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockIComic)(nil).Insert), arg0)
+}
+
+// CreateIndex mocks base method
+func (m *MockIComic) CreateIndex(arg0 context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateIndex", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateIndex indicates an expected call of CreateIndex
+func (mr *MockIComicMockRecorder) CreateIndex(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIndex", reflect.TypeOf((*MockIComic)(nil).CreateIndex), arg0)
 }

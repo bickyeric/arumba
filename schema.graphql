@@ -1,5 +1,5 @@
 type Query {
-  comics(name: String!): [ Comic! ]!
+  comics(name: String!, first: Int = 10, offset: Int): [ Comic! ]!
 }
 
 type Comic {

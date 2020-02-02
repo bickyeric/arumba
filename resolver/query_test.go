@@ -20,13 +20,14 @@ func (s *querySuite) TestComics() {
 	defer ctrl.Finish()
 
 	q := "one piece"
+	first, offset := 20, 0
 	expected := model.Comic{
 		Name: "One Piece",
 	}
 	comicRepo := mock.NewMockIComic(ctrl)
-	comicRepo.EXPECT().FindAll(q).Return([]model.Comic{expected}, nil)
+	comicRepo.EXPECT().FindAll(q, first, offset).Return([]model.Comic{expected}, nil)
 	query := resolver.NewQuery(comicRepo)
-	actual, err := query.Comics(context.Background(), q)
+	actual, err := query.Comics(context.Background(), q, &first, &offset)
 	s.Nil(err)
 	for _, comic := range actual {
 		s.Equal(expected.Name, comic.Name)

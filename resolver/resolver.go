@@ -4,6 +4,12 @@ import (
 	"github.com/bickyeric/arumba/generated"
 )
 
+// DefaultValue
+const (
+	DefaultFirst  = 20
+	DefaultOffset = 0
+)
+
 type resolver struct {
 	query generated.QueryResolver
 }
