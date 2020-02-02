@@ -17,5 +17,10 @@ func NewQuery(cRepo repository.IComic) generated.QueryResolver {
 }
 
 func (r *query) Comics(ctx context.Context, name string) ([]*model.Comic, error) {
-	return r.cRepo.FindAll(name)
+	var comics []*model.Comic
+	res, err := r.cRepo.FindAll(name)
+	for i := 0; i < len(res); i++ {
+		comics = append(comics, &res[i])
+	}
+	return comics, err
 }

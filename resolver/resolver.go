@@ -4,16 +4,16 @@ import (
 	"github.com/bickyeric/arumba/generated"
 )
 
-type Resolver struct {
+type resolver struct {
 	query generated.QueryResolver
 }
 
 func New(q generated.QueryResolver) generated.ResolverRoot {
-	return &Resolver{
+	return &resolver{
 		query: q,
 	}
 }
 
-func (r *Resolver) Query() generated.QueryResolver {
+func (r *resolver) Query() generated.QueryResolver {
 	return r.query
 }
