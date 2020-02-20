@@ -3,15 +3,9 @@ jobs:
     docker:
       - image: circleci/golang:latest
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "9f:34:3d:5c:7b:e3:c4:d3:6e:9a:fd:14:21:f0:38:c0"
-      - run:
-          name: Setup Known Host
-          command: |
-            ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-            sudo apt install gettext
       - checkout
+      - setup_remote_docker:
+        docker_layer_caching: true
       - run:
           name: Setup
           command: |
