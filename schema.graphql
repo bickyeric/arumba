@@ -15,6 +15,14 @@ type Episode {
   id: ID!
   name: String!
   no: Int!
+  pages: [ Page! ]
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+type Page {
+  id: ID!
+  link: String!
   createdAt: Timestamp!
   updatedAt: Timestamp!
 }

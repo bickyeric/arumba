@@ -57,7 +57,7 @@ func (s saveUpdate) Perform(update model.Update, sourceID primitive.ObjectID) (p
 	}
 	page.EpisodeID = ep.ID
 
-	existing, err := s.PageRepo.FindByEpisode(ep.ID, source.ID)
+	existing, err := s.PageRepo.FindByEpisodeSource(ep.ID, source.ID)
 	if err == nil {
 		return existing, ErrEpisodeExists
 	}

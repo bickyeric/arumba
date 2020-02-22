@@ -57,7 +57,8 @@ func main() {
 
 	query := resolver.NewQuery(comicRepo, episodeRepo)
 	comic := resolver.NewComic(episodeRepo)
-	r := resolver.New(query, comic)
+	episode := resolver.NewEpisode(pageRepo)
+	r := resolver.New(query, comic, episode)
 	e.GET("/", echo.WrapHandler(handler.Playground("GraphQL playground", "/query")))
 	e.POST("/query", echo.WrapHandler(handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: r}))))
 

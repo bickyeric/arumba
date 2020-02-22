@@ -11,14 +11,16 @@ const (
 )
 
 type resolver struct {
-	query generated.QueryResolver
-	comic generated.ComicResolver
+	query   generated.QueryResolver
+	comic   generated.ComicResolver
+	episode generated.EpisodeResolver
 }
 
-func New(q generated.QueryResolver, comic generated.ComicResolver) generated.ResolverRoot {
+func New(q generated.QueryResolver, comic generated.ComicResolver, episode generated.EpisodeResolver) generated.ResolverRoot {
 	return &resolver{
-		query: q,
-		comic: comic,
+		query:   q,
+		comic:   comic,
+		episode: episode,
 	}
 }
 
@@ -28,4 +30,8 @@ func (r *resolver) Query() generated.QueryResolver {
 
 func (r *resolver) Comic() generated.ComicResolver {
 	return r.comic
+}
+
+func (r *resolver) Episode() generated.EpisodeResolver {
+	return r.episode
 }

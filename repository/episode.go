@@ -36,8 +36,7 @@ func (repo episodeRepository) FindAll(ctx context.Context, comicID primitive.Obj
 	var episodes []model.Episode
 	cur, err := repo.coll.Find(ctx,
 		bson.M{"comic_id": comicID},
-		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)),
-	)
+		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)).SetSort(bson.D{{"no", -1}}))
 	if err != nil {
 		return episodes, err
 	}
