@@ -12,9 +12,10 @@ type rootResolverSuite struct {
 }
 
 func (s *rootResolverSuite) TestResolver() {
-	resolver := resolver.New(nil)
+	resolver := resolver.New(nil, nil)
 	s.NotPanics(func() {
 		s.Nil(resolver.Query())
+		s.Nil(resolver.Comic())
 	})
 }
 
