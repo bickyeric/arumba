@@ -33,14 +33,14 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - test-results
+            - cover.out
 
   after-test:
     docker:
       - image: circleci/golang:latest
     steps:
       - attach_workspace:
-          at: /tmp/test-results
+          at: /tmp
       - run: echo "hehehe"
 
   deploy:
