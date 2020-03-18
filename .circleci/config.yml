@@ -27,7 +27,6 @@ jobs:
       - checkout
       - run: mkdir -p $TEST_RESULTS
       - run: go mod tidy
-      # - run: go test ./... -coverprofile=${TEST_RESULTS}/cover.txt
       - run: gotestsum --junitfile ${TEST_RESULTS}/cover.xml
       - store_artifacts:
           path: /tmp/test-results
