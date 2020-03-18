@@ -33,7 +33,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - workspace
+            - workspace/cover.out
 
   after-test:
     docker:
