@@ -1,3 +1,5 @@
+version: 2.1
+
 jobs:
   build:
     docker:
@@ -19,10 +21,14 @@ jobs:
   test:
     docker:
       - image: circleci/golang:latest
+    environment:
+      TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
+      - run: mkdir -p $TEST_RESULTS
       - run: go mod tidy
-      - run: make test
+      - run: go test ./... -coverprofile=/tmp/cover.txt
+      # - run: make test
 
   deploy:
     docker:
