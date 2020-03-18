@@ -66,7 +66,7 @@ func (s *kendangWebhookSuite) TestInvalidSourceID() {
 	handler := controller.NewKendang(nil)
 
 	err := handler.OnHandle(c)
-	s.Nil(err)
+	s.NotNil(err)
 }
 
 func (s *kendangWebhookSuite) TestEpisodeExists() {
