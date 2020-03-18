@@ -27,20 +27,20 @@ jobs:
       - checkout
       - run: mkdir -p $TEST_RESULTS /tmp/workspace
       - run: go mod tidy
-      - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=cover.out ./...
+      - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=/tmp/workspace/cover.out ./...
       - store_test_results:
           path: /tmp/test-results
       - persist_to_workspace:
           root: /tmp
           paths:
-            - cover.out
+            - workspace
 
   after-test:
     docker:
       - image: circleci/golang:latest
     steps:
       - attach_workspace:
-          at: /tmp
+          at: ~/
       - run: echo "hehehe"
 
   deploy:
