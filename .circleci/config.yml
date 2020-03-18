@@ -31,8 +31,8 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
       - persist_to_workspace:
-          root: /tmp/test-results
-          path: test.xml
+          root: /tmp
+          path: test-results
 
   after-test:
     docker:
