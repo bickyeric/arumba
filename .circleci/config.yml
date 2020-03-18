@@ -31,6 +31,13 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
 
+  after-test:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - checkout
+      - run: echo "hehehe"
+
   deploy:
     docker:
       - image: circleci/golang:latest
@@ -51,6 +58,9 @@ workflows:
   production:
     jobs:
       - test
+      - after-test:
+          requires:
+            - test
       - build:
           filters:
             branches:
