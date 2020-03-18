@@ -32,7 +32,8 @@ jobs:
           path: /tmp/test-results
       - persist_to_workspace:
           root: /tmp
-          path: test-results
+          paths:
+            - test-results
 
   after-test:
     docker:
