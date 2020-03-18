@@ -27,7 +27,7 @@ jobs:
       - checkout
       - run: mkdir -p $TEST_RESULTS
       - run: go mod tidy
-      - run: go test ./... -coverprofile=/tmp/cover.txt
+      - run: go test ./... -coverprofile=${TEST_RESULTS}/cover.txt
       # - run: make test
 
   deploy:
