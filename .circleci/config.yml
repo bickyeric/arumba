@@ -32,7 +32,7 @@ jobs:
           path: /tmp/test-results
       - persist_to_workspace:
           root: /tmp/test-results
-          path: cover.out
+          path: test.xml
 
   after-test:
     docker:
