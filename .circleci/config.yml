@@ -31,7 +31,7 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: /tmp/test-results
           path: cover.out
 
   after-test:
@@ -39,7 +39,7 @@ jobs:
       - image: circleci/golang:latest
     steps:
       - attach_workspace:
-          at: /tmp/workspace
+          at: /tmp/test-results
       - run: echo "hehehe"
 
   deploy:
