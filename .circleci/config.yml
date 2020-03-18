@@ -30,12 +30,16 @@ jobs:
       - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=cover.out ./...
       - store_test_results:
           path: /tmp/test-results
+      - persist_to_workspace:
+          root: /tmp/workspace
+          path: cover.out
 
   after-test:
     docker:
       - image: circleci/golang:latest
     steps:
-      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
       - run: echo "hehehe"
 
   deploy:
