@@ -28,10 +28,6 @@ jobs:
             mkdir -p /tmp/workspace
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/workspace/cc-test-reporter
             chmod +x /tmp/workspace/cc-test-reporter
-      - run:
-          name: Notify codeclimate
-          command: |
-            /tmp/workspace/cc-test-reporter before-build
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -47,26 +43,21 @@ jobs:
           at: /tmp
       - checkout
       - run: mkdir -p $TEST_RESULTS
-      - run: go mod tidy
-      - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=/tmp/workspace/c.out ./...
+      - run:
+          name: Notify Codeclimate
+          command: |
+            /tmp/workspace/cc-test-reporter before-build
+      - run:
+          name: Unit Test
+          command: |
+            go mod tidy
+            gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=c.out ./...
+      - run:
+          name: Upload Test Coverage
+          command: |
+            /tmp/workspace/cc-test-reporter after-build
       - store_test_results:
           path: /tmp/test-results
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - workspace
-
-  after-test:
-    docker:
-      - image: circleci/golang:latest
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout
-      - run:
-          name: Upload coverage
-          command: |
-            /tmp/workspace/cc-test-reporter -p /tmp/workspace -t gocov
 
   deploy:
     docker:
