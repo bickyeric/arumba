@@ -55,7 +55,7 @@ jobs:
       - run:
           name: Upload Test Coverage
           command: |
-            /tmp/workspace/cc-test-reporter after-build
+            /tmp/workspace/cc-test-reporter after-build -p github.com/bickyeric/arumba
       - store_test_results:
           path: /tmp/test-results
 
