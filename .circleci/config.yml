@@ -82,9 +82,6 @@ workflows:
       - test:
           requires:
             - before-test
-      - after-test:
-          requires:
-            - test
       - build:
           filters:
             branches:
