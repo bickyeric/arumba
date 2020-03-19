@@ -36,26 +36,21 @@ jobs:
   test:
     docker:
       - image: circleci/golang:latest
-    environment:
-      TEST_RESULTS: /tmp/test-results
     steps:
       - attach_workspace:
           at: /tmp
       - checkout
-      - run: mkdir -p $TEST_RESULTS
+      - run: mkdir -p /tmp/test-results
       - run:
-          name: Notify Codeclimate
+          name: Download Dependencies
           command: |
-            /tmp/workspace/cc-test-reporter before-build
+            go mod tidy
       - run:
           name: Unit Test
           command: |
-            go mod tidy
-            gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=c.out ./...
-      - run:
-          name: Upload Test Coverage
-          command: |
-            /tmp/workspace/cc-test-reporter after-build -p github.com/bickyeric/arumba
+            /tmp/workspace/cc-test-reporter before-build
+            gotestsum --junitfile /tmp/test-results/test.xml -- -coverprofile=c.out ./...
+            /tmp/workspace/cc-test-reporter after-build -p github.com/bickyeric/arumba --exit-code $?
       - store_test_results:
           path: /tmp/test-results
 
