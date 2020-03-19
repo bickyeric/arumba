@@ -18,27 +18,6 @@ jobs:
             docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
             make push
 
-  test:
-    docker:
-      - image: circleci/golang:latest
-    environment:
-      TEST_RESULTS: /tmp/test-results
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout
-      - run: mkdir -p $TEST_RESULTS
-
-      - run: echo "hehe" > /tmp/workspace/cover.out
-      # - run: go mod tidy
-      # - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=/tmp/workspace/cover.out ./...
-      # - store_test_results:
-      #     path: /tmp/test-results
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - workspace
-
   before-test:
     docker:
       - image: circleci/golang:latest
@@ -58,13 +37,36 @@ jobs:
           paths:
             - workspace
 
+  test:
+    docker:
+      - image: circleci/golang:latest
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+      - run: go mod tidy
+      - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=/tmp/workspace/c.out ./...
+      - store_test_results:
+          path: /tmp/test-results
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - workspace
+
   after-test:
     docker:
       - image: circleci/golang:latest
     steps:
       - attach_workspace:
           at: /tmp
-      - run: echo "hehehe"
+      - checkout
+      - run:
+          name: Upload coverage
+          command: |
+            /tmp/workspace/cc-test-reporter -p /tmp/workspace -t gocov
 
   deploy:
     docker:
