@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bickyeric/arumba.svg?branch=master)](https://travis-ci.org/bickyeric/arumba)
+[![CircleCI](https://circleci.com/gh/bickyeric/arumba.svg?style=svg)](https://app.circleci.com/pipelines/github/bickyeric/arumba)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7c866acd4c69b94e56cd/maintainability)](https://codeclimate.com/github/bickyeric/arumba/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7c866acd4c69b94e56cd/test_coverage)](https://codeclimate.com/github/bickyeric/arumba/test_coverage)
 # Arumba
