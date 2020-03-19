@@ -1,3 +1,5 @@
+version: 2.1
+
 jobs:
   build:
     docker:
@@ -16,13 +18,41 @@ jobs:
             docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
             make push
 
+  before-test:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - run:
+          name: Download test-reporter
+          command: |
+            mkdir -p /tmp/workspace
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/workspace/cc-test-reporter
+            chmod +x /tmp/workspace/cc-test-reporter
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - workspace
+
   test:
     docker:
       - image: circleci/golang:latest
     steps:
+      - attach_workspace:
+          at: /tmp
       - checkout
-      - run: go mod tidy
-      - run: make test
+      - run:
+          name: Download Dependencies
+          command: |
+            go mod tidy
+      - run:
+          name: Unit Test
+          command: |
+            /tmp/workspace/cc-test-reporter before-build
+            mkdir -p /tmp/test-results
+            gotestsum --junitfile /tmp/test-results/test.xml -- -coverprofile=c.out ./...
+            /tmp/workspace/cc-test-reporter after-build -p github.com/bickyeric/arumba --exit-code $?
+      - store_test_results:
+          path: /tmp/test-results
 
   deploy:
     docker:
@@ -43,7 +73,10 @@ workflows:
   version: 2
   production:
     jobs:
-      - test
+      - before-test
+      - test:
+          requires:
+            - before-test
       - build:
           filters:
             branches:
