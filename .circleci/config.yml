@@ -24,23 +24,44 @@ jobs:
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
-      - checkout
-      - run: mkdir -p $TEST_RESULTS /tmp/workspace
-      - run: go mod tidy
-      - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=/tmp/workspace/cover.out ./...
-      - store_test_results:
-          path: /tmp/test-results
+      - attach_workspace:
+          at: ~/
+      # - checkout
+      # - run: mkdir -p $TEST_RESULTS /tmp/workspace
+      # - run: go mod tidy
+      # - run: gotestsum --junitfile ${TEST_RESULTS}/test.xml -- -coverprofile=/tmp/workspace/cover.out ./...
+      # - store_test_results:
+      #     path: /tmp/test-results
+      # - persist_to_workspace:
+      #     root: /tmp
+      #     paths:
+      #       - workspace/cover.out
+
+  before-test:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - run:
+          name: Download test-reporter
+          command: |
+            mkdir -p /tmp/workspace
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/workspace/cc-test-reporter
+            chmod +x ./tmp/workspace/cc-test-reporter
+      - run:
+          name: Notify codeclimate
+          command: |
+            ./tmp/workspace/cc-test-reporter before-build
       - persist_to_workspace:
           root: /tmp
           paths:
-            - workspace/cover.out
+            - workspace/cc-test-reporter
 
   after-test:
     docker:
       - image: circleci/golang:latest
     steps:
-      - attach_workspace:
-          at: ~/
+      # - attach_workspace:
+      #     at: ~/
       - run: echo "hehehe"
 
   deploy:
@@ -62,7 +83,10 @@ workflows:
   version: 2
   production:
     jobs:
-      - test
+      - before-test
+      - test:
+          requires:
+            - before-test
       - after-test:
           requires:
             - test
