@@ -40,7 +40,6 @@ jobs:
       - attach_workspace:
           at: /tmp
       - checkout
-      - run: mkdir -p /tmp/test-results
       - run:
           name: Download Dependencies
           command: |
@@ -49,6 +48,7 @@ jobs:
           name: Unit Test
           command: |
             /tmp/workspace/cc-test-reporter before-build
+            mkdir -p /tmp/test-results
             gotestsum --junitfile /tmp/test-results/test.xml -- -coverprofile=c.out ./...
             /tmp/workspace/cc-test-reporter after-build -p github.com/bickyeric/arumba --exit-code $?
       - store_test_results:
