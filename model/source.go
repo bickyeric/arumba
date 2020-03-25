@@ -10,6 +10,7 @@ import (
 type Source struct {
 	ID        primitive.ObjectID `bson:"_id"`
 	Name      string             `bson:"name"`
+	Hostname  string             `bson:"hostname"`
 	CreatedAt time.Time          `bson:"created_at,omitempty"`
 	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
 }

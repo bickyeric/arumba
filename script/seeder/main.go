@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
@@ -13,14 +14,17 @@ import (
 )
 
 var sources = []struct {
-	ID   string
-	Name string
+	ID       string
+	Name     string
+	Hostname string
 }{
-	{"5d0f6dede4e1f617cbbe1865", "komikcast"},
-	{"5d0f6dfbe4e1f617cbbe18b6", "komikindo"},
-	{"5daddd4b73b1d018e959c85b", "mangacan"},
-	{"5d13989eaddc0b6d19eef333", "mangaku"},
-	{"5c89e1cb5cff252ae5db8f1e", "mangatail"},
+	{"5d0f6dede4e1f617cbbe1865", "komikcast", "https://komikcast.co.id/"},
+	{"5d0f6dfbe4e1f617cbbe18b6", "komikindo", "https://www.komikindo.web.id/"},
+	{"5daddd4b73b1d018e959c85b", "mangacan", "http://www.mangacanblog.com/"},
+	{"5d13989eaddc0b6d19eef333", "mangaku", "https://mangaku.in/"},
+	{"5c89e1cb5cff252ae5db8f1e", "mangatail", "https://www.mangatail.me/"},
+	{"5e1f31a200832f65a5e44826", "komiku", "https://komiku.co.id/"},
+	{"5e6f9ad81ae41533caac7d56", "mangakyo", "https://www.mangakyo.com/"},
 }
 
 func main() {
@@ -33,8 +37,11 @@ func main() {
 	for _, s := range sources {
 		id, _ := primitive.ObjectIDFromHex(s.ID)
 		source := model.Source{
-			ID:   id,
-			Name: s.Name,
+			ID:        id,
+			Name:      s.Name,
+			Hostname:  s.Hostname,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		err := repo.Insert(source)
