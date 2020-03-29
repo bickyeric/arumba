@@ -44,18 +44,12 @@ func (p backward) Pipelines() (pipe mongo.Pipeline) {
 }
 
 func validateBackward(before *string, last *int) (p backward, err error) {
-	p.last = defaultLimit
-	if before != nil {
-		p.cursor, err = primitive.ObjectIDFromHex(*before)
-		if err != nil {
-			return p, ErrInvalidBeforeCursor
-		}
+	if p.cursor, err = validateCursor(before); err != nil {
+		return p, ErrInvalidBeforeCursor
 	}
-	if last != nil {
-		if *last < 0 {
-			return p, ErrNegativeLast
-		}
-		p.last = *last
+
+	if p.last, err = validateLimit(last); err != nil {
+		return p, ErrNegativeLast
 	}
 	return p, err
 }

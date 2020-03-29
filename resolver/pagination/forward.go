@@ -32,18 +32,12 @@ func (p forward) Pipelines() (pipe mongo.Pipeline) {
 }
 
 func validateForward(after *string, first *int) (p forward, err error) {
-	p.first = defaultLimit
-	if after != nil {
-		p.cursor, err = primitive.ObjectIDFromHex(*after)
-		if err != nil {
-			return p, ErrInvalidAfterCursor
-		}
+	if p.cursor, err = validateCursor(after); err != nil {
+		return p, ErrInvalidAfterCursor
 	}
-	if first != nil {
-		if *first < 0 {
-			return p, ErrNegativeFirst
-		}
-		p.first = *first
+
+	if p.first, err = validateLimit(first); err != nil {
+		return p, ErrNegativeFirst
 	}
 	return p, err
 }
