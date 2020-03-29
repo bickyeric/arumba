@@ -61,6 +61,17 @@ func (s *validatorSuite) TestForward_NegativeFirst() {
 	s.Equal(pagination.ErrNegativeFirst, err)
 }
 
+func (s *validatorSuite) TestForward_OK() {
+	after := primitive.NewObjectID().Hex()
+	first := 10
+	p, err := pagination.Validate(nil, &after, &first, nil)
+	s.Nil(err)
+	jsonPipeline, err := json.Marshal(p.Pipelines())
+	s.Nil(err)
+	expectedJSON := fmt.Sprintf(`[[{"Key":"$match","Value":{"_id":{"$gt":"%s"}}}],[{"Key":"$limit","Value":%d}]]`, after, first)
+	s.Equal(expectedJSON, string(jsonPipeline))
+}
+
 func (s *validatorSuite) TestDefaultPagination() {
 	p, err := pagination.Validate(nil, nil, nil, nil)
 	s.Nil(err)

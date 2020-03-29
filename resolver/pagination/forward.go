@@ -3,6 +3,7 @@ package pagination
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type forward struct {
@@ -10,7 +11,25 @@ type forward struct {
 	first  int
 }
 
-func (p forward) Pipelines() mongo.Pipeline { return mongo.Pipeline{} }
+func (p forward) Pipelines() (pipe mongo.Pipeline) {
+	if p.cursor != primitive.NilObjectID {
+		pipe = append(pipe, primitive.D{
+			{
+				Key: "$match",
+				Value: bson.M{
+					"_id": bson.M{
+						"$gt": p.cursor,
+					},
+				},
+			},
+		})
+	}
+	pipe = append(pipe, primitive.D{{
+		Key:   "$limit",
+		Value: p.first,
+	}})
+	return pipe
+}
 
 func validateForward(after *string, first *int) (p forward, err error) {
 	p.first = defaultLimit
