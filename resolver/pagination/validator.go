@@ -27,21 +27,10 @@ type Interface interface {
 func Validate(before, after *string, first, last *int) (Interface, error) {
 	if before != nil || last != nil {
 		return validateBackward(before, last)
-	} else if after != nil || first != nil {
+	} else if first != nil {
 		return validateForward(after, first)
 	}
-	return defaultPagination{}, nil
-}
-
-type defaultPagination struct{}
-
-func (p defaultPagination) Pipelines() mongo.Pipeline {
-	return mongo.Pipeline{
-		{{
-			Key:   "$limit",
-			Value: defaultLimit,
-		}},
-	}
+	return validateForward(after, &defaultLimit)
 }
 
 func validateCursor(s *string) (cursor primitive.ObjectID, err error) {
