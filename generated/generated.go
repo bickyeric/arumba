@@ -39,6 +39,7 @@ type Config struct {
 type ResolverRoot interface {
 	Comic() ComicResolver
 	Episode() EpisodeResolver
+	EpisodeConnection() EpisodeConnectionResolver
 	Query() QueryResolver
 }
 
@@ -63,6 +64,15 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
+	EpisodeConnection struct {
+		Edges func(childComplexity int) int
+	}
+
+	EpisodeEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	Page struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
@@ -72,7 +82,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Comics   func(childComplexity int, name string, first *int, offset *int) int
-		Episodes func(childComplexity int, comicID primitive.ObjectID, first *int, offset *int) int
+		Episodes func(childComplexity int, comicID primitive.ObjectID, before *string, after *string, first *int, last *int) int
 	}
 }
 
@@ -82,9 +92,12 @@ type ComicResolver interface {
 type EpisodeResolver interface {
 	Pages(ctx context.Context, obj *model.Episode) ([]*model.Page, error)
 }
+type EpisodeConnectionResolver interface {
+	Edges(ctx context.Context, obj *model.EpisodeConnection) ([]*model.EpisodeEdge, error)
+}
 type QueryResolver interface {
 	Comics(ctx context.Context, name string, first *int, offset *int) ([]*model.Comic, error)
-	Episodes(ctx context.Context, comicID primitive.ObjectID, first *int, offset *int) ([]*model.Episode, error)
+	Episodes(ctx context.Context, comicID primitive.ObjectID, before *string, after *string, first *int, last *int) (*model.EpisodeConnection, error)
 }
 
 type executableSchema struct {
@@ -184,6 +197,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Episode.UpdatedAt(childComplexity), true
 
+	case "EpisodeConnection.edges":
+		if e.complexity.EpisodeConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.EpisodeConnection.Edges(childComplexity), true
+
+	case "EpisodeEdge.cursor":
+		if e.complexity.EpisodeEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.EpisodeEdge.Cursor(childComplexity), true
+
+	case "EpisodeEdge.node":
+		if e.complexity.EpisodeEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.EpisodeEdge.Node(childComplexity), true
+
 	case "Page.createdAt":
 		if e.complexity.Page.CreatedAt == nil {
 			break
@@ -234,7 +268,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Episodes(childComplexity, args["comicId"].(primitive.ObjectID), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Episodes(childComplexity, args["comicId"].(primitive.ObjectID), args["before"].(*string), args["after"].(*string), args["first"].(*int), args["last"].(*int)), true
 
 	}
 	return 0, false
@@ -287,7 +321,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
   comics(name: String!, first: Int, offset: Int): [ Comic! ]!
-  episodes(comicId: ID!, first: Int, offset: Int): [ Episode! ]!
+  episodes(comicId: ID!, before: String, after: String, first: Int, last: Int): EpisodeConnection!
 }
 
 type Comic {
@@ -305,6 +339,15 @@ type Episode {
   pages: [ Page! ]
   createdAt: Timestamp!
   updatedAt: Timestamp!
+}
+
+type EpisodeConnection {
+  edges: [EpisodeEdge!]
+}
+
+type EpisodeEdge {
+  node: Episode!
+  cursor: String!
 }
 
 type Page {
@@ -399,22 +442,38 @@ func (ec *executionContext) field_Query_episodes_args(ctx context.Context, rawAr
 		}
 	}
 	args["comicId"] = arg0
-	var arg1 *int
+	var arg1 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg2
+	var arg3 *int
 	if tmp, ok := rawArgs["first"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	args["first"] = arg3
+	var arg4 *int
+	if tmp, ok := rawArgs["last"]; ok {
+		arg4, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["offset"] = arg2
+	args["last"] = arg4
 	return args, nil
 }
 
@@ -862,6 +921,114 @@ func (ec *executionContext) _Episode_updatedAt(ctx context.Context, field graphq
 	return ec.marshalNTimestamp2timeᚐTime(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _EpisodeConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeConnection) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "EpisodeConnection",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.EpisodeConnection().Edges(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.EpisodeEdge)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOEpisodeEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EpisodeEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeEdge) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "EpisodeEdge",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Episode)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EpisodeEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeEdge) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "EpisodeEdge",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Page_id(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1080,7 +1247,7 @@ func (ec *executionContext) _Query_episodes(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Episodes(rctx, args["comicId"].(primitive.ObjectID), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Episodes(rctx, args["comicId"].(primitive.ObjectID), args["before"].(*string), args["after"].(*string), args["first"].(*int), args["last"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1092,10 +1259,10 @@ func (ec *executionContext) _Query_episodes(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Episode)
+	res := resTmp.(*model.EpisodeConnection)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNEpisode2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeᚄ(ctx, field.Selections, res)
+	return ec.marshalNEpisodeConnection2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2443,6 +2610,71 @@ func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var episodeConnectionImplementors = []string{"EpisodeConnection"}
+
+func (ec *executionContext) _EpisodeConnection(ctx context.Context, sel ast.SelectionSet, obj *model.EpisodeConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, episodeConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EpisodeConnection")
+		case "edges":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EpisodeConnection_edges(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var episodeEdgeImplementors = []string{"EpisodeEdge"}
+
+func (ec *executionContext) _EpisodeEdge(ctx context.Context, sel ast.SelectionSet, obj *model.EpisodeEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, episodeEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EpisodeEdge")
+		case "node":
+			out.Values[i] = ec._EpisodeEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cursor":
+			out.Values[i] = ec._EpisodeEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var pageImplementors = []string{"Page"}
 
 func (ec *executionContext) _Page(ctx context.Context, sel ast.SelectionSet, obj *model.Page) graphql.Marshaler {
@@ -2857,43 +3089,6 @@ func (ec *executionContext) marshalNEpisode2githubᚗcomᚋbickyericᚋarumbaᚋ
 	return ec._Episode(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEpisode2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Episode) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
 func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *model.Episode) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
@@ -2902,6 +3097,34 @@ func (ec *executionContext) marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumba
 		return graphql.Null
 	}
 	return ec._Episode(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNEpisodeConnection2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeConnection(ctx context.Context, sel ast.SelectionSet, v model.EpisodeConnection) graphql.Marshaler {
+	return ec._EpisodeConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEpisodeConnection2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeConnection(ctx context.Context, sel ast.SelectionSet, v *model.EpisodeConnection) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._EpisodeConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNEpisodeEdge2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdge(ctx context.Context, sel ast.SelectionSet, v model.EpisodeEdge) graphql.Marshaler {
+	return ec._EpisodeEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEpisodeEdge2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdge(ctx context.Context, sel ast.SelectionSet, v *model.EpisodeEdge) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._EpisodeEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx context.Context, v interface{}) (primitive.ObjectID, error) {
@@ -3251,6 +3474,46 @@ func (ec *executionContext) marshalOEpisode2ᚕᚖgithubᚗcomᚋbickyericᚋaru
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOEpisodeEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.EpisodeEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNEpisodeEdge2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

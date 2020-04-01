@@ -1,6 +1,7 @@
 package resolver_test
 
 import (
+	"context"
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,6 +29,7 @@ func (s *episodeSuite) TearDownTest() {
 }
 
 func (s *episodeSuite) TestPages() {
+	ctx := context.Background()
 	first, offset := 5, 0
 	episode := model.Episode{
 		ID:   primitive.NewObjectID(),
