@@ -1,6 +1,7 @@
 package resolver_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bickyeric/arumba/model"
@@ -27,6 +28,7 @@ func (s *comicSuite) TearDownTest() {
 }
 
 func (s *comicSuite) TestEpisodes() {
+	ctx := context.Background()
 	first, offset := 100, 0
 	comic := model.Comic{
 		ID: primitive.NewObjectID(),

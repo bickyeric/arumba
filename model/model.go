@@ -6,9 +6,16 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bickyeric/arumba/resolver/pagination"
+
 	"github.com/99designs/gqlgen/graphql"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type EpisodeConnection struct {
+	ComicID    primitive.ObjectID
+	Pagination pagination.Interface
+}
 
 // MarshalTimestamp ...
 func MarshalTimestamp(t time.Time) graphql.Marshaler {
