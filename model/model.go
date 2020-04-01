@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// EpisodeConnection hold data required to build EpisodeConnection on graphql
 type EpisodeConnection struct {
 	ComicID    primitive.ObjectID
 	Pagination pagination.Interface

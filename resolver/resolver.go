@@ -17,6 +17,7 @@ type resolver struct {
 	episodeConnection generated.EpisodeConnectionResolver
 }
 
+// New create graphql root resolver
 func New(q generated.QueryResolver, comic generated.ComicResolver, episode generated.EpisodeResolver, episodeConnection generated.EpisodeConnectionResolver) generated.ResolverRoot {
 	return &resolver{
 		query:             q,
