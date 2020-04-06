@@ -49,14 +49,14 @@ func (s *querySuite) TestEpisodes_NotValidParams() {
 	comicID := primitive.NewObjectID()
 	first := -90
 	query := resolver.NewQuery(s.mockedComicRepo)
-	_, err := query.Episodes(s.ctx, comicID, nil, nil, &first, nil)
+	_, err := query.Episodes(s.ctx, comicID, nil, &first)
 	s.NotNil(err)
 }
 
 func (s *querySuite) TestEpisodes_ForwardPagination() {
 	comicID := primitive.NewObjectID()
 	query := resolver.NewQuery(s.mockedComicRepo)
-	connection, err := query.Episodes(s.ctx, comicID, nil, nil, nil, nil)
+	connection, err := query.Episodes(s.ctx, comicID, nil, nil)
 	s.Nil(err)
 	s.Equal(comicID, connection.ComicID)
 	s.NotNil(connection.Pagination.Pipelines())

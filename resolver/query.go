@@ -35,12 +35,9 @@ func (r *query) Comics(ctx context.Context, name string, first, offset *int) ([]
 	return comics, err
 }
 
-func (r *query) Episodes(ctx context.Context, comicID primitive.ObjectID, before, after *string, first, last *int) (conn *model.EpisodeConnection, err error) {
+func (r *query) Episodes(ctx context.Context, comicID primitive.ObjectID, after *string, first *int) (conn *model.EpisodeConnection, err error) {
 	conn = new(model.EpisodeConnection)
 	conn.ComicID = comicID
-	conn.Pagination, err = pagination.Validate(before, after, first, last)
-	if err != nil {
-		return nil, err
-	}
+	conn.Pagination, err = pagination.Validate(after, first)
 	return conn, err
 }

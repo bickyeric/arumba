@@ -82,7 +82,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Comics   func(childComplexity int, name string, first *int, offset *int) int
-		Episodes func(childComplexity int, comicID primitive.ObjectID, before *string, after *string, first *int, last *int) int
+		Episodes func(childComplexity int, comicID primitive.ObjectID, after *string, first *int) int
 	}
 }
 
@@ -97,7 +97,7 @@ type EpisodeConnectionResolver interface {
 }
 type QueryResolver interface {
 	Comics(ctx context.Context, name string, first *int, offset *int) ([]*model.Comic, error)
-	Episodes(ctx context.Context, comicID primitive.ObjectID, before *string, after *string, first *int, last *int) (*model.EpisodeConnection, error)
+	Episodes(ctx context.Context, comicID primitive.ObjectID, after *string, first *int) (*model.EpisodeConnection, error)
 }
 
 type executableSchema struct {
@@ -268,7 +268,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Episodes(childComplexity, args["comicId"].(primitive.ObjectID), args["before"].(*string), args["after"].(*string), args["first"].(*int), args["last"].(*int)), true
+		return e.complexity.Query.Episodes(childComplexity, args["comicId"].(primitive.ObjectID), args["after"].(*string), args["first"].(*int)), true
 
 	}
 	return 0, false
@@ -321,7 +321,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
   comics(name: String!, first: Int, offset: Int): [ Comic! ]!
-  episodes(comicId: ID!, before: String, after: String, first: Int, last: Int): EpisodeConnection!
+  episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
 }
 
 type Comic {
@@ -443,37 +443,21 @@ func (ec *executionContext) field_Query_episodes_args(ctx context.Context, rawAr
 	}
 	args["comicId"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["before"]; ok {
+	if tmp, ok := rawArgs["after"]; ok {
 		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["before"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["after"] = arg2
-	var arg3 *int
+	args["after"] = arg1
+	var arg2 *int
 	if tmp, ok := rawArgs["first"]; ok {
-		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg3
-	var arg4 *int
-	if tmp, ok := rawArgs["last"]; ok {
-		arg4, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["last"] = arg4
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1247,7 +1231,7 @@ func (ec *executionContext) _Query_episodes(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Episodes(rctx, args["comicId"].(primitive.ObjectID), args["before"].(*string), args["after"].(*string), args["first"].(*int), args["last"].(*int))
+		return ec.resolvers.Query().Episodes(rctx, args["comicId"].(primitive.ObjectID), args["after"].(*string), args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

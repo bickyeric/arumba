@@ -30,14 +30,3 @@ func (p forward) Pipelines() (pipe mongo.Pipeline) {
 	}})
 	return pipe
 }
-
-func validateForward(after *string, first *int) (p forward, err error) {
-	if p.cursor, err = validateCursor(after); err != nil {
-		return p, ErrInvalidAfterCursor
-	}
-
-	if p.first, err = validateLimit(first); err != nil {
-		return p, ErrNegativeFirst
-	}
-	return p, err
-}

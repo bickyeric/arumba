@@ -1,7 +1,7 @@
 type Query {
   comics(name: String!, first: Int, offset: Int): [ Comic! ]!
-  episodes(comicId: ID!, before: String, after: String, first: Int, last: Int): EpisodeConnection!
-}
+  episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
+} 
 
 type Comic {
   id: ID!

@@ -10,10 +10,8 @@ import (
 
 // ...
 var (
-	ErrInvalidBeforeCursor = errors.New(`"before" is not valid cursor`)
-	ErrInvalidAfterCursor  = errors.New(`"after" is not valid cursor`)
-	ErrNegativeFirst       = errors.New(`"first" is negative number`)
-	ErrNegativeLast        = errors.New(`"last" is negative number`)
+	ErrInvalidAfterCursor = errors.New(`"after" is not valid cursor`)
+	ErrNegativeFirst      = errors.New(`"first" is negative number`)
 
 	defaultLimit = 5
 )
@@ -24,13 +22,19 @@ type Interface interface {
 }
 
 // Validate validate pagination options from graphql
-func Validate(before, after *string, first, last *int) (Interface, error) {
-	if before != nil || last != nil {
-		return validateBackward(before, last)
-	} else if first != nil {
-		return validateForward(after, first)
+func Validate(after *string, first *int) (Interface, error) {
+	var (
+		p   forward
+		err error
+	)
+	if p.cursor, err = validateCursor(after); err != nil {
+		return p, ErrInvalidAfterCursor
 	}
-	return validateForward(after, &defaultLimit)
+
+	if p.first, err = validateLimit(first); err != nil {
+		return p, ErrNegativeFirst
+	}
+	return p, err
 }
 
 func validateCursor(s *string) (cursor primitive.ObjectID, err error) {
