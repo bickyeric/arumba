@@ -6,7 +6,7 @@ type Query {
 type Comic {
   id: ID!
   name: String!
-  episodes(first: Int, offset: Int): [ Episode! ]
+  episodes(after: String, first: Int): EpisodeConnection!
   createdAt: Timestamp!
   updatedAt: Timestamp!
 }

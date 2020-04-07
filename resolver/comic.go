@@ -5,29 +5,10 @@ import (
 
 	"github.com/bickyeric/arumba/generated"
 	"github.com/bickyeric/arumba/model"
-	"github.com/bickyeric/arumba/repository"
 )
 
-type comic struct {
-	eRepo repository.IEpisode
-}
+type comic struct{ generated.ResolverRoot }
 
-func NewComic(eRepo repository.IEpisode) generated.ComicResolver {
-	return &comic{eRepo: eRepo}
-}
-
-func (r *comic) Episodes(ctx context.Context, comic *model.Comic, first, offset *int) ([]*model.Episode, error) {
-	var episodes []*model.Episode
-	f, o := 100, 0
-	if first != nil {
-		f = *first
-	}
-	if offset != nil {
-		o = *offset
-	}
-	res, err := r.eRepo.FindAll(ctx, comic.ID, f, o)
-	for i := 0; i < len(res); i++ {
-		episodes = append(episodes, &res[i])
-	}
-	return episodes, err
+func (r *comic) Episodes(ctx context.Context, comic *model.Comic, after *string, first *int) (*model.EpisodeConnection, error) {
+	return r.Query().Episodes(ctx, comic.ID, after, first)
 }

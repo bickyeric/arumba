@@ -12,16 +12,14 @@ const (
 
 type resolver struct {
 	query             generated.QueryResolver
-	comic             generated.ComicResolver
 	episode           generated.EpisodeResolver
 	episodeConnection generated.EpisodeConnectionResolver
 }
 
 // New create graphql root resolver
-func New(q generated.QueryResolver, comic generated.ComicResolver, episode generated.EpisodeResolver, episodeConnection generated.EpisodeConnectionResolver) generated.ResolverRoot {
+func New(q generated.QueryResolver, episode generated.EpisodeResolver, episodeConnection generated.EpisodeConnectionResolver) generated.ResolverRoot {
 	return &resolver{
 		query:             q,
-		comic:             comic,
 		episode:           episode,
 		episodeConnection: episodeConnection,
 	}
@@ -32,7 +30,7 @@ func (r *resolver) Query() generated.QueryResolver {
 }
 
 func (r *resolver) Comic() generated.ComicResolver {
-	return r.comic
+	return &comic{r}
 }
 
 func (r *resolver) Episode() generated.EpisodeResolver {

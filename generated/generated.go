@@ -49,7 +49,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Comic struct {
 		CreatedAt func(childComplexity int) int
-		Episodes  func(childComplexity int, first *int, offset *int) int
+		Episodes  func(childComplexity int, after *string, first *int) int
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
@@ -93,7 +93,7 @@ type ComplexityRoot struct {
 }
 
 type ComicResolver interface {
-	Episodes(ctx context.Context, obj *model.Comic, first *int, offset *int) ([]*model.Episode, error)
+	Episodes(ctx context.Context, obj *model.Comic, after *string, first *int) (*model.EpisodeConnection, error)
 }
 type EpisodeResolver interface {
 	Pages(ctx context.Context, obj *model.Episode) ([]*model.Page, error)
@@ -139,7 +139,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Comic.Episodes(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Comic.Episodes(childComplexity, args["after"].(*string), args["first"].(*int)), true
 
 	case "Comic.id":
 		if e.complexity.Comic.ID == nil {
@@ -355,7 +355,7 @@ var parsedSchema = gqlparser.MustLoadSchema(
 type Comic {
   id: ID!
   name: String!
-  episodes(first: Int, offset: Int): [ Episode! ]
+  episodes(after: String, first: Int): EpisodeConnection!
   createdAt: Timestamp!
   updatedAt: Timestamp!
 }
@@ -402,22 +402,22 @@ scalar Timestamp
 func (ec *executionContext) field_Comic_episodes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	var arg0 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg0
+	args["after"] = arg0
 	var arg1 *int
-	if tmp, ok := rawArgs["offset"]; ok {
+	if tmp, ok := rawArgs["first"]; ok {
 		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["offset"] = arg1
+	args["first"] = arg1
 	return args, nil
 }
 
@@ -631,19 +631,22 @@ func (ec *executionContext) _Comic_episodes(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Comic().Episodes(rctx, obj, args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Comic().Episodes(rctx, obj, args["after"].(*string), args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Episode)
+	res := resTmp.(*model.EpisodeConnection)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOEpisode2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeᚄ(ctx, field.Selections, res)
+	return ec.marshalNEpisodeConnection2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Comic_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Comic) (ret graphql.Marshaler) {
@@ -2658,6 +2661,9 @@ func (ec *executionContext) _Comic(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Comic_episodes(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "createdAt":
@@ -3633,46 +3639,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
-}
-
-func (ec *executionContext) marshalOEpisode2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Episode) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalOEpisodeEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.EpisodeEdge) graphql.Marshaler {
