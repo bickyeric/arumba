@@ -61,3 +61,25 @@ func (r *episodeConnection) Edges(ctx context.Context, c *model.EpisodeConnectio
 	}
 	return edges, err
 }
+
+func (r *episodeConnection) PageInfo(ctx context.Context, c *model.EpisodeConnection) (pageInfo *model.PageInfo, err error) {
+	pageInfo = new(model.PageInfo)
+	pipe := mongo.Pipeline{
+		{{Key: "$match", Value: bson.M{"comic_id": c.ComicID}}},
+	}
+	pipe = append(pipe, c.Pagination.NextPipelines()...)
+	cur, err := r.Aggregate(ctx, pipe)
+	if err != nil {
+		return pageInfo, err
+	}
+
+	var nodes []model.Episode
+	if err = cur.All(ctx, &nodes); err != nil {
+		return pageInfo, err
+	}
+	pageInfo.HasNextPage = len(nodes) > 1
+	if len(nodes) > 0 {
+		pageInfo.StartCursor = eResolver.EncodeCursor(nodes[0].No)
+	}
+	return pageInfo, err
+}

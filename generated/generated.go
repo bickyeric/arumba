@@ -65,7 +65,8 @@ type ComplexityRoot struct {
 	}
 
 	EpisodeConnection struct {
-		Edges func(childComplexity int) int
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
 	}
 
 	EpisodeEdge struct {
@@ -78,6 +79,11 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Link      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
+	}
+
+	PageInfo struct {
+		HasNextPage func(childComplexity int) int
+		StartCursor func(childComplexity int) int
 	}
 
 	Query struct {
@@ -94,6 +100,7 @@ type EpisodeResolver interface {
 }
 type EpisodeConnectionResolver interface {
 	Edges(ctx context.Context, obj *model.EpisodeConnection) ([]*model.EpisodeEdge, error)
+	PageInfo(ctx context.Context, obj *model.EpisodeConnection) (*model.PageInfo, error)
 }
 type QueryResolver interface {
 	Comics(ctx context.Context, name string, first *int, offset *int) ([]*model.Comic, error)
@@ -204,6 +211,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EpisodeConnection.Edges(childComplexity), true
 
+	case "EpisodeConnection.pageInfo":
+		if e.complexity.EpisodeConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.EpisodeConnection.PageInfo(childComplexity), true
+
 	case "EpisodeEdge.cursor":
 		if e.complexity.EpisodeEdge.Cursor == nil {
 			break
@@ -245,6 +259,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Page.UpdatedAt(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
 
 	case "Query.comics":
 		if e.complexity.Query.Comics == nil {
@@ -343,11 +371,17 @@ type Episode {
 
 type EpisodeConnection {
   edges: [EpisodeEdge!]
+  pageInfo: PageInfo!
 }
 
 type EpisodeEdge {
-  node: Episode!
   cursor: String!
+  node: Episode!
+}
+
+type PageInfo {
+  startCursor: String!
+  hasNextPage: Boolean!
 }
 
 type Page {
@@ -939,7 +973,7 @@ func (ec *executionContext) _EpisodeConnection_edges(ctx context.Context, field 
 	return ec.marshalOEpisodeEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdgeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EpisodeEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeEdge) (ret graphql.Marshaler) {
+func (ec *executionContext) _EpisodeConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeConnection) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -949,16 +983,16 @@ func (ec *executionContext) _EpisodeEdge_node(ctx context.Context, field graphql
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "EpisodeEdge",
+		Object:   "EpisodeConnection",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
+		return ec.resolvers.EpisodeConnection().PageInfo(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -970,10 +1004,10 @@ func (ec *executionContext) _EpisodeEdge_node(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Episode)
+	res := resTmp.(*model.PageInfo)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EpisodeEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeEdge) (ret graphql.Marshaler) {
@@ -1011,6 +1045,43 @@ func (ec *executionContext) _EpisodeEdge_cursor(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EpisodeEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.EpisodeEdge) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "EpisodeEdge",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Episode)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNEpisode2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Page_id(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
@@ -1159,6 +1230,80 @@ func (ec *executionContext) _Page_updatedAt(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNTimestamp2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "PageInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "PageInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_comics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2616,6 +2761,20 @@ func (ec *executionContext) _EpisodeConnection(ctx context.Context, sel ast.Sele
 				res = ec._EpisodeConnection_edges(ctx, field, obj)
 				return res
 			})
+		case "pageInfo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EpisodeConnection_pageInfo(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2638,13 +2797,13 @@ func (ec *executionContext) _EpisodeEdge(ctx context.Context, sel ast.SelectionS
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EpisodeEdge")
-		case "node":
-			out.Values[i] = ec._EpisodeEdge_node(ctx, field, obj)
+		case "cursor":
+			out.Values[i] = ec._EpisodeEdge_cursor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "cursor":
-			out.Values[i] = ec._EpisodeEdge_cursor(ctx, field, obj)
+		case "node":
+			out.Values[i] = ec._EpisodeEdge_node(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2687,6 +2846,38 @@ func (ec *executionContext) _Page(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "updatedAt":
 			out.Values[i] = ec._Page_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var pageInfoImplementors = []string{"PageInfo"}
+
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, pageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PageInfo")
+		case "startCursor":
+			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hasNextPage":
+			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3151,6 +3342,20 @@ func (ec *executionContext) marshalNPage2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋ
 		return graphql.Null
 	}
 	return ec._Page(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v model.PageInfo) graphql.Marshaler {
+	return ec._PageInfo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PageInfo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

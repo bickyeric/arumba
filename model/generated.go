@@ -3,6 +3,11 @@
 package model
 
 type EpisodeEdge struct {
-	Node   *Episode `json:"node"`
 	Cursor string   `json:"cursor"`
+	Node   *Episode `json:"node"`
+}
+
+type PageInfo struct {
+	StartCursor string `json:"startCursor"`
+	HasNextPage bool   `json:"hasNextPage"`
 }

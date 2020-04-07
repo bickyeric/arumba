@@ -19,6 +19,7 @@ var (
 // Interface ...
 type Interface interface {
 	Pipelines() mongo.Pipeline
+	NextPipelines() mongo.Pipeline
 }
 
 // Validate validate pagination options from graphql
