@@ -31,11 +31,9 @@ func (r *episode) Pages(ctx context.Context, episode *model.Episode) ([]*model.P
 	return pages, err
 }
 
-type episodeConnection struct{ *mongo.Collection }
-
-// NewEpisodeConnection ...
-func NewEpisodeConnection(coll *mongo.Collection) generated.EpisodeConnectionResolver {
-	return &episodeConnection{coll}
+type episodeConnection struct {
+	generated.ResolverRoot
+	*mongo.Collection
 }
 
 func (r *episodeConnection) Edges(ctx context.Context, c *model.EpisodeConnection) (edges []*model.EpisodeEdge, err error) {

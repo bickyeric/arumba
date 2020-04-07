@@ -17,7 +17,7 @@ func (s *rootResolverSuite) TestResolver() {
 		s.Nil(resolver.Query())
 		s.NotNil(resolver.Comic())
 		s.Nil(resolver.Episode())
-		s.Nil(resolver.EpisodeConnection())
+		// s.Nil(resolver.EpisodeConnection())
 	})
 }
 
