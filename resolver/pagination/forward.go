@@ -1,24 +1,23 @@
 package pagination
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type forward struct {
-	cursor primitive.ObjectID
-	first  int
+	episodeNo int
+	first     int
 }
 
 func (p forward) Pipelines() (pipe mongo.Pipeline) {
-	if p.cursor != primitive.NilObjectID {
+	if p.episodeNo > 0 {
 		pipe = append(pipe, primitive.D{
 			{
 				Key: "$match",
-				Value: bson.M{
-					"_id": bson.M{
-						"$gt": p.cursor,
+				Value: primitive.M{
+					"no": primitive.M{
+						"$lt": p.episodeNo,
 					},
 				},
 			},

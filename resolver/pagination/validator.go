@@ -3,7 +3,7 @@ package pagination
 import (
 	"errors"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/bickyeric/arumba/resolver/episode"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -27,7 +27,7 @@ func Validate(after *string, first *int) (Interface, error) {
 		p   forward
 		err error
 	)
-	if p.cursor, err = validateCursor(after); err != nil {
+	if p.episodeNo, err = validateCursor(after); err != nil {
 		return p, ErrInvalidAfterCursor
 	}
 
@@ -37,9 +37,9 @@ func Validate(after *string, first *int) (Interface, error) {
 	return p, err
 }
 
-func validateCursor(s *string) (cursor primitive.ObjectID, err error) {
+func validateCursor(s *string) (cursor int, err error) {
 	if s != nil {
-		cursor, err = primitive.ObjectIDFromHex(*s)
+		cursor, err = episode.DecodeCursor(*s)
 	}
 	return cursor, err
 }

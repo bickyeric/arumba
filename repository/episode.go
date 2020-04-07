@@ -61,7 +61,7 @@ func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no int) (*mod
 func (repo episodeRepository) CreateIndex(ctx context.Context) error {
 	models := []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"comic_id", 1}, {"no", 1}},
+			Keys:    bson.D{{"comic_id", 1}, {"no", -1}},
 			Options: options.Index().SetBackground(true).SetUnique(true)},
 	}
 	return createIndex(ctx, repo.coll, models)

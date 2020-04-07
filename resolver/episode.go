@@ -9,6 +9,7 @@ import (
 	"github.com/bickyeric/arumba/generated"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/repository"
+	eResolver "github.com/bickyeric/arumba/resolver/episode"
 )
 
 type episode struct {
@@ -55,7 +56,7 @@ func (r *episodeConnection) Edges(ctx context.Context, c *model.EpisodeConnectio
 		if err = cur.Decode(edge.Node); err != nil {
 			return edges, err
 		}
-		edge.Cursor = edge.Node.ID.Hex()
+		edge.Cursor = eResolver.EncodeCursor(edge.Node.No)
 		edges = append(edges, &edge)
 	}
 	return edges, err
