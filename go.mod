@@ -3,28 +3,27 @@ module github.com/bickyeric/arumba
 go 1.12
 
 require (
-	github.com/99designs/gqlgen v0.10.2
-	github.com/DataDog/zstd v1.4.4 // indirect
+	github.com/99designs/gqlgen v0.11.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/golang/mock v0.0.0-20190508161146-9fa652df1129
-	github.com/golang/snappy v0.0.1 // indirect
+	github.com/golang/mock v1.4.3
 	github.com/google/go-cmp v0.3.1 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/mattn/go-isatty v0.0.10 // indirect
-	github.com/sirupsen/logrus v1.4.2
-	github.com/stretchr/testify v1.4.0
-	github.com/subosito/gotenv v1.1.1
-	github.com/tidwall/pretty v1.0.0 // indirect
+	github.com/mattn/go-colorable v0.1.6 // indirect
+	github.com/mitchellh/mapstructure v1.2.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sirupsen/logrus v1.5.0
+	github.com/stretchr/testify v1.5.1
+	github.com/subosito/gotenv v1.2.0
 	github.com/valyala/fasttemplate v1.1.0 // indirect
-	github.com/vektah/gqlparser v1.2.0
-	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
-	github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc // indirect
-	go.mongodb.org/mongo-driver v1.2.1
-	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 // indirect
-	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
-	golang.org/x/text v0.3.2 // indirect
+	github.com/vektah/gqlparser/v2 v2.0.1
+	go.mongodb.org/mongo-driver v1.3.2
+	golang.org/x/crypto v0.0.0-20200406173513-056763e48d71 // indirect
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
+	rsc.io/sampler v1.99.99 // indirect
 )
