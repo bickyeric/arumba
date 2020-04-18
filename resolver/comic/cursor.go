@@ -6,10 +6,12 @@ import (
 	"strconv"
 )
 
+// EncodeCursor used to build comic cursor
 func EncodeCursor(i int) string {
 	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%d", i)))
 }
 
+// DecodeCursor used to parse comic cursor
 func DecodeCursor(after *string) (int, error) {
 	if after == nil {
 		return 0, nil
