@@ -18,6 +18,12 @@ type EpisodeConnection struct {
 	Pagination pagination.Interface
 }
 
+// ComicConnection hold data required to build ComicConnection on graphql
+type ComicConnection struct {
+	BaseQuery   primitive.M
+	Skip, Limit int
+}
+
 // MarshalTimestamp ...
 func MarshalTimestamp(t time.Time) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {

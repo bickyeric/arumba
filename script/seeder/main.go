@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/subosito/gotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var sources = []struct {
@@ -32,7 +34,11 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
 	db := connection.NewMongo(context.Background()).Database(os.Getenv("DB_MONGO_DATABASE"))
+	sourceSeeder(db)
+	comicSeeder(db)
+}
 
+func sourceSeeder(db *mongo.Database) {
 	repo := repository.NewSource(db)
 	for _, s := range sources {
 		id, _ := primitive.ObjectIDFromHex(s.ID)
@@ -45,6 +51,19 @@ func main() {
 		}
 
 		err := repo.Insert(source)
+		if err != nil {
+			log.Warn(err)
+		}
+	}
+}
+
+func comicSeeder(db *mongo.Database) {
+	repo := repository.NewComic(db)
+	for i := 1; i <= 100; i++ {
+		comic := model.Comic{
+			Name: fmt.Sprintf("Comic %d", i),
+		}
+		err := repo.Insert(&comic)
 		if err != nil {
 			log.Warn(err)
 		}

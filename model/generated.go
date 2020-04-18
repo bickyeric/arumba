@@ -2,6 +2,11 @@
 
 package model
 
+type ComicEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Comic `json:"node"`
+}
+
 type EpisodeEdge struct {
 	Cursor string   `json:"cursor"`
 	Node   *Episode `json:"node"`

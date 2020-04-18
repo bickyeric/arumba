@@ -12,12 +12,11 @@ type rootResolverSuite struct {
 }
 
 func (s *rootResolverSuite) TestResolver() {
-	resolver := resolver.New(nil, nil, nil)
+	resolver := resolver.New(nil, nil)
 	s.NotPanics(func() {
-		s.Nil(resolver.Query())
+		s.NotNil(resolver.Query())
 		s.NotNil(resolver.Comic())
 		s.Nil(resolver.Episode())
-		// s.Nil(resolver.EpisodeConnection())
 	})
 }
 
