@@ -3,7 +3,7 @@ package resolver
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/bickyeric/arumba/generated"
@@ -39,7 +39,7 @@ type episodeConnection struct {
 func (r *episodeConnection) Edges(ctx context.Context, c *model.EpisodeConnection) (edges []*model.EpisodeEdge, err error) {
 	edges = make([]*model.EpisodeEdge, 0)
 	pipe := mongo.Pipeline{
-		{{Key: "$match", Value: bson.M{"comic_id": c.ComicID}}},
+		{{Key: "$match", Value: primitive.M{"comic_id": c.ComicID}}},
 	}
 	pipe = append(pipe, c.Pagination.Pipelines()...)
 
@@ -63,7 +63,7 @@ func (r *episodeConnection) Edges(ctx context.Context, c *model.EpisodeConnectio
 func (r *episodeConnection) PageInfo(ctx context.Context, c *model.EpisodeConnection) (pageInfo *model.PageInfo, err error) {
 	pageInfo = new(model.PageInfo)
 	pipe := mongo.Pipeline{
-		{{Key: "$match", Value: bson.M{"comic_id": c.ComicID}}},
+		{{Key: "$match", Value: primitive.M{"comic_id": c.ComicID}}},
 	}
 	pipe = append(pipe, c.Pagination.NextPipelines()...)
 	cur, err := r.Aggregate(ctx, pipe)

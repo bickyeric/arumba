@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/bickyeric/arumba/model"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,6 +27,6 @@ func (repo sourceRepository) Insert(s model.Source) error {
 }
 
 func (repo sourceRepository) FindByID(id primitive.ObjectID) (source model.Source, err error) {
-	err = repo.coll.FindOne(ctx, bson.M{"_id": id}).Decode(&source)
+	err = repo.coll.FindOne(ctx, primitive.M{"_id": id}).Decode(&source)
 	return source, err
 }

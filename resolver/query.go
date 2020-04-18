@@ -7,7 +7,6 @@ import (
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/resolver/comic"
 	"github.com/bickyeric/arumba/resolver/pagination"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -15,7 +14,7 @@ type query struct{ generated.ResolverRoot }
 
 func (r *query) Comics(ctx context.Context, name string, after *string, first *int) (conn *model.ComicConnection, err error) {
 	conn = new(model.ComicConnection)
-	conn.BaseQuery = bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}}
+	conn.BaseQuery = primitive.M{"name": primitive.M{"$regex": ".*" + name + ".*", "$options": "i"}}
 	conn.Limit = 10
 	if first != nil {
 		conn.Limit = *first

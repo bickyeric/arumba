@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/bickyeric/arumba/model"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -33,7 +32,7 @@ func NewPage(db *mongo.Database) IPage {
 func (repo pageRepository) FindByEpisode(ctx context.Context, episodeID primitive.ObjectID, first, offset int) ([]model.Page, error) {
 	var pages []model.Page
 	cur, err := repo.coll.Find(ctx,
-		bson.M{"episode_id": episodeID},
+		primitive.M{"episode_id": episodeID},
 		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)),
 	)
 	if err != nil {
@@ -52,7 +51,7 @@ func (repo pageRepository) FindByEpisode(ctx context.Context, episodeID primitiv
 
 func (repo pageRepository) FindByEpisodeSource(episodeID, sourceID primitive.ObjectID) (model.Page, error) {
 	result := model.Page{}
-	err := repo.coll.FindOne(ctx, bson.M{"episode_id": episodeID, "source_id": sourceID}).Decode(&result)
+	err := repo.coll.FindOne(ctx, primitive.M{"episode_id": episodeID, "source_id": sourceID}).Decode(&result)
 	return result, err
 }
 
@@ -67,7 +66,7 @@ func (repo pageRepository) Insert(page *model.Page) error {
 func (repo pageRepository) CreateIndex(ctx context.Context) error {
 	models := []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"episode_id", 1}, {"source_id", 1}},
+			Keys:    primitive.D{{"episode_id", 1}, {"source_id", 1}},
 			Options: options.Index().SetBackground(true).SetUnique(true)},
 	}
 	return createIndex(ctx, repo.coll, models)

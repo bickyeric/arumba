@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/bickyeric/arumba/model"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -41,24 +40,24 @@ func (repo comicRepository) Insert(comic *model.Comic) error {
 }
 
 func (repo comicRepository) FindByID(id primitive.ObjectID) (c model.Comic, err error) {
-	err = repo.coll.FindOne(ctx, bson.M{"_id": id}).Decode(&c)
+	err = repo.coll.FindOne(ctx, primitive.M{"_id": id}).Decode(&c)
 	return c, err
 }
 
 func (repo comicRepository) Find(name string) (c model.Comic, err error) {
-	err = repo.coll.FindOne(ctx, bson.M{"name": name}).Decode(&c)
+	err = repo.coll.FindOne(ctx, primitive.M{"name": name}).Decode(&c)
 	return c, err
 }
 
 func (repo comicRepository) FindByName(ctx context.Context, name string) (c model.Comic, err error) {
-	err = repo.coll.FindOne(ctx, bson.M{"name": name}).Decode(&c)
+	err = repo.coll.FindOne(ctx, primitive.M{"name": name}).Decode(&c)
 	return c, err
 }
 
 func (repo comicRepository) FindAll(ctx context.Context, name string, first, offset int) ([]model.Comic, error) {
 	var comics []model.Comic
 	cur, err := repo.coll.Find(ctx,
-		bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}},
+		primitive.M{"name": primitive.M{"$regex": ".*" + name + ".*", "$options": "i"}},
 		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)),
 	)
 	if err != nil {
@@ -79,7 +78,7 @@ func (repo comicRepository) FindAll(ctx context.Context, name string, first, off
 func (repo comicRepository) CreateIndex(ctx context.Context) error {
 	models := []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"name", 1}},
+			Keys:    primitive.D{{"name", 1}},
 			Options: options.Index().SetName("name").SetBackground(true).SetUnique(true),
 		},
 	}

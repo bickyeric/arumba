@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/bickyeric/arumba/model"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -35,8 +34,8 @@ func NewEpisode(db *mongo.Database) IEpisode {
 func (repo episodeRepository) FindAll(ctx context.Context, comicID primitive.ObjectID, first, offset int) ([]model.Episode, error) {
 	var episodes []model.Episode
 	cur, err := repo.coll.Find(ctx,
-		bson.M{"comic_id": comicID},
-		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)).SetSort(bson.D{{"no", -1}}))
+		primitive.M{"comic_id": comicID},
+		options.Find().SetLimit(int64(first)).SetSkip(int64(offset)).SetSort(primitive.D{{"no", -1}}))
 	if err != nil {
 		return episodes, err
 	}
@@ -54,14 +53,14 @@ func (repo episodeRepository) Insert(ep *model.Episode) error {
 
 func (repo episodeRepository) FindByNo(comicID primitive.ObjectID, no int) (*model.Episode, error) {
 	ep := new(model.Episode)
-	err := repo.coll.FindOne(ctx, bson.M{"comic_id": comicID, "no": no}).Decode(ep)
+	err := repo.coll.FindOne(ctx, primitive.M{"comic_id": comicID, "no": no}).Decode(ep)
 	return ep, err
 }
 
 func (repo episodeRepository) CreateIndex(ctx context.Context) error {
 	models := []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"comic_id", 1}, {"no", -1}},
+			Keys:    primitive.D{{"comic_id", 1}, {"no", -1}},
 			Options: options.Index().SetBackground(true).SetUnique(true)},
 	}
 	return createIndex(ctx, repo.coll, models)
