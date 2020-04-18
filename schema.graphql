@@ -1,5 +1,5 @@
 type Query {
-  comics(name: String!, first: Int, offset: Int): [ Comic! ]!
+  comics(name: String!, after: String, first: Int): ComicConnection!
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
 }
 
@@ -18,6 +18,16 @@ type Episode {
   pages: [ Page! ]
   createdAt: Timestamp!
   updatedAt: Timestamp!
+}
+
+type ComicConnection {
+  edges: [ComicEdge!]
+  pageInfo: PageInfo!
+}
+
+type ComicEdge {
+  cursor: String!
+  node: Comic!
 }
 
 type EpisodeConnection {

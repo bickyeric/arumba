@@ -1,6 +1,6 @@
 module github.com/bickyeric/arumba
 
-go 1.12
+go 1.14
 
 require (
 	github.com/99designs/gqlgen v0.11.3
@@ -25,5 +25,4 @@ require (
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
-	rsc.io/sampler v1.99.99 // indirect
 )

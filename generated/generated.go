@@ -38,6 +38,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Comic() ComicResolver
+	ComicConnection() ComicConnectionResolver
 	Episode() EpisodeResolver
 	EpisodeConnection() EpisodeConnectionResolver
 	Query() QueryResolver
@@ -53,6 +54,16 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
+	}
+
+	ComicConnection struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	ComicEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	Episode struct {
@@ -87,13 +98,17 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Comics   func(childComplexity int, name string, first *int, offset *int) int
+		Comics   func(childComplexity int, name string, after *string, first *int) int
 		Episodes func(childComplexity int, comicID primitive.ObjectID, after *string, first *int) int
 	}
 }
 
 type ComicResolver interface {
 	Episodes(ctx context.Context, obj *model.Comic, after *string, first *int) (*model.EpisodeConnection, error)
+}
+type ComicConnectionResolver interface {
+	Edges(ctx context.Context, obj *model.ComicConnection) ([]*model.ComicEdge, error)
+	PageInfo(ctx context.Context, obj *model.ComicConnection) (*model.PageInfo, error)
 }
 type EpisodeResolver interface {
 	Pages(ctx context.Context, obj *model.Episode) ([]*model.Page, error)
@@ -103,7 +118,7 @@ type EpisodeConnectionResolver interface {
 	PageInfo(ctx context.Context, obj *model.EpisodeConnection) (*model.PageInfo, error)
 }
 type QueryResolver interface {
-	Comics(ctx context.Context, name string, first *int, offset *int) ([]*model.Comic, error)
+	Comics(ctx context.Context, name string, after *string, first *int) (*model.ComicConnection, error)
 	Episodes(ctx context.Context, comicID primitive.ObjectID, after *string, first *int) (*model.EpisodeConnection, error)
 }
 
@@ -161,6 +176,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comic.UpdatedAt(childComplexity), true
+
+	case "ComicConnection.edges":
+		if e.complexity.ComicConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.ComicConnection.Edges(childComplexity), true
+
+	case "ComicConnection.pageInfo":
+		if e.complexity.ComicConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.ComicConnection.PageInfo(childComplexity), true
+
+	case "ComicEdge.cursor":
+		if e.complexity.ComicEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.ComicEdge.Cursor(childComplexity), true
+
+	case "ComicEdge.node":
+		if e.complexity.ComicEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.ComicEdge.Node(childComplexity), true
 
 	case "Episode.createdAt":
 		if e.complexity.Episode.CreatedAt == nil {
@@ -284,7 +327,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Comics(childComplexity, args["name"].(string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Comics(childComplexity, args["name"].(string), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.episodes":
 		if e.complexity.Query.Episodes == nil {
@@ -349,7 +392,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
-  comics(name: String!, first: Int, offset: Int): [ Comic! ]!
+  comics(name: String!, after: String, first: Int): ComicConnection!
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
 }
 
@@ -368,6 +411,16 @@ type Episode {
   pages: [ Page! ]
   createdAt: Timestamp!
   updatedAt: Timestamp!
+}
+
+type ComicConnection {
+  edges: [ComicEdge!]
+  pageInfo: PageInfo!
+}
+
+type ComicEdge {
+  cursor: String!
+  node: Comic!
 }
 
 type EpisodeConnection {
@@ -448,22 +501,22 @@ func (ec *executionContext) field_Query_comics_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg1
+	args["after"] = arg1
 	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
+	if tmp, ok := rawArgs["first"]; ok {
 		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["offset"] = arg2
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -708,6 +761,139 @@ func (ec *executionContext) _Comic_updatedAt(ctx context.Context, field graphql.
 	res := resTmp.(time.Time)
 	fc.Result = res
 	return ec.marshalNTimestamp2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ComicConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.ComicConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ComicConnection",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ComicConnection().Edges(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ComicEdge)
+	fc.Result = res
+	return ec.marshalOComicEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ComicConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.ComicConnection) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ComicConnection",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ComicConnection().PageInfo(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ComicEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.ComicEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ComicEdge",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ComicEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.ComicEdge) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ComicEdge",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Comic)
+	fc.Result = res
+	return ec.marshalNComic2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComic(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Episode_id(ctx context.Context, field graphql.CollectedField, obj *model.Episode) (ret graphql.Marshaler) {
@@ -1272,7 +1458,7 @@ func (ec *executionContext) _Query_comics(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Comics(rctx, args["name"].(string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Comics(rctx, args["name"].(string), args["after"].(*string), args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1284,9 +1470,9 @@ func (ec *executionContext) _Query_comics(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Comic)
+	res := resTmp.(*model.ComicConnection)
 	fc.Result = res
-	return ec.marshalNComic2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicᚄ(ctx, field.Selections, res)
+	return ec.marshalNComicConnection2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_episodes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2518,6 +2704,85 @@ func (ec *executionContext) _Comic(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var comicConnectionImplementors = []string{"ComicConnection"}
+
+func (ec *executionContext) _ComicConnection(ctx context.Context, sel ast.SelectionSet, obj *model.ComicConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, comicConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ComicConnection")
+		case "edges":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ComicConnection_edges(ctx, field, obj)
+				return res
+			})
+		case "pageInfo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ComicConnection_pageInfo(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var comicEdgeImplementors = []string{"ComicEdge"}
+
+func (ec *executionContext) _ComicEdge(ctx context.Context, sel ast.SelectionSet, obj *model.ComicEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, comicEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ComicEdge")
+		case "cursor":
+			out.Values[i] = ec._ComicEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+			out.Values[i] = ec._ComicEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var episodeImplementors = []string{"Episode"}
 
 func (ec *executionContext) _Episode(ctx context.Context, sel ast.SelectionSet, obj *model.Episode) graphql.Marshaler {
@@ -3050,43 +3315,6 @@ func (ec *executionContext) marshalNComic2githubᚗcomᚋbickyericᚋarumbaᚋmo
 	return ec._Comic(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNComic2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Comic) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNComic2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComic(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
 func (ec *executionContext) marshalNComic2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComic(ctx context.Context, sel ast.SelectionSet, v *model.Comic) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3095,6 +3323,34 @@ func (ec *executionContext) marshalNComic2ᚖgithubᚗcomᚋbickyericᚋarumba�
 		return graphql.Null
 	}
 	return ec._Comic(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNComicConnection2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicConnection(ctx context.Context, sel ast.SelectionSet, v model.ComicConnection) graphql.Marshaler {
+	return ec._ComicConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNComicConnection2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicConnection(ctx context.Context, sel ast.SelectionSet, v *model.ComicConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ComicConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNComicEdge2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicEdge(ctx context.Context, sel ast.SelectionSet, v model.ComicEdge) graphql.Marshaler {
+	return ec._ComicEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNComicEdge2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicEdge(ctx context.Context, sel ast.SelectionSet, v *model.ComicEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ComicEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNEpisode2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisode(ctx context.Context, sel ast.SelectionSet, v model.Episode) graphql.Marshaler {
@@ -3470,6 +3726,46 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOComicEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ComicEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNComicEdge2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐComicEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOEpisodeEdge2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.EpisodeEdge) graphql.Marshaler {
