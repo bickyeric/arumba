@@ -16,6 +16,7 @@ type query struct{ generated.ResolverRoot }
 func (r *query) Comics(ctx context.Context, name string, after *string, first *int) (conn *model.ComicConnection, err error) {
 	conn = new(model.ComicConnection)
 	conn.BaseQuery = bson.M{"name": bson.M{"$regex": ".*" + name + ".*", "$options": "i"}}
+	conn.Limit = 10
 	if first != nil {
 		conn.Limit = *first
 	}
