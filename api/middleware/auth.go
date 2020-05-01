@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/labstack/echo"
@@ -36,6 +37,7 @@ func (a BasicAuth) Checker(next echo.HandlerFunc) echo.HandlerFunc {
 
 // IsAuthenticated ...
 func (a BasicAuth) IsAuthenticated(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+	log.Println("KIWKWIW")
 	authenticated := ctx.Value(basicAuthCtxKey).(bool)
 	if !authenticated {
 		return nil, errors.New("Who are you?")

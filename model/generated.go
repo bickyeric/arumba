@@ -16,3 +16,18 @@ type PageInfo struct {
 	StartCursor string `json:"startCursor"`
 	HasNextPage bool   `json:"hasNextPage"`
 }
+
+type SourceCreatePayload struct {
+	Source    *Source      `json:"source"`
+	UserError []*UserError `json:"userError"`
+}
+
+type SourceInput struct {
+	Name     string `json:"name"`
+	Hostname string `json:"hostname"`
+}
+
+type UserError struct {
+	Message string   `json:"message"`
+	Field   []string `json:"field"`
+}
