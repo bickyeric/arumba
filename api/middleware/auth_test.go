@@ -16,6 +16,9 @@ type basicAuthSuite struct {
 }
 
 func (s *basicAuthSuite) TestNotAuthenticated() {
+	nextResolver := func(c echo.Context) error {
+		return nil
+	}
 	auth := middleware.BasicAuth{
 		Username: "root",
 		Password: "root",
@@ -23,9 +26,8 @@ func (s *basicAuthSuite) TestNotAuthenticated() {
 
 	req, _ := http.NewRequest("GET", "http://local.host", nil)
 	echoContext := echo.New().NewContext(req, httptest.NewRecorder())
-	httpAuthenticated, err := auth.Assignor("uname", "passwd", echoContext)
+	err := auth.Checker(nextResolver)(echoContext)
 	s.Nil(err)
-	s.True(httpAuthenticated)
 
 	ctx := echoContext.Request().Context()
 	_, err = auth.IsAuthenticated(ctx, nil, nil)
@@ -33,6 +35,9 @@ func (s *basicAuthSuite) TestNotAuthenticated() {
 }
 
 func (s *basicAuthSuite) TestAuthenticated() {
+	next := func(c echo.Context) error {
+		return nil
+	}
 	nextResolver := func(ctx context.Context) (res interface{}, err error) {
 		return nil, nil
 	}
@@ -42,10 +47,10 @@ func (s *basicAuthSuite) TestAuthenticated() {
 	}
 
 	req, _ := http.NewRequest("GET", "http://local.host", nil)
+	req.SetBasicAuth("root", "root")
 	echoContext := echo.New().NewContext(req, httptest.NewRecorder())
-	httpAuthenticated, err := auth.Assignor("root", "root", echoContext)
+	err := auth.Checker(next)(echoContext)
 	s.Nil(err)
-	s.True(httpAuthenticated)
 
 	ctx := echoContext.Request().Context()
 	_, err = auth.IsAuthenticated(ctx, nil, nextResolver)

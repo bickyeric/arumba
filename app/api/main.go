@@ -45,8 +45,6 @@ func main() {
 	}))
 
 	basicAuth := apiMiddleware.BasicAuth{Username: os.Getenv("USERNAME"), Password: os.Getenv("PASSWORD")}
-	authConfig := middleware.DefaultBasicAuthConfig
-	authConfig.Validator = basicAuth.Assignor
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.RequestID())
@@ -62,7 +60,7 @@ func main() {
 
 	schema := generated.NewExecutableSchema(config)
 	e.GET("/", echo.WrapHandler(handler.Playground("GraphQL playground", "/query")))
-	e.POST("/query", echo.WrapHandler(handler.GraphQL(schema)), middleware.BasicAuthWithConfig(authConfig))
+	e.POST("/query", echo.WrapHandler(handler.GraphQL(schema)), basicAuth.Checker)
 	e.POST("/kendang/webhook", kendang.OnHandle)
 
 	go e.Start(":1907")

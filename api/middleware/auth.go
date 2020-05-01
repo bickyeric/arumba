@@ -19,13 +19,19 @@ type BasicAuth struct {
 	Username, Password string
 }
 
-// Assignor ...
-func (a BasicAuth) Assignor(uname string, passwd string, c echo.Context) (bool, error) {
-	ctx := c.Request().Context()
-	ctx = context.WithValue(ctx, basicAuthCtxKey, a.Username == uname && a.Password == passwd)
-	c.SetRequest(c.Request().WithContext(ctx))
-
-	return true, nil
+// Checker ...
+func (a BasicAuth) Checker(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var authenticated bool
+		uname, passwd, ok := c.Request().BasicAuth()
+		if ok {
+			authenticated = a.Username == uname && a.Password == passwd
+		}
+		ctx := c.Request().Context()
+		ctx = context.WithValue(ctx, basicAuthCtxKey, authenticated)
+		c.SetRequest(c.Request().WithContext(ctx))
+		return next(c)
+	}
 }
 
 // IsAuthenticated ...
