@@ -44,18 +44,27 @@ func main() {
 		AllowOrigins: []string{"*"},
 	}))
 
+	basicAuth := apiMiddleware.BasicAuth{Username: os.Getenv("USERNAME"), Password: os.Getenv("PASSWORD")}
+	authConfig := middleware.DefaultBasicAuthConfig
+	authConfig.Validator = basicAuth.Assignor
+
 	e.Use(middleware.Logger())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
+	e.Use(middleware.BasicAuthWithConfig(authConfig))
 	e.Use(apiMiddleware.ErrorHandler)
 
 	kendang := controller.NewKendang(saver)
-	e.POST("/kendang/webhook", kendang.OnHandle)
 
 	episode := resolver.NewEpisode(pageRepo)
 	r := resolver.New(episode, db)
+	config := generated.Config{Resolvers: r}
+	config.Directives.Authenticated = basicAuth.IsAuthenticated
+
+	schema := generated.NewExecutableSchema(config)
 	e.GET("/", echo.WrapHandler(handler.Playground("GraphQL playground", "/query")))
-	e.POST("/query", echo.WrapHandler(handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: r}))))
+	e.POST("/query", echo.WrapHandler(handler.GraphQL(schema)))
+	e.POST("/kendang/webhook", kendang.OnHandle)
 
 	go e.Start(":1907")
 

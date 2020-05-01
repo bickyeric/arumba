@@ -53,3 +53,5 @@ type Page {
 }
 
 scalar Timestamp
+
+directive @authenticated on FIELD_DEFINITION
