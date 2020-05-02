@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"github.com/bickyeric/arumba/external"
 	"github.com/bickyeric/arumba/generated"
 	"github.com/bickyeric/arumba/repository"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,18 +14,18 @@ const (
 )
 
 type root struct {
-	episode                generated.EpisodeResolver
 	comicColl, episodeColl *mongo.Collection
 	sourceRepository       repository.ISource
+	pageRepository         repository.IPage
 }
 
 // New create graphql root resolver
-func New(episode generated.EpisodeResolver, db *mongo.Database) generated.ResolverRoot {
+func New(db external.MongoDatabase) generated.ResolverRoot {
 	return &root{
-		episode:          episode,
 		episodeColl:      db.Collection("episodes"),
 		comicColl:        db.Collection("comics"),
 		sourceRepository: repository.NewSource(db),
+		pageRepository:   repository.NewPage(db),
 	}
 }
 
@@ -37,7 +38,7 @@ func (r *root) Comic() generated.ComicResolver {
 }
 
 func (r *root) Episode() generated.EpisodeResolver {
-	return r.episode
+	return &episodeResolver{r, r.pageRepository}
 }
 
 func (r *root) EpisodeConnection() generated.EpisodeConnectionResolver {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/model"
@@ -43,14 +42,12 @@ func sourceSeeder(db *mongo.Database) {
 	for _, s := range sources {
 		id, _ := primitive.ObjectIDFromHex(s.ID)
 		source := model.Source{
-			ID:        id,
-			Name:      s.Name,
-			Hostname:  s.Hostname,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			ID:       id,
+			Name:     s.Name,
+			Hostname: s.Hostname,
 		}
 
-		err := repo.Insert(source)
+		err := repo.Insert(&source)
 		if err != nil {
 			log.Warn(err)
 		}

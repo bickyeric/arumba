@@ -12,16 +12,12 @@ import (
 	eResolver "github.com/bickyeric/arumba/resolver/episode"
 )
 
-type episode struct {
+type episodeResolver struct {
+	generated.ResolverRoot
 	pRepo repository.IPage
 }
 
-// NewEpisode ...
-func NewEpisode(pRepo repository.IPage) generated.EpisodeResolver {
-	return &episode{pRepo: pRepo}
-}
-
-func (r *episode) Pages(ctx context.Context, episode *model.Episode) ([]*model.Page, error) {
+func (r *episodeResolver) Pages(ctx context.Context, episode *model.Episode) ([]*model.Page, error) {
 	var pages []*model.Page
 	f, o := 5, 0
 	res, err := r.pRepo.FindByEpisode(ctx, episode.ID, f, o)

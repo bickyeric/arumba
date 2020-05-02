@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/bickyeric/arumba/external"
 	"github.com/bickyeric/arumba/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,7 +26,7 @@ type pageRepository struct {
 }
 
 // NewPage ...
-func NewPage(db *mongo.Database) IPage {
+func NewPage(db external.MongoDatabase) IPage {
 	return pageRepository{db.Collection("pages")}
 }
 

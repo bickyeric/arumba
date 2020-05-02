@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/bickyeric/arumba/external"
 	"github.com/bickyeric/arumba/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,7 +28,7 @@ type comicRepository struct {
 }
 
 // NewComic ...
-func NewComic(db *mongo.Database) IComic {
+func NewComic(db external.MongoDatabase) IComic {
 	return comicRepository{db.Collection("comics")}
 }
 

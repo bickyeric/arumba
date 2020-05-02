@@ -6,7 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	apiMiddleware "github.com/bickyeric/arumba/api/middleware"
 	"github.com/bickyeric/arumba/connection"
 	"github.com/bickyeric/arumba/controller"
@@ -39,29 +40,32 @@ func main() {
 	saver := episode.NewSaveUpdate(sourceRepo, comicRepo, episodeRepo, pageRepo)
 	// endregion    ************************** SERVICE **************************
 
+	basicAuth := apiMiddleware.BasicAuth{Username: os.Getenv("USERNAME"), Password: os.Getenv("PASSWORD")}
+
 	e := echo.New()
+	// region    ************************** GLOBAL HTTP MIDDLEWARE **************************
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 	}))
-
-	basicAuth := apiMiddleware.BasicAuth{Username: os.Getenv("USERNAME"), Password: os.Getenv("PASSWORD")}
-
 	e.Use(middleware.Logger())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
 	e.Use(apiMiddleware.ErrorHandler)
+	// endregion    ************************** GLOBAL HTTP MIDDLEWARE **************************
+
+	r := resolver.New(db)
+	config := generated.Config{Resolvers: r}
+	config.Directives.Authenticated = basicAuth.IsAuthenticated
+	schema := generated.NewExecutableSchema(config)
+	graphql := handler.NewDefaultServer(schema)
 
 	kendang := controller.NewKendang(saver)
 
-	episode := resolver.NewEpisode(pageRepo)
-	r := resolver.New(episode, db)
-	config := generated.Config{Resolvers: r}
-	config.Directives.Authenticated = basicAuth.IsAuthenticated
-
-	schema := generated.NewExecutableSchema(config)
-	e.GET("/", echo.WrapHandler(handler.Playground("GraphQL playground", "/query")))
-	e.POST("/query", echo.WrapHandler(handler.GraphQL(schema)), basicAuth.Checker)
+	// region    ************************** HTTP ROUTER **************************
+	e.GET("/", echo.WrapHandler(playground.Handler("GraphQL playground", "/query")))
+	e.POST("/query", echo.WrapHandler(graphql), basicAuth.Checker)
 	e.POST("/kendang/webhook", kendang.OnHandle)
+	// endregion    ************************** HTTP ROUTER **************************
 
 	go e.Start(":1907")
 

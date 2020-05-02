@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 
+	"github.com/bickyeric/arumba/external"
 	"github.com/bickyeric/arumba/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,12 +20,14 @@ type sourceRepository struct {
 }
 
 // NewSource ...
-func NewSource(db *mongo.Database) ISource {
+func NewSource(db external.MongoDatabase) ISource {
 	return sourceRepository{db.Collection("sources")}
 }
 
 func (repo sourceRepository) Insert(s *model.Source) error {
-	s.ID = primitive.NewObjectID()
+	if s.ID == primitive.NilObjectID {
+		s.ID = primitive.NewObjectID()
+	}
 	s.CreatedAt = time.Now()
 	s.UpdatedAt = s.CreatedAt
 	_, err := repo.coll.InsertOne(ctx, s)
