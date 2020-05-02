@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	gotenv.Load(".env", "/run/secrets/arumba-api")
+	gotenv.Load(".env", "/run/secrets/env-file")
 	ctx := context.Background()
 
 	// region    ************************** CONNECTION **************************

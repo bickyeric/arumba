@@ -73,19 +73,19 @@ workflows:
   version: 2
   production:
     jobs:
-      - before-test
-      - test:
-          requires:
-            - before-test
+      # - before-test
+      # - test:
+      #     requires:
+      #       - before-test
       - build:
-          filters:
-            branches:
-              only: master
-          requires:
-            - test
+          # filters:
+          #   branches:
+          #     only: master
+          # requires:
+          #   - test
       - deploy:
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master
           requires:
             - build

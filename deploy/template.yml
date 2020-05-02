@@ -11,7 +11,9 @@ services:
       USERNAME: ${USERNAME}
       PASSWORD: ${PASSWORD}
     secrets:
-      - env-file
+      - source: env-file
+        target: /usr/local/bin/.env
+
 
 secrets:
   env-file:
