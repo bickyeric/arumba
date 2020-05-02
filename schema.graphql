@@ -3,6 +3,10 @@ type Query {
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
 }
 
+type Mutation {
+  sourceCreate(source: SourceInput!): SourceCreatePayload! @authenticated
+}
+
 type Comic {
   id: ID!
   name: String!
@@ -18,6 +22,19 @@ type Episode {
   pages: [ Page! ]
   createdAt: Timestamp!
   updatedAt: Timestamp!
+}
+
+type Source {
+  id: ID!
+  name: String!
+  hostname: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+input SourceInput {
+  name: String!
+  hostname: String!
 }
 
 type ComicConnection {
@@ -50,6 +67,16 @@ type Page {
   link: String!
   createdAt: Timestamp!
   updatedAt: Timestamp!
+}
+
+type SourceCreatePayload {
+  source: Source
+  userError: [UserError!]!
+}
+
+type UserError {
+  message: String!
+  field: [String!]
 }
 
 scalar Timestamp

@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/bickyeric/arumba/external"
 	"github.com/bickyeric/arumba/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,7 +28,7 @@ type episodeRepository struct {
 }
 
 // NewEpisode ...
-func NewEpisode(db *mongo.Database) IEpisode {
+func NewEpisode(db external.MongoDatabase) IEpisode {
 	return episodeRepository{db.Collection("episodes")}
 }
 
