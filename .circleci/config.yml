@@ -73,11 +73,12 @@ workflows:
   version: 2
   production:
     jobs:
+      - build
       # - before-test
       # - test:
       #     requires:
       #       - before-test
-      - build:
+      # - build:
           # filters:
           #   branches:
           #     only: master
