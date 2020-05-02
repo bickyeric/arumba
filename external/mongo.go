@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// MongoDatabase is abstraction for *mongo.Database
 type MongoDatabase interface {
 	Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection
 }
