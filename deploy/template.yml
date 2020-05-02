@@ -8,3 +8,5 @@ services:
     environment:
       DB_MONGO_HOST: ${DB_MONGO_HOST}
       DB_MONGO_DATABASE: ${DB_MONGO_DATABASE}
+      USERNAME: ${USERNAME}
+      PASSWORD: ${PASSWORD}
