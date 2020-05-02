@@ -10,3 +10,10 @@ services:
       DB_MONGO_DATABASE: ${DB_MONGO_DATABASE}
       USERNAME: ${USERNAME}
       PASSWORD: ${PASSWORD}
+    secrets:
+      - env-file
+
+secrets:
+  env-file:
+    external: true
+    name: arumba-api
