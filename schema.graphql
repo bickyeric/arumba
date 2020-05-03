@@ -1,6 +1,7 @@
 type Query {
   comics(name: String!, after: String, first: Int): ComicConnection!
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
+  sources: [Source!]!
 }
 
 type Mutation {

@@ -14,16 +14,17 @@ const (
 )
 
 type root struct {
-	comicColl, episodeColl *mongo.Collection
-	sourceRepository       repository.ISource
-	pageRepository         repository.IPage
+	sourceColl, comicColl, episodeColl *mongo.Collection
+	sourceRepository                   repository.ISource
+	pageRepository                     repository.IPage
 }
 
 // New create graphql root resolver
 func New(db external.MongoDatabase) generated.ResolverRoot {
 	return &root{
-		episodeColl:      db.Collection("episodes"),
+		sourceColl:       db.Collection("sources"),
 		comicColl:        db.Collection("comics"),
+		episodeColl:      db.Collection("episodes"),
 		sourceRepository: repository.NewSource(db),
 		pageRepository:   repository.NewPage(db),
 	}

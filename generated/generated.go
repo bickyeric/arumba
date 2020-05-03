@@ -107,6 +107,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Comics   func(childComplexity int, name string, after *string, first *int) int
 		Episodes func(childComplexity int, comicID primitive.ObjectID, after *string, first *int) int
+		Sources  func(childComplexity int) int
 	}
 
 	Source struct {
@@ -148,6 +149,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Comics(ctx context.Context, name string, after *string, first *int) (*model.ComicConnection, error)
 	Episodes(ctx context.Context, comicID primitive.ObjectID, after *string, first *int) (*model.EpisodeConnection, error)
+	Sources(ctx context.Context) ([]*model.Source, error)
 }
 
 type executableSchema struct {
@@ -381,6 +383,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Episodes(childComplexity, args["comicId"].(primitive.ObjectID), args["after"].(*string), args["first"].(*int)), true
 
+	case "Query.sources":
+		if e.complexity.Query.Sources == nil {
+			break
+		}
+
+		return e.complexity.Query.Sources(childComplexity), true
+
 	case "Source.createdAt":
 		if e.complexity.Source.CreatedAt == nil {
 			break
@@ -511,6 +520,7 @@ var sources = []*ast.Source{
 	&ast.Source{Name: "schema.graphql", Input: `type Query {
   comics(name: String!, after: String, first: Int): ComicConnection!
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
+  sources: [Source!]!
 }
 
 type Mutation {
@@ -1735,6 +1745,40 @@ func (ec *executionContext) _Query_episodes(ctx context.Context, field graphql.C
 	res := resTmp.(*model.EpisodeConnection)
 	fc.Result = res
 	return ec.marshalNEpisodeConnection2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐEpisodeConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_sources(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Sources(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Source)
+	fc.Result = res
+	return ec.marshalNSource2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3613,6 +3657,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "sources":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_sources(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -4130,6 +4188,57 @@ func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋbickyericᚋarumb
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSource2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSource(ctx context.Context, sel ast.SelectionSet, v model.Source) graphql.Marshaler {
+	return ec._Source(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSource2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Source) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSource2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSource(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNSource2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSource(ctx context.Context, sel ast.SelectionSet, v *model.Source) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Source(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNSourceCreatePayload2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceCreatePayload(ctx context.Context, sel ast.SelectionSet, v model.SourceCreatePayload) graphql.Marshaler {

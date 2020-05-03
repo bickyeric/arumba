@@ -3,14 +3,13 @@ package resolver
 import (
 	"context"
 
-	"github.com/bickyeric/arumba/generated"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/resolver/comic"
 	"github.com/bickyeric/arumba/resolver/pagination"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type query struct{ generated.ResolverRoot }
+type query struct{ *root }
 
 func (r *query) Comics(ctx context.Context, name string, after *string, first *int) (conn *model.ComicConnection, err error) {
 	conn = new(model.ComicConnection)
@@ -28,4 +27,13 @@ func (r *query) Episodes(ctx context.Context, comicID primitive.ObjectID, after 
 	conn.ComicID = comicID
 	conn.Pagination, err = pagination.Validate(after, first)
 	return conn, err
+}
+
+func (r *query) Sources(ctx context.Context) (sources []*model.Source, err error) {
+	cur, err := r.sourceColl.Find(ctx, primitive.M{})
+	if err != nil {
+		return sources, err
+	}
+	err = cur.All(ctx, &sources)
+	return sources, err
 }
