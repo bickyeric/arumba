@@ -5,13 +5,9 @@ services:
     image: bickyeric/arumba:${VERSION}
     ports:
       - "1907:1907"
-    environment:
-      DB_MONGO_HOST: ${DB_MONGO_HOST}
-      DB_MONGO_DATABASE: ${DB_MONGO_DATABASE}
-      USERNAME: ${USERNAME}
-      PASSWORD: ${PASSWORD}
     secrets:
-      - env-file
+      - source: env-file
+        target: /.env
 
 secrets:
   env-file:
