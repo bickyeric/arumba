@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	gotenv.Load(".env", "/run/secrets/env-file")
+	gotenv.Load(".env")
 	ctx := context.Background()
 
 	// region    ************************** CONNECTION **************************

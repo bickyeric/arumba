@@ -8,12 +8,9 @@ services:
     environment:
       DB_MONGO_HOST: ${DB_MONGO_HOST}
       DB_MONGO_DATABASE: ${DB_MONGO_DATABASE}
-      USERNAME: ${USERNAME}
-      PASSWORD: ${PASSWORD}
     secrets:
       - source: env-file
-        target: /usr/local/bin/.env
-
+        target: /.env
 
 secrets:
   env-file:
