@@ -22,6 +22,11 @@ type SourceCreatePayload struct {
 	UserError []*UserError `json:"userError"`
 }
 
+type SourceDeletePayload struct {
+	Source    *Source      `json:"source"`
+	UserError []*UserError `json:"userError"`
+}
+
 type SourceInput struct {
 	Name     string `json:"name"`
 	Hostname string `json:"hostname"`

@@ -3,6 +3,8 @@ package resolver
 import (
 	"context"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/resolver/comic"
 	"github.com/bickyeric/arumba/resolver/pagination"
@@ -36,4 +38,13 @@ func (r *query) Sources(ctx context.Context) (sources []*model.Source, err error
 	}
 	err = cur.All(ctx, &sources)
 	return sources, err
+}
+
+func (r *query) Source(ctx context.Context, sourceID primitive.ObjectID) (source *model.Source, err error) {
+	source = new(model.Source)
+	err = r.sourceColl.FindOne(ctx, primitive.M{"_id": sourceID}).Decode(source)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	return source, err
 }

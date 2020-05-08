@@ -2,10 +2,12 @@ type Query {
   comics(name: String!, after: String, first: Int): ComicConnection!
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
   sources: [Source!]!
+  source(sourceId: ID!): Source
 }
 
 type Mutation {
   sourceCreate(source: SourceInput!): SourceCreatePayload! @authenticated
+  sourceDelete(sourceId: ID!): SourceDeletePayload! @authenticated
 }
 
 type Comic {
@@ -71,6 +73,11 @@ type Page {
 }
 
 type SourceCreatePayload {
+  source: Source
+  userError: [UserError!]!
+}
+
+type SourceDeletePayload {
   source: Source
   userError: [UserError!]!
 }

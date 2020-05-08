@@ -90,6 +90,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		SourceCreate func(childComplexity int, source model.SourceInput) int
+		SourceDelete func(childComplexity int, sourceID primitive.ObjectID) int
 	}
 
 	Page struct {
@@ -107,6 +108,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Comics   func(childComplexity int, name string, after *string, first *int) int
 		Episodes func(childComplexity int, comicID primitive.ObjectID, after *string, first *int) int
+		Source   func(childComplexity int, sourceID primitive.ObjectID) int
 		Sources  func(childComplexity int) int
 	}
 
@@ -119,6 +121,11 @@ type ComplexityRoot struct {
 	}
 
 	SourceCreatePayload struct {
+		Source    func(childComplexity int) int
+		UserError func(childComplexity int) int
+	}
+
+	SourceDeletePayload struct {
 		Source    func(childComplexity int) int
 		UserError func(childComplexity int) int
 	}
@@ -145,11 +152,13 @@ type EpisodeConnectionResolver interface {
 }
 type MutationResolver interface {
 	SourceCreate(ctx context.Context, source model.SourceInput) (*model.SourceCreatePayload, error)
+	SourceDelete(ctx context.Context, sourceID primitive.ObjectID) (*model.SourceDeletePayload, error)
 }
 type QueryResolver interface {
 	Comics(ctx context.Context, name string, after *string, first *int) (*model.ComicConnection, error)
 	Episodes(ctx context.Context, comicID primitive.ObjectID, after *string, first *int) (*model.EpisodeConnection, error)
 	Sources(ctx context.Context) ([]*model.Source, error)
+	Source(ctx context.Context, sourceID primitive.ObjectID) (*model.Source, error)
 }
 
 type executableSchema struct {
@@ -317,6 +326,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SourceCreate(childComplexity, args["source"].(model.SourceInput)), true
 
+	case "Mutation.sourceDelete":
+		if e.complexity.Mutation.SourceDelete == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sourceDelete_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SourceDelete(childComplexity, args["sourceId"].(primitive.ObjectID)), true
+
 	case "Page.createdAt":
 		if e.complexity.Page.CreatedAt == nil {
 			break
@@ -383,6 +404,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Episodes(childComplexity, args["comicId"].(primitive.ObjectID), args["after"].(*string), args["first"].(*int)), true
 
+	case "Query.source":
+		if e.complexity.Query.Source == nil {
+			break
+		}
+
+		args, err := ec.field_Query_source_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Source(childComplexity, args["sourceId"].(primitive.ObjectID)), true
+
 	case "Query.sources":
 		if e.complexity.Query.Sources == nil {
 			break
@@ -438,6 +471,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SourceCreatePayload.UserError(childComplexity), true
+
+	case "SourceDeletePayload.source":
+		if e.complexity.SourceDeletePayload.Source == nil {
+			break
+		}
+
+		return e.complexity.SourceDeletePayload.Source(childComplexity), true
+
+	case "SourceDeletePayload.userError":
+		if e.complexity.SourceDeletePayload.UserError == nil {
+			break
+		}
+
+		return e.complexity.SourceDeletePayload.UserError(childComplexity), true
 
 	case "UserError.field":
 		if e.complexity.UserError.Field == nil {
@@ -521,10 +568,12 @@ var sources = []*ast.Source{
   comics(name: String!, after: String, first: Int): ComicConnection!
   episodes(comicId: ID!, after: String, first: Int): EpisodeConnection!
   sources: [Source!]!
+  source(sourceId: ID!): Source
 }
 
 type Mutation {
   sourceCreate(source: SourceInput!): SourceCreatePayload! @authenticated
+  sourceDelete(sourceId: ID!): SourceDeletePayload! @authenticated
 }
 
 type Comic {
@@ -594,6 +643,11 @@ type SourceCreatePayload {
   userError: [UserError!]!
 }
 
+type SourceDeletePayload {
+  source: Source
+  userError: [UserError!]!
+}
+
 type UserError {
   message: String!
   field: [String!]
@@ -643,6 +697,20 @@ func (ec *executionContext) field_Mutation_sourceCreate_args(ctx context.Context
 		}
 	}
 	args["source"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_sourceDelete_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 primitive.ObjectID
+	if tmp, ok := rawArgs["sourceId"]; ok {
+		arg0, err = ec.unmarshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceId"] = arg0
 	return args, nil
 }
 
@@ -717,6 +785,20 @@ func (ec *executionContext) field_Query_episodes_args(ctx context.Context, rawAr
 		}
 	}
 	args["first"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_source_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 primitive.ObjectID
+	if tmp, ok := rawArgs["sourceId"]; ok {
+		arg0, err = ec.unmarshalNID2goᚗmongodbᚗorgᚋmongoᚑdriverᚋbsonᚋprimitiveᚐObjectID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceId"] = arg0
 	return args, nil
 }
 
@@ -1461,6 +1543,67 @@ func (ec *executionContext) _Mutation_sourceCreate(ctx context.Context, field gr
 	return ec.marshalNSourceCreatePayload2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceCreatePayload(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_sourceDelete(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_sourceDelete_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().SourceDelete(rctx, args["sourceId"].(primitive.ObjectID))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Authenticated == nil {
+				return nil, errors.New("directive authenticated is not implemented")
+			}
+			return ec.directives.Authenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.SourceDeletePayload); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/bickyeric/arumba/model.SourceDeletePayload`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SourceDeletePayload)
+	fc.Result = res
+	return ec.marshalNSourceDeletePayload2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceDeletePayload(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Page_id(ctx context.Context, field graphql.CollectedField, obj *model.Page) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1781,6 +1924,44 @@ func (ec *executionContext) _Query_sources(ctx context.Context, field graphql.Co
 	return ec.marshalNSource2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_source(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_source_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Source(rctx, args["sourceId"].(primitive.ObjectID))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Source)
+	fc.Result = res
+	return ec.marshalOSource2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSource(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2060,6 +2241,71 @@ func (ec *executionContext) _SourceCreatePayload_userError(ctx context.Context, 
 	}()
 	fc := &graphql.FieldContext{
 		Object:   "SourceCreatePayload",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserError, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UserError)
+	fc.Result = res
+	return ec.marshalNUserError2ᚕᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐUserErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SourceDeletePayload_source(ctx context.Context, field graphql.CollectedField, obj *model.SourceDeletePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "SourceDeletePayload",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Source)
+	fc.Result = res
+	return ec.marshalOSource2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSource(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SourceDeletePayload_userError(ctx context.Context, field graphql.CollectedField, obj *model.SourceDeletePayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "SourceDeletePayload",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -3529,6 +3775,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "sourceDelete":
+			out.Values[i] = ec._Mutation_sourceDelete(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3671,6 +3922,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "source":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_source(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -3748,6 +4010,35 @@ func (ec *executionContext) _SourceCreatePayload(ctx context.Context, sel ast.Se
 			out.Values[i] = ec._SourceCreatePayload_source(ctx, field, obj)
 		case "userError":
 			out.Values[i] = ec._SourceCreatePayload_userError(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var sourceDeletePayloadImplementors = []string{"SourceDeletePayload"}
+
+func (ec *executionContext) _SourceDeletePayload(ctx context.Context, sel ast.SelectionSet, obj *model.SourceDeletePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sourceDeletePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SourceDeletePayload")
+		case "source":
+			out.Values[i] = ec._SourceDeletePayload_source(ctx, field, obj)
+		case "userError":
+			out.Values[i] = ec._SourceDeletePayload_userError(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4253,6 +4544,20 @@ func (ec *executionContext) marshalNSourceCreatePayload2ᚖgithubᚗcomᚋbickye
 		return graphql.Null
 	}
 	return ec._SourceCreatePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSourceDeletePayload2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceDeletePayload(ctx context.Context, sel ast.SelectionSet, v model.SourceDeletePayload) graphql.Marshaler {
+	return ec._SourceDeletePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSourceDeletePayload2ᚖgithubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceDeletePayload(ctx context.Context, sel ast.SelectionSet, v *model.SourceDeletePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SourceDeletePayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNSourceInput2githubᚗcomᚋbickyericᚋarumbaᚋmodelᚐSourceInput(ctx context.Context, v interface{}) (model.SourceInput, error) {
