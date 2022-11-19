@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/bickyeric/arumba/api"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {

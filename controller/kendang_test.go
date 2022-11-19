@@ -12,7 +12,7 @@ import (
 	"github.com/bickyeric/arumba/service/episode"
 	"github.com/bickyeric/arumba/service/episode/mock"
 	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 )
 

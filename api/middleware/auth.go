@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var basicAuthCtxKey = &contextKey{name: "basic-authenticated"}

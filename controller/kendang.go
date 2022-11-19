@@ -6,7 +6,7 @@ import (
 	"github.com/bickyeric/arumba/api"
 	"github.com/bickyeric/arumba/model"
 	"github.com/bickyeric/arumba/service/episode"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

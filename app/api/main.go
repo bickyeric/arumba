@@ -15,8 +15,8 @@ import (
 	"github.com/bickyeric/arumba/repository"
 	"github.com/bickyeric/arumba/resolver"
 	"github.com/bickyeric/arumba/service/episode"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/subosito/gotenv"
 )
 
